@@ -37,6 +37,7 @@ public class Board {
         for (Piece p : group) {
             Position newPos = pathStrategy.getNextPosition(p.getPosition(), result);
             p.setPosition(newPos);
+            p.setMoved(); // 이동한 말로 표시
 
             // 잡기: 같은 칸에 있는 상대 말들을 출발점으로
             for (Player otherPlayer : players) {
@@ -44,15 +45,23 @@ public class Board {
                     for (Piece other : otherPlayer.getPieces()) {
                         if (!other.isFinished() &&
                                 other.getPosition().getIndex() == newPos.getIndex()) {
-                            other.setPosition(pathStrategy.getPath().get(0)); // 출발점
-                            other.setGroup(new ArrayList<>(List.of(other))); // 단독 그룹으로 설정
+
+                            // 잡은 말이 속한 그룹 전체 해제 + 출발점 이동
+                            List<Piece> capturedGroup = other.getGroup().isEmpty() ? List.of(other) : other.getGroup();
+                            for (Piece capturedp : capturedGroup) {
+                                capturedp.setPosition(pathStrategy.getPath().get(0)); // 출발점
+                                List<Piece> soloGroup = new ArrayList<>();
+                                soloGroup.add(capturedp);
+                                capturedp.setGroup(soloGroup);
+                            }
+
                             captured = true;
                         }
                     }
                 }
             }
         }
-
+        
         return captured;
     }
 }

@@ -3,6 +3,7 @@ package model.state;
 import model.Game;
 import model.board.Board;
 import model.piece.Piece;
+import model.position.Position;
 import model.yut.YutResult;
 
 import java.util.ArrayList;
@@ -45,14 +46,17 @@ public class SelectingPieceState implements GameState {
         for (Piece other : piece.getOwner().getPieces()) {
             if (other != piece &&
                     !other.isFinished() &&
-                    other.getPosition().getIndex() == piece.getPosition().getIndex()) {
+                    other.getPosition().equals(piece.getPosition()) &&
+                    other.hasMoved()) { // 이동한 적 있는 말만 그룹 허용
                 group.add(other);
             }
         }
 
         // 그룹 설정
         for (Piece p : group) {
-            p.setGroup(group);
+            if (p.getGroup() != group) {
+                p.setGroup(group);
+            }
         }
 
         // 이동 처리
@@ -60,9 +64,17 @@ public class SelectingPieceState implements GameState {
         boolean captured = board.movePiece(piece, result, game.getPlayers());
 
         // 도착 위치가 끝이라면 완료 처리
-        if (piece.getPosition().getIndex() == board.getPathStrategy().getPath().size() - 1) {
-            piece.setFinished(true);
-            piece.setGroup(new ArrayList<>(List.of(piece))); // 완주 시 그룹 해제
+        Position finalPos = board.getPathStrategy().getPath().get(
+                board.getPathStrategy().getPath().size() - 1);
+
+        boolean allAtGoal = group.stream()
+                .allMatch(p -> p.getPosition().equals(finalPos));
+
+        if (allAtGoal) {
+            for (Piece p : group) { // 그룹 상태에서 함께 골인
+                p.setFinished(true);
+                p.setGroup(new ArrayList<>(List.of(p))); // 완주 시 그룹 해제
+            }
         }
 
         // 말 완주 후 게임 종료 조건 확인
