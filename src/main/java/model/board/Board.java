@@ -1,6 +1,7 @@
 package model.board;
 
 import model.piece.Piece;
+import model.piece.PieceUtil;
 import model.player.Player;
 import model.position.Position;
 import model.yut.YutResult;
@@ -50,9 +51,7 @@ public class Board {
                             List<Piece> capturedGroup = other.getGroup().isEmpty() ? List.of(other) : other.getGroup();
                             for (Piece capturedp : capturedGroup) {
                                 capturedp.setPosition(pathStrategy.getPath().get(0)); // 출발점
-                                List<Piece> soloGroup = new ArrayList<>();
-                                soloGroup.add(capturedp);
-                                capturedp.setGroup(soloGroup);
+                                PieceUtil.resetGroupToSelf(capturedp);
                             }
 
                             captured = true;
@@ -60,8 +59,10 @@ public class Board {
                     }
                 }
             }
+
         }
-        
+
+
         return captured;
     }
 }

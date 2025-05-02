@@ -7,20 +7,18 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Piece {
-    private Player owner;
-    private int id;
+    private final Player owner;
+    private final int id;
     private Position position;
-    private boolean isGrouped;
-    private boolean isFinished;
+    private boolean isFinished = false;
     private boolean hasMoved = false;
-    private List<Piece> group = new ArrayList<>();
+    private List<Piece> group;
 
     public Piece(Player owner, int id, Position startPos) {
         this.owner = owner;
         this.id = id;
         this.position = startPos;
-        this.isGrouped = false;
-        this.isFinished = false;
+        this.group = new ArrayList<>(List.of(this)); // 단독 그룹 초기화
     }
 
     public Player getOwner() {
@@ -39,14 +37,6 @@ public class Piece {
         this.position = position;
     }
 
-    public boolean isGrouped() {
-        return isGrouped;
-    }
-
-    public void setGrouped(boolean grouped) {
-        this.isGrouped = grouped;
-    }
-
     public boolean isFinished() {
         return isFinished;
     }
@@ -54,6 +44,8 @@ public class Piece {
     public void setFinished(boolean finished) {
         this.isFinished = finished;
     }
+
+
 
     public List<Piece> getGroup() {
         return group;
@@ -68,5 +60,9 @@ public class Piece {
     }
     public boolean hasMoved() {
         return this.hasMoved;
+    }
+
+    public boolean isGrouped() {
+        return this.getGroup().size() > 1;
     }
 }

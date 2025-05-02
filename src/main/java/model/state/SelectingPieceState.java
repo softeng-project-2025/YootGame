@@ -3,6 +3,7 @@ package model.state;
 import model.Game;
 import model.board.Board;
 import model.piece.Piece;
+import model.piece.PieceUtil;
 import model.position.Position;
 import model.yut.YutResult;
 
@@ -52,12 +53,7 @@ public class SelectingPieceState implements GameState {
             }
         }
 
-        // 그룹 설정
-        for (Piece p : group) {
-            if (p.getGroup() != group) {
-                p.setGroup(group);
-            }
-        }
+        PieceUtil.ensureGroupConsistency(group);
 
         // 이동 처리
         Board board = game.getBoard();
@@ -73,7 +69,7 @@ public class SelectingPieceState implements GameState {
         if (allAtGoal) {
             for (Piece p : group) { // 그룹 상태에서 함께 골인
                 p.setFinished(true);
-                p.setGroup(new ArrayList<>(List.of(p))); // 완주 시 그룹 해제
+                PieceUtil.resetGroupToSelf(p); // 완주 시 그룹 해제
             }
         }
 
