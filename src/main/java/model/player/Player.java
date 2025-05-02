@@ -8,8 +8,8 @@ import model.position.Position;
 import model.piece.Piece;
 
 public class Player {
-    private String name;
-    private List<Piece> pieces;
+    private final String name;
+    private final List<Piece> pieces;
 
     public Player(String name, int pieceCount, Board board) {
         this.name = name;
@@ -45,9 +45,5 @@ public class Player {
     // 움직일 수 있는 말이 존재하는지
     public boolean hasMovablePieces() {
         return pieces.stream().anyMatch(p -> !p.isFinished());
-    }
-
-    public boolean hasWon() {
-        return pieces.stream().allMatch(Piece::isFinished);
     }
 }

@@ -54,7 +54,7 @@ public class Game {
 
     public void checkAndHandleWinner() {
         for (Player player : players) {
-            if (player.hasWon()) {
+            if (player.hasFinishedAllPieces()) {
                 isFinished = true;
                 if (view != null) {
                     view.showMessage(player.getName() + " wins!");
