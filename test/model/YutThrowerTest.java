@@ -1,5 +1,10 @@
 package model;
 
+
+import model.yut.YutResult;
+import model.yut.YutThrower;
+import org.junit.jupiter.api.Test;
+
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 // 윷을 던지는 모든 시나리오에 관한 테스트 케이스
@@ -11,6 +16,18 @@ public class YutThrowerTest {
     /* 테스트 케이스 2: 랜덤 윷 던지기를 하는 경우.
      * 결과가 랜덤하게 잘 나오는지
      */
+    @Test
+    public void testThrowYutReturnsValidResult() {
+        for (int i = 0; i < 100; i++) {
+            YutResult result = YutThrower.throwYut();
+            assertTrue(result == YutResult.DO ||
+                            result == YutResult.GAE ||
+                            result == YutResult.GEOL ||
+                            result == YutResult.YUT ||
+                            result == YutResult.MO,
+                    "결과가 유효한 YutResult 여야 함");
+        }
+    }
 
     /* 테스트 케이스 3: 윷/모 가 나오는 경우.
      * 한 번 더 throwing 기회가 주어지고, 결과들을 player 가 잘 선택할 수 있는지
