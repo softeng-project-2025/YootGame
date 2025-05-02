@@ -26,7 +26,21 @@ YootGame/
 </code></pre>
 
 ## 실행 방법
+
+1. 본 프로젝트는 Maven 기반입니다. 클론 후 아래 순서로 설정하세요:
 ```bash
+git clone https://github.com/softeng-project-2025/YootGame.git
+cd YootGame
+```
+
+2. IntelliJ에서 `pom.xml`을 열고, Maven 동기화 버튼을 클릭하세요.
+
+3. JDK 17이 설치돼 있어야 합니다. 없다면 설치 후 `JAVA_HOME`을 설정하거나 IntelliJ에서 수동 지정하세요.
+
+4. 실행:
+```bash
+mvn compile
+mvn exec:java -Dexec.mainClass="app.Main"
 javac src/app.Main.java
 java app.Main
 ```
