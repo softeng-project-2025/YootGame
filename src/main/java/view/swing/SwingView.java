@@ -3,12 +3,17 @@ package view.swing;
 import controller.GameController;
 import model.Game;
 import model.piece.Piece;
+import model.position.Position;
 import model.yut.YutResult;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.List;
+import java.util.ArrayList;
 
 public class SwingView extends JFrame {
 
@@ -54,18 +59,34 @@ public class SwingView extends JFrame {
     public void renderGame(Game game) {
         boardPanel.removeAll();
 
+        // 위치별 말 리스트를 위한 맵: Position index -> 말들
+        Map<Integer, List<Piece>> positionMap = new HashMap<>();
+
         for (var player : game.getPlayers()) {
             for (var piece : player.getPieces()) {
-                JButton pieceButton = new JButton(player.getName().charAt(player.getName().length() - 1) + "-" + piece.getId());
+                int idx = piece.getPosition().getIndex();
+                positionMap.computeIfAbsent(idx, k -> new ArrayList<>()).add(piece);
+            }
+        }
 
-                // 말의 좌표 위치 가져오기
-                int x = piece.getPosition().getX();
-                int y = piece.getPosition().getY();
+        // 위치별로 버튼 배치 (오프셋 적용)
+        for (List<Piece> piecesAtPosition : positionMap.values()) {
+            if (piecesAtPosition.isEmpty()) continue;
 
-                // 좌표 기반으로 버튼 위치 지정 (폭, 높이는 임의로 40)
-                pieceButton.setBounds(x, y, 40, 40);
+            Position pos = piecesAtPosition.get(0).getPosition();
+            int baseX = pos.getX();
+            int baseY = pos.getY();
 
-                // 클릭 시 controller에 알림
+            for (int i = 0; i < piecesAtPosition.size(); i++) {
+                Piece piece = piecesAtPosition.get(i);
+
+                JButton pieceButton = new JButton(piece.getOwner().getName().charAt(piece.getOwner().getName().length() - 1) + "-" + piece.getId());
+
+                // 오프셋 위치 (ex: 6픽셀씩 우하향 이동)
+                int offsetX = baseX + i * 6;
+                int offsetY = baseY + i * 6;
+
+                pieceButton.setBounds(offsetX, offsetY, 40, 40);
                 pieceButton.addActionListener(e -> controller.handlePieceSelect(piece));
 
                 boardPanel.add(pieceButton);
