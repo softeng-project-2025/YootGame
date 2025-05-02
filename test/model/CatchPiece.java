@@ -59,4 +59,34 @@ public class CatchPiece {
      * 모든 잡힌 말이 출발지로 잘 가는지
      * 업힌 말들의 그룹화가 풀리는지
      */
+    @Test
+    void testCatchRiddenPiecesResetToStartAndUngroup() {
+        Piece p2a = p2.getPieces().get(0);
+        Piece p1a = p1.getPieces().get(0);
+        Piece p1b = p1.getPieces().get(1);
+
+        //시나리오
+        game.handleYutThrow(YutResult.GAE);
+        game.handlePieceSelect(p1a);
+        game.handleYutThrow(YutResult.DO);
+        game.handlePieceSelect(p2a);
+        game.handleYutThrow(YutResult.GAE);
+        game.handlePieceSelect(p1b);
+        game.handleYutThrow(YutResult.DO);
+        game.handlePieceSelect(p2a);
+
+        // 출발점 위치
+        Position start = board.getPathStrategy().getPath().get(0);
+
+        // victim1과 victim2가 출발점으로 이동했는지
+        assertEquals(start.getIndex(), p1a.getPosition().getIndex(), "잡힌 첫 번째 말은 출발점으로 돌아가야 함");
+        assertEquals(start.getIndex(), p1b.getPosition().getIndex(), "잡힌 두 번째 말도 출발점으로 돌아가야 함");
+
+        // 그룹이 해제됐는지 (각자 단독 그룹인지)
+        assertEquals(1, p1a.getGroup().size(), "잡힌 말의 그룹이 해제되어야 함");
+        assertEquals(p1a, p1a.getGroup().get(0), "자기 자신만 그룹에 있어야 함");
+
+        assertEquals(1, p1b.getGroup().size(), "잡힌 말의 그룹이 해제되어야 함");
+        assertEquals(p1b, p1b.getGroup().get(0), "자기 자신만 그룹에 있어야 함");
+    }
 }
