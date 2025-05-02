@@ -18,6 +18,9 @@ public class Game {
 
     private GameState currentState;
 
+    private boolean isFinished = false;
+    private transient view.View view; // 인터페이스 형태 추천
+
     public Game(Board board, List<Player> players) {
         this.board = board;
         this.players = players;
@@ -44,6 +47,24 @@ public class Game {
         currentState = new WaitingForThrowState(this); // 다음 턴은 다시 초기 상태
     }
 
+    // 종료 상태 조건
+    public boolean isFinished() {
+        return isFinished;
+    }
+
+    public void checkAndHandleWinner() {
+        for (Player player : players) {
+            if (player.hasWon()) {
+                isFinished = true;
+                if (view != null) {
+                    view.showMessage(player.getName() + " wins!");
+                }
+                break;
+            }
+        }
+    }
+
+
     public void setState(GameState state) {
         this.currentState = state;
     }
@@ -59,4 +80,11 @@ public class Game {
     public List<Player> getPlayers() {
         return players;
     }
+
+    public void setView(view.View view) {
+        this.view = view;
+    }
+
+
+
 }

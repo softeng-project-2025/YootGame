@@ -7,6 +7,7 @@ import model.piece.Piece;
 import model.strategy.PathStrategy;
 import model.strategy.SquarePathStrategy;
 import model.yut.YutResult;
+import view.View;
 import view.swing.SwingView; // 필요 시 JavaFXView 등으로 교체 가능
 
 import java.util.ArrayList;
@@ -15,11 +16,10 @@ import java.util.List;
 public class GameController {
 
     private Game game;
-    private SwingView view;
+    private View view; // 인터페이스
 
-    public GameController(SwingView view) {
+    public GameController(View view) {
         this.view = view;
-
     }
 
     // 게임 시작 설정: 플레이어 수, 말 수, 보드 타입
@@ -48,6 +48,7 @@ public class GameController {
         this.game = new Game(board, players);
         view.setController(this); // View에 컨트롤러 주입
         view.renderGame(game);    // 초기 화면 렌더링
+        game.setView(view); // initializeGame() 이후에 호출
     }
 
     // 윷 던지기(랜덤 or 지정)
@@ -60,6 +61,7 @@ public class GameController {
     public void handlePieceSelect(Piece piece) {
         game.handlePieceSelect(piece);
         view.renderGame(game);
+
     }
 
     public Game getGame() {
