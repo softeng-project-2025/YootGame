@@ -4,7 +4,6 @@ import model.board.Board;
 import model.piece.Piece;
 import model.player.Player;
 import model.position.Position;
-import model.state.WaitingForThrowState;
 import model.strategy.SquarePathStrategy;
 import model.yut.YutResult;
 import org.junit.jupiter.api.BeforeEach;
@@ -16,7 +15,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 //말이 업히는 시나리오에 관한 테스트 케이스
-public class RidePiece {
+public class RidePieceTest {
     private Game game;
     private Player p1, p2;
     private Board board;

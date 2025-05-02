@@ -15,7 +15,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 //말이 도착하는 시나리오 테스트 케이스
-public class ArrivePiece {
+public class ArrivePieceTest {
     private Game game;
     private Player p1, p2;
     private Board board;

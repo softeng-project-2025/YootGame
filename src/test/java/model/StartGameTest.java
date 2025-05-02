@@ -13,7 +13,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 //게임을 진행하는 시나리오에 관한 테스트 케이스
-public class StartGame {
+public class StartGameTest {
     private Game game;
     private Player p1, p2;
     private Board board;

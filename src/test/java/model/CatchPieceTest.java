@@ -15,7 +15,7 @@ import java.util.Arrays;
 import static org.junit.jupiter.api.Assertions.*;
 
 //말을 잡는 시나리오에 관한 테스트 케이스
-public class CatchPiece {
+public class CatchPieceTest {
     private Game game;
     private Player p1, p2;
     private Board board;

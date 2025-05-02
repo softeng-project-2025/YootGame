@@ -6,7 +6,6 @@ import model.player.Player;
 import model.strategy.SquarePathStrategy;
 import model.position.Position;
 import model.yut.YutResult;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
@@ -14,7 +13,7 @@ import java.util.Arrays;
 import static org.junit.jupiter.api.Assertions.*;
 
 //게임이 끝나는 시나리오에 관한 테스트 케이스
-public class EndGame {
+public class EndGameTest {
     private Game game;
     private Player p1, p2;
     private Board board;
@@ -49,8 +48,8 @@ public class EndGame {
         game.handleYutThrow(YutResult.GAE);
         game.handlePieceSelect(p2.getPieces().get(1));
 
-        assertFalse(p2.hasWon(), "Player2는 말을 도착시키지 않았기 때문에 승리하지 않아야 함");
-        assertTrue(p1.hasWon(), "Player1의 모든 말이 도착했기 때문에 승리 조건이 만족되어야 함");
+        assertFalse(p2.hasFinishedAllPieces(), "Player2는 말을 도착시키지 않았기 때문에 승리하지 않아야 함");
+        assertTrue(p1.hasFinishedAllPieces(), "Player1의 모든 말이 도착했기 때문에 승리 조건이 만족되어야 함");
     }
 
 }
