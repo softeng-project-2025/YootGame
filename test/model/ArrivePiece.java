@@ -6,42 +6,44 @@ import model.player.Player;
 import model.position.Position;
 import model.strategy.SquarePathStrategy;
 import model.yut.YutResult;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 //말이 도착하는 시나리오 테스트 케이스
 public class ArrivePiece {
-    //임의의 새로운 보드를 생성한다. 현재는 사각형 보드만 조재한다.
-    private Board createSquareBoard() {
-        return new Board(new SquarePathStrategy());
-    }
+    private Game game;
+    private Player p1, p2;
+    private Board board;
 
+    @BeforeEach
+    public void setUp() {
+        board = new Board(new SquarePathStrategy());
+        p1 = new Player("Player1", 4, board);
+        p2 = new Player("Player2", 4, board);
+        List<Player> players = Arrays.asList(p1, p2);
+        game = new Game(board, players);
+    }
 
     /* 테스트 케이스 1: 사용자의 말 하나가 도착점을 통과함.
      * 사용자의 Piece 수가 하나 줄어드는지
      */
     @Test
     void testSinglePieceArrives() {
-        Board board = createSquareBoard();
-        Player player = new Player("Player1", 1, board);
-        Piece piece = player.getPieces().get(0);
-
-        // 도착점 바로 전 위치로 이동
         List<Position> path = board.getPathStrategy().getPath();
+        Piece piece = p1.getPieces().get(0);
         piece.setPosition(path.get(path.size() - 2)); // 마지막 전 위치
 
-        // 윷 결과: 한 칸 이동 → 도착점
-        YutResult yut = YutResult.GEOL;
-        board.movePiece(piece, yut); // 시스템 호출
+        board.movePiece(piece, YutResult.GEOL); // 한 칸 이동
 
-        // 시스템이 자동으로 도착 처리했는가?
-        assertTrue(piece.isFinished());
+        assertTrue(piece.isFinished(), "말이 도착점에 도달하면 isFinished는 true여야 함");
 
-        long remaining = player.getPieces().stream().filter(p -> !p.isFinished()).count();
-        assertEquals(3, remaining);
+        long remaining = p1.getPieces().stream().filter(p -> !p.isFinished()).count();
+        assertEquals(3, remaining, "완주한 말을 제외한 나머지 개수는 3개여야 함");
     }
 
 
@@ -50,35 +52,31 @@ public class ArrivePiece {
      */
     @Test
     void testMultiplePlayersMultiplePiecesArrive() {
-        Board board = createSquareBoard();
         List<Position> path = board.getPathStrategy().getPath();
         Position almostFinish = path.get(path.size() - 2); // 도착 직전
-        YutResult oneStep = YutResult.GEOL;
 
-        // Player 1: 4개 중 1개 도착
-        Player p1 = new Player("Player1", 4, board);
-        Piece p1Piece1 = p1.getPieces().get(0); // 도착할 말
-        p1Piece1.setPosition(almostFinish);
-        board.movePiece(p1Piece1, oneStep);
+        // Player 1: 1개 도착
+        Piece p1Piece = p1.getPieces().get(0);
+        p1Piece.setPosition(almostFinish);
+        board.movePiece(p1Piece, YutResult.GEOL);
 
-        // Player 2: 4개 중 2개 도착
-        Player p2 = new Player("Player2", 4, board);
+        // Player 2: 2개 도착
         Piece p2Piece1 = p2.getPieces().get(0);
         Piece p2Piece2 = p2.getPieces().get(1);
         p2Piece1.setPosition(almostFinish);
         p2Piece2.setPosition(almostFinish);
-        board.movePiece(p2Piece1, oneStep);
-        board.movePiece(p2Piece2, oneStep);
+        board.movePiece(p2Piece1, YutResult.GEOL);
+        board.movePiece(p2Piece2, YutResult.GEOL);
 
-        assertTrue(p1Piece1.isFinished());
-        assertTrue(p2Piece1.isFinished());
-        assertTrue(p2Piece2.isFinished());
-        // 검증
-        long remainingP1 = p1.getPieces().stream().filter(p -> !p.isFinished()).count();
-        long remainingP2 = p2.getPieces().stream().filter(p -> !p.isFinished()).count();
+        // 상태 확인
+        assertTrue(p1Piece.isFinished(), "Player 1의 첫 번째 말은 도착 완료 상태여야 함");
+        assertTrue(p2Piece1.isFinished(), "Player 2의 첫 번째 말은 도착 완료 상태여야 함");
+        assertTrue(p2Piece2.isFinished(), "Player 2의 두 번째 말은 도착 완료 상태여야 함");
 
-        assertEquals(3, remainingP1, "Player 1 should have 3 piece remaining.");
-        assertEquals(2, remainingP2, "Player 2 should have 2 piece remaining.");
+        assertEquals(3, p1.getPieces().stream().filter(p -> !p.isFinished()).count(),
+                "Player 1의 남은 말 수는 3개여야 함");
+        assertEquals(2, p2.getPieces().stream().filter(p -> !p.isFinished()).count(),
+                "Player 2의 남은 말 수는 2개여야 함");
     }
 
     /* 테스트 케이스 3: 사용자의 업힌 말이 도착점을 통과함.
