@@ -59,10 +59,19 @@ public class Board {
                     }
                 }
             }
-
         }
-
-
+        // 이동 완료 후 같은 위치의 같은 플레이어 말들끼리 자동 그룹 형성
+        for (Piece p : group) {
+            List<Piece> autoGroup = new ArrayList<>();
+            for (Piece candidate : p.getOwner().getPieces()) {
+                if (!candidate.isFinished() &&
+                        candidate.getPosition().equals(p.getPosition())) {
+                    autoGroup.add(candidate);
+                }
+            }
+            // 그룹 무결성 보장
+            PieceUtil.ensureGroupConsistency(autoGroup);
+        }
         return captured;
     }
 }
