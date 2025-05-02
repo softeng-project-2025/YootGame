@@ -1,5 +1,3 @@
-package app;
-
 import controller.GameController;
 import view.swing.SwingView;
 
