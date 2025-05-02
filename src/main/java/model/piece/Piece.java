@@ -12,6 +12,7 @@ public class Piece {
     private Position position;
     private boolean isGrouped;
     private boolean isFinished;
+    private boolean hasMoved = false;
     private List<Piece> group = new ArrayList<>();
 
     public Piece(Player owner, int id, Position startPos) {
@@ -60,5 +61,12 @@ public class Piece {
 
     public void setGroup(List<Piece> group) {
         this.group = group;
+    }
+
+    public void setMoved() {
+        this.hasMoved = true;
+    }
+    public boolean hasMoved() {
+        return this.hasMoved;
     }
 }
