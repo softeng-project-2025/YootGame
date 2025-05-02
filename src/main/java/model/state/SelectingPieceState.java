@@ -5,6 +5,9 @@ import model.board.Board;
 import model.piece.Piece;
 import model.yut.YutResult;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class SelectingPieceState implements GameState {
 
     private Game game;
@@ -35,6 +38,23 @@ public class SelectingPieceState implements GameState {
 
         System.out.println("[INFO] " + piece.getOwner().getName() + " 이(가) 말 " + piece.getId() + "을(를) 이동합니다.");
 
+        // 이동 직전: 같은 위치의 같은 플레이어 말이 있는지 확인
+        List<Piece> group = new ArrayList<>();
+        group.add(piece);
+
+        for (Piece other : piece.getOwner().getPieces()) {
+            if (other != piece &&
+                    !other.isFinished() &&
+                    other.getPosition().getIndex() == piece.getPosition().getIndex()) {
+                group.add(other);
+            }
+        }
+
+        // 그룹 설정
+        for (Piece p : group) {
+            p.setGroup(group);
+        }
+
         // 이동 처리
         Board board = game.getBoard();
         boolean captured = board.movePiece(piece, result, game.getPlayers());
@@ -42,6 +62,7 @@ public class SelectingPieceState implements GameState {
         // 도착 위치가 끝이라면 완료 처리
         if (piece.getPosition().getIndex() == board.getPathStrategy().getPath().size() - 1) {
             piece.setFinished(true);
+            piece.setGroup(new ArrayList<>(List.of(piece))); // 완주 시 그룹 해제
         }
 
         // 말 완주 후 게임 종료 조건 확인
