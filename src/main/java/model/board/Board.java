@@ -30,18 +30,22 @@ public class Board {
     }
 
     public boolean movePiece(Piece piece, YutResult result, List<Player> players) {
-        Position newPos = pathStrategy.getNextPosition(piece.getPosition(), result);
-        piece.setPosition(newPos);
-
-        // 잡기 처리
+        List<Piece> group = piece.getGroup().isEmpty() ? List.of(piece) : piece.getGroup();
         boolean captured = false;
-        for (Player otherPlayer : players) {
-            if (otherPlayer != piece.getOwner()) {
-                for (Piece otherPiece : otherPlayer.getPieces()) {
-                    if (!otherPiece.isFinished() && otherPiece.getPosition().getIndex() == newPos.getIndex()) {
-                        // 상대 말 잡기 → 출발점으로
-                        otherPiece.setPosition(pathStrategy.getPath().get(0));
-                        captured = true;
+
+        for (Piece p : group) {
+            Position newPos = pathStrategy.getNextPosition(p.getPosition(), result);
+            p.setPosition(newPos);
+
+            // 잡기: 같은 칸에 있는 상대 말들을 출발점으로
+            for (Player otherPlayer : players) {
+                if (otherPlayer != piece.getOwner()) {
+                    for (Piece other : otherPlayer.getPieces()) {
+                        if (!other.isFinished() &&
+                                other.getPosition().getIndex() == newPos.getIndex()) {
+                            other.setPosition(pathStrategy.getPath().get(0)); // 출발점
+                            captured = true;
+                        }
                     }
                 }
             }

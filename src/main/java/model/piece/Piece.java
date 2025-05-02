@@ -3,12 +3,16 @@ package model.piece;
 import model.player.Player;
 import model.position.Position;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Piece {
     private Player owner;
     private int id;
     private Position position;
     private boolean isGrouped;
     private boolean isFinished;
+    private List<Piece> group = new ArrayList<>();
 
     public Piece(Player owner, int id, Position startPos) {
         this.owner = owner;
@@ -48,5 +52,13 @@ public class Piece {
 
     public void setFinished(boolean finished) {
         this.isFinished = finished;
+    }
+
+    public List<Piece> getGroup() {
+        return group;
+    }
+
+    public void setGroup(List<Piece> group) {
+        this.group = group;
     }
 }
