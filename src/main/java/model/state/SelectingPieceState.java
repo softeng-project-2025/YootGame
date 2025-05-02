@@ -37,7 +37,7 @@ public class SelectingPieceState implements GameState {
 
         // 이동 처리
         Board board = game.getBoard();
-        board.movePiece(piece, result);
+        boolean captured = board.movePiece(piece, result, game.getPlayers());
 
         // 도착 위치가 끝이라면 완료 처리
         if (piece.getPosition().getIndex() == board.getPathStrategy().getPath().size() - 1) {
@@ -47,10 +47,10 @@ public class SelectingPieceState implements GameState {
         // 말 완주 후 게임 종료 조건 확인
         game.checkAndHandleWinner();
 
-        // 윷 or 모 → 한 번 더 던질 수 있음
-        if (result == YutResult.YUT || result == YutResult.MO) {
-            System.out.println("[INFO] 윷/모! 한 번 더 던질 수 있습니다.");
+        // 윷 or 모 or 잡기 → 한 번 더 턴
+        if (result == YutResult.YUT || result == YutResult.MO || captured) {
             game.setState(new WaitingForThrowState(game));
+            System.out.println("[INFO] 추가 턴! (윷/모 또는 말 잡기)");
         } else {
             game.nextTurn(); // 턴 종료 및 다음 플레이어로 전환
         }
