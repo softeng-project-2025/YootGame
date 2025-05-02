@@ -36,9 +36,10 @@ public class ArrivePiece {
     void testSinglePieceArrives() {
         List<Position> path = board.getPathStrategy().getPath();
         Piece piece = p1.getPieces().get(0);
-        piece.setPosition(path.get(path.size() - 2)); // 마지막 전 위치
+        piece.setPosition(path.get(path.size() - 2));
 
-        board.movePiece(piece, YutResult.GEOL); // 한 칸 이동
+        game.handleYutThrow(YutResult.GAE);
+        game.handlePieceSelect(piece);
 
         assertTrue(piece.isFinished(), "말이 도착점에 도달하면 isFinished는 true여야 함");
 
@@ -58,15 +59,23 @@ public class ArrivePiece {
         // Player 1: 1개 도착
         Piece p1Piece = p1.getPieces().get(0);
         p1Piece.setPosition(almostFinish);
-        board.movePiece(p1Piece, YutResult.GEOL);
+        game.handleYutThrow(YutResult.GAE);
+        game.handlePieceSelect(p1Piece);
 
         // Player 2: 2개 도착
         Piece p2Piece1 = p2.getPieces().get(0);
         Piece p2Piece2 = p2.getPieces().get(1);
         p2Piece1.setPosition(almostFinish);
         p2Piece2.setPosition(almostFinish);
-        board.movePiece(p2Piece1, YutResult.GEOL);
-        board.movePiece(p2Piece2, YutResult.GEOL);
+        game.handleYutThrow(YutResult.GAE);
+        game.handlePieceSelect(p2Piece1);
+
+        // Player 1 turn 처리
+        game.handleYutThrow(YutResult.GAE);
+        game.handlePieceSelect(p1.getPieces().get(1));
+
+        game.handleYutThrow(YutResult.GAE);
+        game.handlePieceSelect(p2Piece2);
 
         // 상태 확인
         assertTrue(p1Piece.isFinished(), "Player 1의 첫 번째 말은 도착 완료 상태여야 함");
@@ -82,6 +91,7 @@ public class ArrivePiece {
     /* 테스트 케이스 3: 사용자의 업힌 말이 도착점을 통과함.
      * 사용자의 piece 수가 업힌 말 수만큼 줄어드는지
      */
+
 
 
 }
