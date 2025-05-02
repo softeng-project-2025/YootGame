@@ -13,37 +13,70 @@
 ## 디렉토리 구조
 <pre><code>
 YootGame/
-├── src/                # Java 소스코드
-│   ├── model/          # 게임 로직, 말, 보드, 상태 등
-│   ├── <view>          # Swing 및 JavaFX UI
-│   ├── <controller>    # 사용자 입력 및 게임 흐름 제어
-│   └── app.Main.java       # 게임 실행 시작점
-├── test/               # JUnit 테스트 코드
-├── docs/               # 요구사항, 다이어그램 등
-├── README.md
-├── .gitignore
-└── LICENSE
+├── src/
+│   ├── main/
+│   │   ├── java/
+│   │   │   ├── app/               # Main 실행 클래스
+│   │   │   ├── controller/        # GameController
+│   │   │   ├── model/             # Board, Player, Piece, Yut 등 도메인 모델
+│   │   │   ├── state/             # 상태 패턴 (Waiting, Selecting 등)
+│   │   │   ├── strategy/          # 경로 전략 (정사각형, 오각형 등)
+│   │   │   └── view/              # View 계층 (Swing, JavaFX 등)
+│   │   └── resources/
+│   └── test/
+│       ├── java/
+│       └── resources/
+├── docs/                          # 설계 문서, 다이어그램 등
+├── pom.xml                        # Maven 설정
+├── LICENSE
+└── README.md
 </code></pre>
 
 ## 실행 방법
 
+### 개발 환경
+- Java JDK 17
+- Maven 3.8+
+- IntelliJ IDEA 2022 이상 권장
+
+### 실행 명령어
+
 1. 본 프로젝트는 Maven 기반입니다. 클론 후 아래 순서로 설정하세요:
+
 ```bash
 git clone https://github.com/softeng-project-2025/YootGame.git
 cd YootGame
 ```
 
-2. IntelliJ에서 `pom.xml`을 열고, Maven 동기화 버튼을 클릭하세요.
-
-3. JDK 17이 설치돼 있어야 합니다. 없다면 설치 후 `JAVA_HOME`을 설정하거나 IntelliJ에서 수동 지정하세요.
-
-4. 실행:
+2.	IntelliJ에서 pom.xml을 열고, 오른쪽 상단 Maven 탭에서 동기화 버튼을 클릭하세요. 
+3. JDK 17이 설치돼 있어야 합니다. 없다면 설치 후 JAVA_HOME을 설정하거나 IntelliJ에서 수동 지정하세요.
+4. 실행 방법 :
 ```bash
+# 프로젝트 컴파일
 mvn compile
-mvn exec:java -Dexec.mainClass="app.Main"
-javac src/app.Main.java
-java app.Main
+
+# 실행
+mvn exec:java
 ```
+
+## 주요기능
+
+- 사용자 수 / 말 개수 / 윷판 형태 설정 가능 
+- 랜덤 윷 던지기 및 지정 던지기 지원 
+- 말 이동, 겹침, 잡기, 업기 처리 
+- 상태 패턴 기반 턴 전환 로직 
+- 게임 종료 및 승자 출력 기능 
+- Swing 기반 UI 및 JavaFX 교체 구조 준비됨
+
+## 적용 패턴
+
+- MVC: 모델-뷰-컨트롤러 분리 
+- Strategy: 윷판 경로 전략 교체 (Square, Pentagon, Hexagon)
+- State: 게임 상태 전환 관리 
+- Factory (예정): 말, 보드 객체 생성 분리 
+- Observer (예정): 모델-뷰 자동 동기화
+
+
 
 ## 팀원
 
