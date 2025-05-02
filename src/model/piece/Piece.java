@@ -1,7 +1,7 @@
-package model;
+package model.piece;
 
-import model.Player;
-import model.Position;
+import model.player.Player;
+import model.position.Position;
 
 public class Piece {
     private Player owner;
@@ -10,10 +10,10 @@ public class Piece {
     private boolean isGrouped;
     private boolean isFinished;
 
-    public Piece(Player owner, int id) {
+    public Piece(Player owner, int id, Position startPos) {
         this.owner = owner;
         this.id = id;
-        this.position = new Position(0); // 초기 위치는 보드 시작점 (예시)
+        this.position = startPos;
         this.isGrouped = false;
         this.isFinished = false;
     }
