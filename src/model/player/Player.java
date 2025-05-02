@@ -1,7 +1,9 @@
-package model;
+package model.player;
 
 import java.util.ArrayList;
 import java.util.List;
+import model.board.Board;
+import model.position.Position;
 
 import model.piece.Piece;
 
@@ -9,11 +11,13 @@ public class Player {
     private String name;
     private List<Piece> pieces;
 
-    public Player(String name, int pieceCount) {
+    public Player(String name, int pieceCount, Board board) {
         this.name = name;
         this.pieces = new ArrayList<>();
+        Position startPos = board.getPathStrategy().getPath().get(0); // 시작 위치
+
         for (int i = 0; i < pieceCount; i++) {
-            pieces.add(new Piece(this, i));
+            pieces.add(new Piece(this, i, startPos));
         }
     }
 
