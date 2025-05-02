@@ -1,5 +1,6 @@
 package view.swing;
 
+import view.View;
 import controller.GameController;
 import model.Game;
 import model.piece.Piece;
@@ -15,7 +16,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.ArrayList;
 
-public class SwingView extends JFrame {
+public class SwingView extends JFrame implements View {
 
     private GameController controller;
     private JPanel boardPanel;
@@ -92,8 +93,18 @@ public class SwingView extends JFrame {
                 boardPanel.add(pieceButton);
             }
         }
+        if (game.isFinished()) {
+            throwButton.setEnabled(false);
+        }
 
         boardPanel.revalidate();
         boardPanel.repaint();
     }
+
+    @Override
+    public void showMessage(String message) {
+        JOptionPane.showMessageDialog(this, message);
+    }
 }
+
+

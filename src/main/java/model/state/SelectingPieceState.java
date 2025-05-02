@@ -40,9 +40,12 @@ public class SelectingPieceState implements GameState {
         board.movePiece(piece, result);
 
         // 도착 위치가 끝이라면 완료 처리
-        if (/* 도착 위치가 끝인지 판별하는 조건 필요 */ false) {
+        if (piece.getPosition().getIndex() == board.getPathStrategy().getPath().size() - 1) {
             piece.setFinished(true);
         }
+
+        // 말 완주 후 게임 종료 조건 확인
+        game.checkAndHandleWinner();
 
         // 윷 or 모 → 한 번 더 던질 수 있음
         if (result == YutResult.YUT || result == YutResult.MO) {
