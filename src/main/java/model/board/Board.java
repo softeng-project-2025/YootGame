@@ -6,6 +6,7 @@ import model.position.Position;
 import model.yut.YutResult;
 import model.strategy.PathStrategy;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Board {
@@ -44,6 +45,7 @@ public class Board {
                         if (!other.isFinished() &&
                                 other.getPosition().getIndex() == newPos.getIndex()) {
                             other.setPosition(pathStrategy.getPath().get(0)); // 출발점
+                            other.setGroup(new ArrayList<>(List.of(other))); // 단독 그룹으로 설정
                             captured = true;
                         }
                     }

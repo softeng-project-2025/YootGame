@@ -62,6 +62,7 @@ public class SelectingPieceState implements GameState {
         // 도착 위치가 끝이라면 완료 처리
         if (piece.getPosition().getIndex() == board.getPathStrategy().getPath().size() - 1) {
             piece.setFinished(true);
+            piece.setGroup(new ArrayList<>(List.of(piece))); // 완주 시 그룹 해제
         }
 
         // 말 완주 후 게임 종료 조건 확인
