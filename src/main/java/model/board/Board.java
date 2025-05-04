@@ -36,7 +36,12 @@ public class Board {
         boolean captured = false;
 
         for (Piece p : group) {
-            Position newPos = pathStrategy.getNextPosition(p.getPosition(), result);
+            Position newPos;
+            if (result.getStep() < 0) {
+                newPos = pathStrategy.getPreviousPosition(p.getPosition(), Math.abs(result.getStep()));
+            } else {
+                newPos = pathStrategy.getNextPosition(p.getPosition(), result);
+            }
             p.setPosition(newPos);
             p.setMoved(); // 이동한 말로 표시
 

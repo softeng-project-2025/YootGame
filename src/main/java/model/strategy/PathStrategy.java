@@ -13,4 +13,5 @@ public interface PathStrategy {
      * 전체 경로(Position 리스트) 반환 (초기화, 렌더링용)
      */
     java.util.List<Position> getPath();
+    Position getPreviousPosition(Position current, int steps);
 }
