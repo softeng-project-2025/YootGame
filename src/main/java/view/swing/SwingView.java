@@ -1,5 +1,6 @@
 package view.swing;
 
+import model.yut.YutThrower;
 import view.View;
 import controller.GameController;
 import model.Game;
@@ -23,6 +24,7 @@ public class SwingView extends JFrame implements View {
     private JPanel boardPanel;
     private JButton throwButton;
     private JButton restartButton;
+    private JComboBox<String> yutChoiceBox;
 
 
     public SwingView() {
@@ -46,12 +48,17 @@ public class SwingView extends JFrame implements View {
         add(resultLabel, BorderLayout.NORTH);
 
         throwButton = new JButton("윷 던지기");
-        throwButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                // 테스트용으로 도 고정
-                controller.handleYutThrow(YutResult.DO);
+        throwButton.addActionListener(e -> {
+            String choice = (String) yutChoiceBox.getSelectedItem();
+            YutResult result;
+
+            if ("랜덤".equals(choice)) {
+                result = YutThrower.throwYut(); // 기존 랜덤 윷 던지기 로직
+            } else {
+                result = YutResult.fromName(choice); // 한글 → enum 매핑
             }
+
+            controller.handleYutThrow(result);
         });
         restartButton = new JButton("다시 시작");
         restartButton.setEnabled(false); // 초기엔 비활성화
@@ -63,6 +70,8 @@ public class SwingView extends JFrame implements View {
         buttonPanel.setLayout(new FlowLayout());
         buttonPanel.add(throwButton);
         buttonPanel.add(restartButton);
+        yutChoiceBox = new JComboBox<>(new String[]{"랜덤", "도", "개", "걸", "윷", "모", "빽도"});
+        buttonPanel.add(yutChoiceBox);
 
         add(boardPanel, BorderLayout.CENTER);
         add(buttonPanel, BorderLayout.SOUTH);

@@ -28,4 +28,13 @@ public enum YutResult {
     public String toString() {
         return name;
     }
+
+    public static YutResult fromName(String name) {
+        for (YutResult result : YutResult.values()) {
+            if (result.name.equals(name)) {
+                return result;
+            }
+        }
+        throw new IllegalArgumentException("Invalid 윷 result: " + name);
+    }
 }
