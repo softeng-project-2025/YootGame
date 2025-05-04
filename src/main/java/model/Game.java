@@ -30,10 +30,12 @@ public class Game {
 
     // 턴 진행: 현재 상태에 따라 동작
     public void handleYutThrow(YutResult result) {
+        if (isFinished) return;
         currentState.handleYutThrow(result);
     }
 
     public void handlePieceSelect(Piece piece) {
+        if (isFinished) return;
         currentState.handlePieceSelect(piece);
     }
 
@@ -84,6 +86,7 @@ public class Game {
     public void setView(view.View view) {
         this.view = view;
     }
+
 
 
 

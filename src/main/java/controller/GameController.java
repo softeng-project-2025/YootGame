@@ -61,10 +61,12 @@ public class GameController {
     // 말 선택
     public void handlePieceSelect(Piece piece) {
         game.handlePieceSelect(piece);
+        view.renderGame(game);
 
         if (game.isFinished()) {
-            view.showMessage(game.getCurrentPlayer().getName() + " wins!");
-            view.promptRestart(this); // view가 controller 참조
+            String winner = game.getCurrentPlayer().getName();
+            view.showMessage(winner + " wins!");
+            view.promptRestart(this); // View가 사용자에게 묻도록 함
         }
 
         view.renderGame(game);

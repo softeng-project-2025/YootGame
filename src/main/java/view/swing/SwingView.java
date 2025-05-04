@@ -22,6 +22,8 @@ public class SwingView extends JFrame implements View {
     private JLabel resultLabel;
     private JPanel boardPanel;
     private JButton throwButton;
+    private JButton restartButton;
+
 
     public SwingView() {
         setTitle("YootGame");
@@ -51,9 +53,19 @@ public class SwingView extends JFrame implements View {
                 controller.handleYutThrow(YutResult.DO);
             }
         });
+        restartButton = new JButton("다시 시작");
+        restartButton.setEnabled(false); // 초기엔 비활성화
+        restartButton.addActionListener(e -> {
+            controller.initializeGame(2, 3, "square"); // 기본값 또는 사용자 입력값
+        });
+
+        JPanel buttonPanel = new JPanel();
+        buttonPanel.setLayout(new FlowLayout());
+        buttonPanel.add(throwButton);
+        buttonPanel.add(restartButton);
 
         add(boardPanel, BorderLayout.CENTER);
-        add(throwButton, BorderLayout.SOUTH);
+        add(buttonPanel, BorderLayout.SOUTH);
     }
 
     // Controller에서 주입
@@ -100,7 +112,12 @@ public class SwingView extends JFrame implements View {
         }
         if (game.isFinished()) {
             throwButton.setEnabled(false);
+        } else {
+            throwButton.setEnabled(true);
         }
+        boolean finished = game.isFinished();
+        throwButton.setEnabled(!finished);
+        restartButton.setEnabled(finished); // 게임 끝났을 때만 가능
 
         boardPanel.revalidate();
         boardPanel.repaint();
