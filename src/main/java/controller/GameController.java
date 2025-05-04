@@ -54,6 +54,7 @@ public class GameController {
     // 윷 던지기(랜덤 or 지정)
     public void handleYutThrow(YutResult result) {
         game.handleYutThrow(result);
+        view.updateYutResult(result);
         view.renderGame(game);
     }
 

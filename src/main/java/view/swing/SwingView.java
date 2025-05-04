@@ -19,6 +19,7 @@ import java.util.ArrayList;
 public class SwingView extends JFrame implements View {
 
     private GameController controller;
+    private JLabel resultLabel;
     private JPanel boardPanel;
     private JButton throwButton;
 
@@ -37,6 +38,10 @@ public class SwingView extends JFrame implements View {
         boardPanel.setLayout(null);
         boardPanel.setPreferredSize(new Dimension(600, 600));
         boardPanel.setBackground(Color.WHITE);
+
+        resultLabel = new JLabel("결과: ");
+        resultLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        add(resultLabel, BorderLayout.NORTH);
 
         throwButton = new JButton("윷 던지기");
         throwButton.addActionListener(new ActionListener() {
@@ -104,6 +109,9 @@ public class SwingView extends JFrame implements View {
     @Override
     public void showMessage(String message) {
         JOptionPane.showMessageDialog(this, message);
+    }
+    public void updateYutResult(YutResult result) {
+        resultLabel.setText("결과: " + result.name());
     }
 }
 
