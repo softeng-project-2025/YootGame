@@ -74,7 +74,9 @@ public class SelectingPieceState implements GameState {
         }
 
         // 말 완주 후 게임 종료 조건 확인
-        game.checkAndHandleWinner();
+        if (game.checkAndHandleWinner()) {
+            return;
+        }
 
         // 윷 or 모 or 잡기 → 한 번 더 턴
         if (result == YutResult.YUT || result == YutResult.MO || captured) {

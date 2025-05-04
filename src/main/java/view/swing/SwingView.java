@@ -113,6 +113,22 @@ public class SwingView extends JFrame implements View {
     public void updateYutResult(YutResult result) {
         resultLabel.setText("결과: " + result.name());
     }
+
+    public void promptRestart(GameController controller) {
+        int result = JOptionPane.showConfirmDialog(
+                this,
+                "게임을 다시 시작할까요?",
+                "게임 종료",
+                JOptionPane.YES_NO_OPTION
+        );
+
+        if (result == JOptionPane.YES_OPTION) {
+            controller.initializeGame(2, 3, "square"); // 예시 값
+        } else {
+            throwButton.setEnabled(false);
+            showMessage("게임을 종료합니다.");
+        }
+    }
 }
 
 

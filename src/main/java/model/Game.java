@@ -52,16 +52,16 @@ public class Game {
         return isFinished;
     }
 
-    public void checkAndHandleWinner() {
+
+    // 승자가 있으면 true, 없으면 false
+    public boolean checkAndHandleWinner() {
         for (Player player : players) {
             if (player.hasFinishedAllPieces()) {
                 isFinished = true;
-                if (view != null) {
-                    view.showMessage(player.getName() + " wins!");
-                }
-                break;
+                return true;
             }
         }
+        return false;
     }
 
 
