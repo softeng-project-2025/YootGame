@@ -7,8 +7,14 @@ public class YutThrower {
     private static final Random random = new Random();
 
     public static YutResult throwYut() {
-        int count = 0;
+        // 5개 윷가락 중 하나가 "등"이면 빽도
+        int backdoChance = random.nextInt(10); // 10% 확률로 빽도
+        if (backdoChance == 0) {
+            return YutResult.BACK_DO;
+        }
 
+        // 기본 4개 던지기
+        int count = 0;
         for (int i = 0; i < 4; i++) {
             int stick = random.nextInt(2); // 0 or 1
             count += stick;
