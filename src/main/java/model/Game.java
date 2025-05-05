@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import model.board.Board;
+import model.dto.GameMessage;
+import model.dto.MessageType;
 import model.player.Player;
 import model.state.GameState;
 import model.dto.MoveResult;
@@ -19,6 +21,7 @@ public class Game {
 
     private GameState currentState;
     private boolean isFinished = false;
+    private GameMessage lastMessage;
 
     public Game(Board board, List<Player> players) {
         this.board = board;
@@ -30,12 +33,22 @@ public class Game {
     // 턴 진행: 현재 상태에 따라 동작
     public MoveResult handleYutThrow(YutResult result) {
         if (isFinished) {
-            return new MoveResult("게임이 이미 종료되었습니다.", false, true, getCurrentPlayer(), false, false);
+            String msg = "게임이 이미 종료되었습니다.";
+            GameMessage message = new GameMessage(msg, MessageType.INFO);
+            this.setLastMessage(message);
+
+            return new MoveResult(false, true, getCurrentPlayer(), false, false);
         }
         return currentState.handleYutThrowWithResult(result);
     }
     public MoveResult handlePieceSelect(Piece piece) {
-        if (isFinished) return new MoveResult("게임이 이미 종료되었습니다.", false, true, getCurrentPlayer(), false, false);
+
+        if (isFinished) {
+            String msg = "게임이 이미 종료되었습니다.";
+            GameMessage message = new GameMessage(msg, MessageType.INFO);
+            this.setLastMessage(message);
+            return new MoveResult( false, true, getCurrentPlayer(), false, false);
+        }
 
         MoveResult result = currentState.handlePieceSelectWithResult(piece);
         return result;
@@ -87,6 +100,13 @@ public class Game {
 
     public List<Player> getPlayers() {
         return players;
+    }
+
+    public void setLastMessage(GameMessage message) {
+        this.lastMessage = message;
+    }
+    public GameMessage getLastMessage() {
+        return this.lastMessage;
     }
 
 

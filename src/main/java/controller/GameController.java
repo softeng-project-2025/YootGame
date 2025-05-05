@@ -2,6 +2,7 @@ package controller;
 
 import model.Game;
 import model.board.Board;
+import model.dto.GameMessage;
 import model.dto.MoveResult;
 import model.player.Player;
 import model.piece.Piece;
@@ -52,7 +53,8 @@ public class GameController {
         MoveResult moveResult = game.handleYutThrow(result);
         view.updateYutResult(result);
         view.renderGame(game);
-        view.updateStatus(moveResult.getMessage());
+        GameMessage msg = game.getLastMessage();
+        view.updateStatus(msg.getText(), msg.getType());
 
         if (moveResult.isGameFinished()) {
             if (moveResult.getWinner() != null) {
@@ -74,7 +76,8 @@ public class GameController {
 
         // 말 이동 후 렌더링
         view.renderGame(game);
-        view.updateStatus(result.getMessage());
+        GameMessage msg = game.getLastMessage();
+        view.updateStatus(msg.getText(), msg.getType());
 
         // 혹시라도 게임이 다른 이유로 종료됐을 경우
         if (result.isGameFinished()) {

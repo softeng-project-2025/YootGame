@@ -1,6 +1,8 @@
 package model.state;
 
 import model.Game;
+import model.dto.GameMessage;
+import model.dto.MessageType;
 import model.dto.MoveResult;
 import model.piece.Piece;
 import model.piece.PieceUtil;
@@ -22,13 +24,12 @@ public class WaitingForThrowState implements GameState {
         this.lastResult = result;
 
         String message = game.getCurrentPlayer().getName() + " 이(가) 윷을 던졌습니다: " + result.getName();
-        System.out.println("[INFO] " + message);
 
         List<Piece> movable = PieceUtil.getMovablePieces(game.getCurrentPlayer(), result);
 
         if (movable.isEmpty()) {
+            game.setLastMessage(new GameMessage(message + "그러나 이동할 수 있는 말이 없어 턴을 넘깁니다." , MessageType.INFO));
             return new MoveResult(
-                    message + " 그러나 이동할 수 있는 말이 없어 턴을 넘깁니다.",
                     false, // captured
                     false, // gameFinished
                     null,
@@ -37,19 +38,18 @@ public class WaitingForThrowState implements GameState {
             );
         } else {
             game.setState(new SelectingPieceState(game, result));
+            game.setLastMessage(new GameMessage(message + " 말을 선택하세요." , MessageType.INFO));
             return new MoveResult(
-                    message + " 말을 선택하세요.",
-                    false, false, null,
-                    false, false
+                    false, false, null, false, false
             );
         }
     }
 
     @Override
     public MoveResult handlePieceSelectWithResult(Piece piece) {
-        String warning = "아직 윷을 던지지 않았습니다!";
-        System.out.println("[WARN] " + warning);
-        return new MoveResult(warning, false, false, null, false, false);
+
+        game.setLastMessage(new GameMessage("아직 윷을 던지지 않았습니다!" , MessageType.WARN));
+        return new MoveResult(false, false, null, false, false);
     }
 
     @Override

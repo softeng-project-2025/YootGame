@@ -2,6 +2,8 @@ package model.state;
 
 import model.Game;
 import model.board.Board;
+import model.dto.GameMessage;
+import model.dto.MessageType;
 import model.dto.MoveResult;
 import model.piece.Piece;
 import model.piece.PieceUtil;
@@ -24,11 +26,9 @@ public class SelectingPieceState implements GameState {
 
     @Override
     public MoveResult handleYutThrowWithResult(YutResult result) {
-        String message = "이미 윷을 던졌습니다. 말을 선택하세요.";
-        System.out.println("[WARN] " + message);
+        game.setLastMessage(new GameMessage("이미 윷을 던졌습니다. 말을 선택하세요.", MessageType.WARN));
 
         return new MoveResult(
-                message,
                 false,   // captured
                 game.isFinished(),
                 null,    // winner
@@ -41,8 +41,8 @@ public class SelectingPieceState implements GameState {
     @Override
     public MoveResult handlePieceSelectWithResult(Piece piece) {
         if (piece.isFinished() || piece.getOwner() != game.getCurrentPlayer()) {
-            return new MoveResult("잘못된 말 선택입니다.",
-                    false, false, null, false, false);
+            game.setLastMessage(new GameMessage("잘못된 말 선택입니다.", MessageType.WARN));
+            return new MoveResult(false, false, null, false, false);
         }
 
         List<Piece> group = new ArrayList<>();
@@ -60,7 +60,8 @@ public class SelectingPieceState implements GameState {
         Board board = game.getBoard();
         boolean captured = board.movePiece(piece, currentResult, game.getPlayers());
 
-        Position finalPos = board.getPathStrategy().getPath().getLast(); // 마지막 위치
+        List<Position> path = board.getPathStrategy().getPath();
+        Position finalPos = path.get(path.size() - 1); // 마지막 위치
 
         boolean allAtGoal = group.stream().allMatch(p -> p.getPosition().equals(finalPos));
         if (allAtGoal) {
@@ -69,8 +70,8 @@ public class SelectingPieceState implements GameState {
                 PieceUtil.resetGroupToSelf(p);
             });
             boolean isWin = game.checkAndHandleWinner();
-            return new MoveResult(piece.getOwner().getName() + "의 말이 골인했습니다!",
-                    false, isWin, game.isFinished() ? piece.getOwner() : null, false, false);
+            game.setLastMessage(new GameMessage(piece.getOwner().getName() + "의 말이 골인했습니다!", MessageType.INFO));
+            return new MoveResult(false, isWin, game.isFinished() ? piece.getOwner() : null, false, false);
         }
 
         boolean isYutOrMo = currentResult == YutResult.YUT || currentResult == YutResult.MO;
@@ -80,14 +81,16 @@ public class SelectingPieceState implements GameState {
         String message;
         if (captured) {
             message = piece.getOwner().getName() + "이(가) 상대 말을 잡았습니다!" + (bonusTurn ? " 한 번 더 던지세요." : "");
+            game.setLastMessage(new GameMessage(message , MessageType.INFO));
         } else if (isYutOrMo) {
             message = piece.getOwner().getName() + "이(가) 윷 또는 모로 추가 턴을 얻었습니다.";
+            game.setLastMessage(new GameMessage(message , MessageType.INFO));
         } else {
             message = piece.getOwner().getName() + "이(가) 말을 이동했습니다. 턴 종료, 다음 플레이어로 넘어갑니다.";
+            game.setLastMessage(new GameMessage(message , MessageType.INFO));
         }
 
         return new MoveResult(
-                message,
                 captured,
                 win,
                 win ? piece.getOwner() : null,

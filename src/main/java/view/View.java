@@ -1,6 +1,7 @@
 package view;
 
 import controller.GameController;
+import model.dto.MessageType;
 import model.player.Player;
 import model.yut.YutResult;
 
@@ -12,4 +13,5 @@ public interface View {
     void promptRestart(GameController controller);
     void showWinner(Player currentPlayer);
     void updateStatus(String message);
+    void updateStatus(String message, MessageType type);
 }

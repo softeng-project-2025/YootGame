@@ -1,5 +1,6 @@
 package view.swing;
 
+import model.dto.MessageType;
 import model.player.Player;
 import model.yut.YutThrower;
 import view.View;
@@ -234,6 +235,12 @@ public class SwingView extends JFrame implements View {
                 winner.getName() + "님이 모든 말을 도착시켜 승리했습니다!",
                 "게임 종료",
                 JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    @Override
+    public void updateStatus(String message, MessageType type) {
+        System.out.println("[VIEW-" + type + "] " + message);
+        statusLabel.setText(message); // GUI 상태 표시용 라벨
     }
 
     public void resetUI() {
