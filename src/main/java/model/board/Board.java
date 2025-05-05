@@ -19,8 +19,8 @@ public class Board {
     }
 
     // Piece가 현재 위치에서 YutResult에 따라 다음 위치로 이동
-    public Position getNextPosition(Position current, YutResult result) {
-        return pathStrategy.getNextPosition(current, result);
+    public Position getNextPosition(Piece piece, YutResult result) {
+        return pathStrategy.getNextPosition(piece, result);
     }
 
     public PathStrategy getPathStrategy() {
@@ -35,15 +35,24 @@ public class Board {
         List<Piece> group = piece.getGroup().isEmpty() ? List.of(piece) : piece.getGroup();
         boolean captured = false;
 
+
         for (Piece p : group) {
+            if (p.getCustomPath() == null) {
+                PieceUtil.initializePath(p, pathStrategy);
+            }
             Position newPos;
             if (result.getStep() < 0) {
                 newPos = pathStrategy.getPreviousPosition(p.getPosition(), Math.abs(result.getStep()));
+                p.setPosition(newPos);
+                p.advancePathIndex(result.getStep());
             } else {
-                newPos = pathStrategy.getNextPosition(p.getPosition(), result);
+                newPos = pathStrategy.getNextPosition(p, result);
+                p.setPosition(newPos);
+                p.advancePathIndex(result.getStep());
             }
             p.setPosition(newPos);
-            p.setMoved(); // 이동한 말로 표시
+            p.setMoved();// 이동한 말로 표시
+
 
             // 잡기: 같은 칸에 있는 상대 말들을 출발점으로
             for (Player otherPlayer : players) {
@@ -64,9 +73,15 @@ public class Board {
                     }
                 }
             }
+
+            if (newPos.getIndex() == 28) {
+                p.setPassedCenter(true);
+            }
+
         }
         // 이동 완료 후 같은 위치의 같은 플레이어 말들끼리 자동 그룹 형성
         for (Piece p : group) {
+
             List<Piece> autoGroup = new ArrayList<>();
             for (Piece candidate : p.getOwner().getPieces()) {
                 if (!candidate.isFinished() &&

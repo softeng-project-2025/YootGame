@@ -1,5 +1,7 @@
 package model.piece;
 
+import model.strategy.PathStrategy;
+
 import java.util.List;
 
 public class PieceUtil {
@@ -14,5 +16,11 @@ public class PieceUtil {
     // 단독 그룹으로 리셋 (잡힘, 완주)
     public static void resetGroupToSelf(Piece p) {
         p.setGroup(List.of(p));
+    }
+
+    public static void initializePath(Piece piece, PathStrategy strategy) {
+        piece.setPathType(PathType.OUTER);
+        piece.setCustomPath(strategy.getPath());
+        piece.setPathIndex(0);
     }
 }
