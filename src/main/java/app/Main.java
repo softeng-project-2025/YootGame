@@ -10,7 +10,8 @@ public class Main {
         SwingUtilities.invokeLater(() -> {
             SwingView view = new SwingView();
             GameController controller = new GameController(view);
-            controller.initializeGame(2, 3, "square"); // ✅ 게임 시작
+            view.setController(controller); // 반드시 먼저 주입
+            view.showGameSetupDialog();     // 이 시점에서 controller는 null이 아님
         });
     }
 }

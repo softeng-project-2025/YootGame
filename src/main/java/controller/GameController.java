@@ -24,20 +24,16 @@ public class GameController {
 
     // 게임 시작 설정: 플레이어 수, 말 수, 보드 타입
     public void initializeGame(int playerCount, int pieceCount, String boardType) {
-        PathStrategy pathStrategy;
-
-        switch (boardType.toLowerCase()) {
-            case "pentagon":
+        PathStrategy pathStrategy = switch (boardType.toLowerCase()) {
+            case "square" -> new SquarePathStrategy();
+            case "pentagon" ->
                 // pathStrategy = new PentagonPathStrategy(); // TODO: 구현 시 교체
-                pathStrategy = new SquarePathStrategy(); // 임시
-                break;
-            case "hexagon":
+                    new SquarePathStrategy(); // 임시
+            case "hexagon" ->
                 // pathStrategy = new HexPathStrategy(); // TODO: 구현 시 교체
-                pathStrategy = new SquarePathStrategy(); // 임시
-                break;
-            default:
-                pathStrategy = new SquarePathStrategy();
-        }
+                    new SquarePathStrategy(); // 임시
+            default -> new SquarePathStrategy();
+        };
 
         Board board = new Board(pathStrategy);
         List<Player> players = new ArrayList<>();
