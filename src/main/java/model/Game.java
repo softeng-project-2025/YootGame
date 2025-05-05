@@ -1,7 +1,9 @@
 package model;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 
 import model.board.Board;
 import model.dto.GameMessage;
@@ -22,6 +24,8 @@ public class Game {
     private GameState currentState;
     private boolean isFinished = false;
     private GameMessage lastMessage;
+
+    private final Queue<YutResult> yutQueue = new LinkedList<>();
 
     public Game(Board board, List<Player> players) {
         this.board = board;
@@ -107,6 +111,26 @@ public class Game {
     }
     public GameMessage getLastMessage() {
         return this.lastMessage;
+    }
+
+    public Queue<YutResult> getYutQueue() {
+        return yutQueue;
+    }
+
+    public void enqueueYutResult(YutResult result) {
+        yutQueue.offer(result);
+    }
+
+    public YutResult dequeueYutResult() {
+        return yutQueue.poll();
+    }
+
+    public boolean hasPendingYutResults() {
+        return !yutQueue.isEmpty();
+    }
+
+    public void clearYutQueue() {
+        yutQueue.clear();
     }
 
 

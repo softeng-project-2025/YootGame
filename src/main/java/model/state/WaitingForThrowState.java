@@ -21,28 +21,13 @@ public class WaitingForThrowState implements GameState {
 
     @Override
     public MoveResult handleYutThrowWithResult(YutResult result) {
-        this.lastResult = result;
+        game.enqueueYutResult(result);
 
-        String message = game.getCurrentPlayer().getName() + " 이(가) 윷을 던졌습니다: " + result.getName();
+        String message = game.getCurrentPlayer().getName() + "이(가) 윷을 던졌습니다: " + result.getName();
+        GameMessage msg = new GameMessage(message, MessageType.INFO);
+        game.setLastMessage(msg);
 
-        List<Piece> movable = PieceUtil.getMovablePieces(game.getCurrentPlayer(), result);
-
-        if (movable.isEmpty()) {
-            game.setLastMessage(new GameMessage(message + "그러나 이동할 수 있는 말이 없어 턴을 넘깁니다." , MessageType.INFO));
-            return new MoveResult(
-                    false, // captured
-                    false, // gameFinished
-                    null,
-                    false, // bonusTurn
-                    true   // turnSkipped
-            );
-        } else {
-            game.setState(new SelectingPieceState(game, result));
-            game.setLastMessage(new GameMessage(message + " 말을 선택하세요." , MessageType.INFO));
-            return new MoveResult(
-                    false, false, null, false, false
-            );
-        }
+        return new MoveResult(false, false, null, false, false);
     }
 
     @Override
@@ -52,8 +37,4 @@ public class WaitingForThrowState implements GameState {
         return new MoveResult(false, false, null, false, false);
     }
 
-    @Override
-    public YutResult getLastYutResult() {
-        return lastResult;
-    }
 }

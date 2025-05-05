@@ -11,7 +11,4 @@ public interface GameState {
     // 말을 선택했을 때 처리
     MoveResult handlePieceSelectWithResult(Piece piece);
 
-    default YutResult getLastYutResult() {
-        return null;
-    }
 }

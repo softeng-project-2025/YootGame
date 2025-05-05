@@ -48,25 +48,16 @@ public class GameController {
         view.renderGame(game);    // 초기 화면 렌더링
     }
 
-    // 윷 던지기(랜덤 or 지정)
+    // 윷 던지기
     public void handleYutThrow(YutResult result) {
-        MoveResult moveResult = game.handleYutThrow(result);
+        // 윷 결과를 게임에 누적 (큐에 추가)
+        game.enqueueYutResult(result);
+
+        // View에 현재 누적된 윷 결과 상태 갱신
         view.updateYutResult(result);
-        view.renderGame(game);
-        GameMessage msg = game.getLastMessage();
-        view.updateStatus(msg.getText(), msg.getType());
 
-        if (moveResult.isGameFinished()) {
-            if (moveResult.getWinner() != null) {
-                view.showWinner(moveResult.getWinner());
-            }
-            view.promptRestart(this);
-            return;
-        }
-
-        if (moveResult.isTurnSkipped()) {
-            game.nextTurn();
-        }
+        // 사용자의 다음 액션(말 선택)을 기다리는 상태 유지
+        view.updateStatus(game.getCurrentPlayer().getName() + " 이(가) 윷을 던졌습니다: " + result.getName() + ". 말을 선택하세요.");
     }
 
     // 말 선택
