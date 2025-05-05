@@ -9,4 +9,8 @@ public interface GameState {
 
     // 말을 선택했을 때 처리
     void handlePieceSelect(Piece piece);
+
+    default YutResult getLastYutResult() {
+        return null;
+    }
 }

@@ -35,9 +35,16 @@ public class Game {
         currentState.handleYutThrow(result);
     }
 
-    public void handlePieceSelect(Piece piece) {
-        if (isFinished) return;
+    public boolean handlePieceSelect(Piece piece) {
+        if (isFinished) return false;
+
+        // 말 이동 및 잡기 여부 판단
+        boolean captured = board.movePiece(piece, currentState.getLastYutResult(), players);
+
+        // 다음 턴 or 유지 등은 상태 패턴에게 위임
         currentState.handlePieceSelect(piece);
+
+        return captured;
     }
 
     // 플레이어 관련

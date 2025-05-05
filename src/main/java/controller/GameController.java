@@ -89,6 +89,33 @@ public class GameController {
         view.renderGame(game);
     }
 
+    public void handlePieceSelect(Piece piece) {
+        Player currentPlayer = game.getCurrentPlayer(); // ← null 방지 위해 명시
+
+        boolean captured = game.handlePieceSelect(piece); // 변경 필요 (다음 단계 참고)
+        view.renderGame(game);
+
+        if (captured) {
+            view.showMessage(currentPlayer.getName() + "이(가) 상대 말을 잡았습니다!");
+        }
+
+        if (game.isFinished()) {
+            String winner = currentPlayer.getName();
+            view.showMessage(winner + " wins!");
+            view.promptRestart(this);
+            return;
+        }
+
+        if (currentPlayer.hasFinishedAllPieces()) {
+            view.showMessage(currentPlayer.getName() + "님이 모든 말을 도착시켜 승리했습니다!");
+            game.setFinished(true);
+            view.showWinner(currentPlayer);
+            return;
+        }
+
+        view.renderGame(game);
+    }
+
 
     public Game getGame() {
         return game;

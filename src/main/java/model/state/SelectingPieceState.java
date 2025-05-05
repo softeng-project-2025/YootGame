@@ -12,12 +12,12 @@ import java.util.List;
 
 public class SelectingPieceState implements GameState {
 
-    private Game game;
-    private YutResult result;
+    private final Game game;
+    private final YutResult currentResult;
 
     public SelectingPieceState(Game game, YutResult result) {
         this.game = game;
-        this.result = result;
+        this.currentResult = result;
     }
 
     @Override
@@ -28,6 +28,7 @@ public class SelectingPieceState implements GameState {
 
     @Override
     public void handlePieceSelect(Piece piece) {
+
         if (piece.isFinished()) {
             System.out.println("[WARN] 이미 완주한 말입니다.");
             return;
@@ -57,7 +58,7 @@ public class SelectingPieceState implements GameState {
 
         // 이동 처리
         Board board = game.getBoard();
-        boolean captured = board.movePiece(piece, result, game.getPlayers());
+        boolean captured = board.movePiece(piece, currentResult, game.getPlayers());
 
         // 도착 위치가 끝이라면 완료 처리
         Position finalPos = board.getPathStrategy().getPath().get(
@@ -79,11 +80,15 @@ public class SelectingPieceState implements GameState {
         }
 
         // 윷 or 모 or 잡기 → 한 번 더 턴
-        if (result == YutResult.YUT || result == YutResult.MO || captured) {
+        if (currentResult == YutResult.YUT || currentResult == YutResult.MO || captured) {
             game.setState(new WaitingForThrowState(game));
             System.out.println("[INFO] 추가 턴! (윷/모 또는 말 잡기)");
         } else {
             game.nextTurn(); // 턴 종료 및 다음 플레이어로 전환
         }
+    }
+    @Override
+    public YutResult getLastYutResult() {
+        return currentResult;
     }
 }
