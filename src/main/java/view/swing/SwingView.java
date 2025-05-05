@@ -29,6 +29,7 @@ public class SwingView extends JFrame implements View {
     private JButton restartButton;
     private JComboBox<String> yutChoiceBox;
     private JLabel statusLabel;
+    
 
 
     public SwingView() {
@@ -239,8 +240,19 @@ public class SwingView extends JFrame implements View {
 
     @Override
     public void updateStatus(String message, MessageType type) {
-        System.out.println("[VIEW-" + type + "] " + message);
-        statusLabel.setText(message); // GUI 상태 표시용 라벨
+        Color color = switch (type) {
+            case INFO -> new Color(33, 150, 243);     // 파랑
+            case WARN -> new Color(255, 152, 0);      // 주황
+            case ERROR -> new Color(244, 67, 54);     // 빨강
+        };
+        String icon = switch (type) {
+            case INFO -> "";
+            case WARN -> "⚠️";
+            case ERROR -> "";
+        };
+
+        statusLabel.setForeground(color); // JLabel 등 UI 컴포넌트 색 변경
+        statusLabel.setText(icon + message);
     }
 
     public void resetUI() {
