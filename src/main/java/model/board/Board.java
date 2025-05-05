@@ -49,8 +49,12 @@ public class Board {
                 newPos = pathStrategy.getNextPosition(p, result);
                 p.setPosition(newPos);
                 p.advancePathIndex(result.getStep());
+
+                // 도착 체크 후 종료 처리 추가
+                if (p.getCustomPath() != null && p.getPathIndex() == p.getCustomPath().size() - 1) {
+                    p.setFinished(true);
+                }
             }
-            p.setPosition(newPos);
             p.setMoved();// 이동한 말로 표시
 
 
@@ -64,8 +68,7 @@ public class Board {
                             // 잡은 말이 속한 그룹 전체 해제 + 출발점 이동
                             List<Piece> capturedGroup = other.getGroup().isEmpty() ? List.of(other) : other.getGroup();
                             for (Piece capturedp : capturedGroup) {
-                                capturedp.setPosition(pathStrategy.getPath().get(0)); // 출발점
-                                PieceUtil.resetGroupToSelf(capturedp);
+                                PieceUtil.resetPieceState(capturedp, pathStrategy);
                             }
 
                             captured = true;

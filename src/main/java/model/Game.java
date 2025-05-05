@@ -19,6 +19,7 @@ public class Game {
     private GameState currentState;
 
     private boolean isFinished = false;
+
     private transient view.View view; // 인터페이스 형태 추천
 
     public Game(Board board, List<Player> players) {
@@ -64,6 +65,10 @@ public class Game {
             }
         }
         return false;
+    }
+
+    public void setFinished(boolean finished) {
+        this.isFinished = finished;
     }
 
 

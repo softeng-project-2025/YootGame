@@ -60,17 +60,35 @@ public class GameController {
 
     // 말 선택
     public void handlePieceSelect(Piece piece) {
+        // 현재 턴 플레이어 참조
+        Player currentPlayer = game.getCurrentPlayer();
+
+        // 말 선택 처리
         game.handlePieceSelect(piece);
+
+        // 말 이동 후 렌더링
         view.renderGame(game);
 
-        if (game.isFinished()) {
-            String winner = game.getCurrentPlayer().getName();
-            view.showMessage(winner + " wins!");
-            view.promptRestart(this); // View가 사용자에게 묻도록 함
+        // 플레이어가 말 전부 도착시켰는지 확인
+        if (currentPlayer.hasFinishedAllPieces()) {
+            System.out.println(currentPlayer.getName() + "님이 모든 말을 도착시켜 승리했습니다!");
+            game.setFinished(true);  // 게임 상태 종료
+            view.showWinner(currentPlayer); // 화면에 승자 표시
+            view.promptRestart(this); // 게임 재시작 여부 묻기
+            return;
         }
 
+        // 혹시라도 게임이 다른 이유로 종료됐을 경우
+        if (game.isFinished()) {
+            String winner = currentPlayer.getName();
+            view.showMessage(winner + " wins!");
+            view.promptRestart(this);
+        }
+
+        // 마지막 렌더링
         view.renderGame(game);
     }
+
 
     public Game getGame() {
         return game;

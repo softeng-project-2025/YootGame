@@ -1,5 +1,6 @@
 package view.swing;
 
+import model.player.Player;
 import model.yut.YutThrower;
 import view.View;
 import controller.GameController;
@@ -153,7 +154,16 @@ public class SwingView extends JFrame implements View {
         } else {
             throwButton.setEnabled(false);
             showMessage("게임을 종료합니다.");
+            System.exit(0); // 게임 종료
         }
+    }
+
+    @Override
+    public void showWinner(Player winner) {
+        JOptionPane.showMessageDialog(null,
+                winner.getName() + "님이 모든 말을 도착시켜 승리했습니다!",
+                "게임 종료",
+                JOptionPane.INFORMATION_MESSAGE);
     }
 }
 

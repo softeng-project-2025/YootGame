@@ -1,6 +1,7 @@
 package view;
 
 import controller.GameController;
+import model.player.Player;
 import model.yut.YutResult;
 
 public interface View {
@@ -9,4 +10,5 @@ public interface View {
     void renderGame(model.Game game);
     void updateYutResult(YutResult yutResult);
     void promptRestart(GameController controller);
+    void showWinner(Player currentPlayer);
 }

@@ -23,4 +23,11 @@ public class PieceUtil {
         piece.setCustomPath(strategy.getPath());
         piece.setPathIndex(0);
     }
+
+    public static void resetPieceState(Piece piece, PathStrategy pathStrategy) {
+        piece.setPosition(pathStrategy.getPath().get(0)); // 출발점
+        piece.resetPath(); // customPath, index, pathType, hasPassedCenter 초기화
+        piece.setFinished(false);
+        resetGroupToSelf(piece); // 그룹도 초기화
+    }
 }

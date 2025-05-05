@@ -46,4 +46,6 @@ public class Player {
     public boolean hasMovablePieces() {
         return pieces.stream().anyMatch(p -> !p.isFinished());
     }
+
+
 }
