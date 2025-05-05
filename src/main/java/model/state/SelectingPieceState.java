@@ -23,21 +23,30 @@ public class SelectingPieceState implements GameState {
     }
 
     @Override
-    public void handleYutThrow(YutResult result) {
-        // 이미 던졌기 때문에 또 던지면 안 됨
-        System.out.println("[WARN] 이미 윷을 던졌습니다. 말을 선택하세요.");
-        game.setLastMoveMessage("이미 윷을 던졌습니다. 말을 선택하세요.");
+    public MoveResult handleYutThrowWithResult(YutResult result) {
+        String message = "이미 윷을 던졌습니다. 말을 선택하세요.";
+        System.out.println("[WARN] " + message);
+
+        return new MoveResult(
+                message,
+                false,   // captured
+                game.isFinished(),
+                null,    // winner
+                false,   // bonusTurn
+                false    // turnSkipped
+        );
     }
+
 
     @Override
     public MoveResult handlePieceSelectWithResult(Piece piece) {
         if (piece.isFinished() || piece.getOwner() != game.getCurrentPlayer()) {
-            return new MoveResult("잘못된 말 선택입니다.", false, false, null, false);
+            return new MoveResult("잘못된 말 선택입니다.",
+                    false, false, null, false, false);
         }
 
         List<Piece> group = new ArrayList<>();
         group.add(piece);
-
         for (Piece other : piece.getOwner().getPieces()) {
             if (other != piece &&
                     !other.isFinished() &&
@@ -51,21 +60,22 @@ public class SelectingPieceState implements GameState {
         Board board = game.getBoard();
         boolean captured = board.movePiece(piece, currentResult, game.getPlayers());
 
-        Position finalPos = board.getPathStrategy().getPath()
-                .get(board.getPathStrategy().getPath().size() - 1);
+        Position finalPos = board.getPathStrategy().getPath().getLast(); // 마지막 위치
 
         boolean allAtGoal = group.stream().allMatch(p -> p.getPosition().equals(finalPos));
         if (allAtGoal) {
-            for (Piece p : group) {
+            group.forEach(p -> {
                 p.setFinished(true);
                 PieceUtil.resetGroupToSelf(p);
-            }
+            });
+            boolean isWin = game.checkAndHandleWinner();
             return new MoveResult(piece.getOwner().getName() + "의 말이 골인했습니다!",
-                    false, game.checkAndHandleWinner(), game.isFinished() ? piece.getOwner() : null, false);
+                    false, isWin, game.isFinished() ? piece.getOwner() : null, false, false);
         }
 
         boolean isYutOrMo = currentResult == YutResult.YUT || currentResult == YutResult.MO;
         boolean bonusTurn = (captured && !isYutOrMo) || (isYutOrMo && !captured);
+        boolean win = game.checkAndHandleWinner();
 
         String message;
         if (captured) {
@@ -79,9 +89,10 @@ public class SelectingPieceState implements GameState {
         return new MoveResult(
                 message,
                 captured,
-                game.checkAndHandleWinner(),
-                game.isFinished() ? piece.getOwner() : null,
-                bonusTurn
+                win,
+                win ? piece.getOwner() : null,
+                bonusTurn,
+                false
         );
     }
 

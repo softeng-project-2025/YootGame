@@ -20,10 +20,6 @@ public class Game {
     private GameState currentState;
     private boolean isFinished = false;
 
-    private transient view.View view; // 인터페이스 형태 추천
-    private String lastMoveMessage = "";
-
-
     public Game(Board board, List<Player> players) {
         this.board = board;
         this.players = players;
@@ -32,12 +28,14 @@ public class Game {
     }
 
     // 턴 진행: 현재 상태에 따라 동작
-    public void handleYutThrow(YutResult result) {
-        if (isFinished) return;
-        currentState.handleYutThrow(result);
+    public MoveResult handleYutThrow(YutResult result) {
+        if (isFinished) {
+            return new MoveResult("게임이 이미 종료되었습니다.", false, true, getCurrentPlayer(), false, false);
+        }
+        return currentState.handleYutThrowWithResult(result);
     }
     public MoveResult handlePieceSelect(Piece piece) {
-        if (isFinished) return new MoveResult("게임이 이미 종료되었습니다.", false, true, getCurrentPlayer(), false);
+        if (isFinished) return new MoveResult("게임이 이미 종료되었습니다.", false, true, getCurrentPlayer(), false, false);
 
         MoveResult result = currentState.handlePieceSelectWithResult(piece);
         return result;
@@ -90,19 +88,6 @@ public class Game {
     public List<Player> getPlayers() {
         return players;
     }
-
-    public void setView(view.View view) {
-        this.view = view;
-    }
-
-    public void setLastMoveMessage(String message) {
-        this.lastMoveMessage = message;
-    }
-    public String getLastMoveMessage() {
-        return this.lastMoveMessage;
-    }
-
-
 
 
 }

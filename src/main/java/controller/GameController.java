@@ -45,15 +45,26 @@ public class GameController {
         this.game = new Game(board, players);
         view.setController(this); // View에 컨트롤러 주입
         view.renderGame(game);    // 초기 화면 렌더링
-        game.setView(view); // initializeGame() 이후에 호출
     }
 
     // 윷 던지기(랜덤 or 지정)
     public void handleYutThrow(YutResult result) {
-        game.handleYutThrow(result);
+        MoveResult moveResult = game.handleYutThrow(result);
         view.updateYutResult(result);
         view.renderGame(game);
-        view.updateStatus(game.getLastMoveMessage());
+        view.updateStatus(moveResult.getMessage());
+
+        if (moveResult.isGameFinished()) {
+            if (moveResult.getWinner() != null) {
+                view.showWinner(moveResult.getWinner());
+            }
+            view.promptRestart(this);
+            return;
+        }
+
+        if (moveResult.isTurnSkipped()) {
+            game.nextTurn();
+        }
     }
 
     // 말 선택

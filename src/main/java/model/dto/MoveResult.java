@@ -8,13 +8,16 @@ public class MoveResult {
     private final boolean gameFinished;
     private final Player winner;
     private final boolean bonusTurn;
+    private final boolean turnSkipped;
 
-    public MoveResult(String message, boolean captured, boolean gameFinished, Player winner, boolean bonusTurn) {
+    public MoveResult(String message, boolean captured, boolean gameFinished,
+                      Player winner, boolean bonusTurn, boolean turnSkipped) {
         this.message = message;
         this.captured = captured;
         this.gameFinished = gameFinished;
         this.winner = winner;
         this.bonusTurn = bonusTurn;
+        this.turnSkipped = turnSkipped;
     }
 
     public String getMessage() { return message; }
@@ -22,4 +25,5 @@ public class MoveResult {
     public boolean isGameFinished() { return gameFinished; }
     public Player getWinner() { return winner; }
     public boolean isBonusTurn() { return bonusTurn; }
+    public boolean isTurnSkipped() { return turnSkipped; }
 }
