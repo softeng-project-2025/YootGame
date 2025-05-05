@@ -12,6 +12,7 @@ import model.piece.Piece;
 
 public class Game {
 
+
     private List<Player> players;
     private Board board;
     private int currentPlayerIndex;
@@ -21,6 +22,7 @@ public class Game {
     private boolean isFinished = false;
 
     private transient view.View view; // 인터페이스 형태 추천
+    private String lastMoveMessage = "";
 
     public Game(Board board, List<Player> players) {
         this.board = board;
@@ -97,6 +99,13 @@ public class Game {
 
     public void setView(view.View view) {
         this.view = view;
+    }
+
+    public void setLastMoveMessage(String message) {
+        this.lastMoveMessage = message;
+    }
+    public String getLastMoveMessage() {
+        return this.lastMoveMessage;
     }
 
 

@@ -2,7 +2,10 @@ package model.state;
 
 import model.Game;
 import model.piece.Piece;
+import model.piece.PieceUtil;
 import model.yut.YutResult;
+
+import java.util.List;
 
 public class WaitingForThrowState implements GameState {
 
@@ -16,11 +19,20 @@ public class WaitingForThrowState implements GameState {
     @Override
     public void handleYutThrow(YutResult result) {
         this.lastResult = result;
-        System.out.println("[INFO] " + game.getCurrentPlayer().getName() + " 이(가) 윷을 던졌습니다: " + result);
 
-        // TODO: 던진 결과 저장, 처리 등 로직 연결
-        // 상태 전환: 다음은 말 선택 상태로
-        game.setState(new SelectingPieceState(game, result));
+        String message = game.getCurrentPlayer().getName() + " 이(가) 윷을 던졌습니다: " + result.getName();
+        System.out.println("[INFO] " + message);
+        game.setLastMoveMessage(message);
+
+        List<Piece> movable = PieceUtil.getMovablePieces(game.getCurrentPlayer(), result);
+
+        if (movable.isEmpty()) {
+            game.setLastMoveMessage(game.getCurrentPlayer().getName() + "은(는) 이동할 수 있는 말이 없습니다. 턴을 넘깁니다.");
+            game.nextTurn();
+        } else {
+            // 이동 가능한 말이 있는 경우
+            game.setState(new SelectingPieceState(game, result));
+        }
     }
 
     @Override

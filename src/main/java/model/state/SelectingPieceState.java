@@ -18,18 +18,20 @@ public class SelectingPieceState implements GameState {
     public SelectingPieceState(Game game, YutResult result) {
         this.game = game;
         this.currentResult = result;
+
     }
 
     @Override
     public void handleYutThrow(YutResult result) {
         // 이미 던졌기 때문에 또 던지면 안 됨
         System.out.println("[WARN] 이미 윷을 던졌습니다. 말을 선택하세요.");
+        game.setLastMoveMessage("이미 윷을 던졌습니다. 말을 선택하세요.");
     }
 
     @Override
     public void handlePieceSelect(Piece piece) {
-
         if (piece.isFinished() || piece.getOwner() != game.getCurrentPlayer()) {
+            game.setLastMoveMessage("잘못된 말 선택입니다.");
             System.out.println("[WARN] 잘못된 말 선택입니다.");
             return;
         }
@@ -68,17 +70,21 @@ public class SelectingPieceState implements GameState {
                 p.setFinished(true);
                 PieceUtil.resetGroupToSelf(p); // 완주 시 그룹 해제
             }
+            game.setLastMoveMessage( piece.getOwner().getName() + "의 말이 골인했습니다!");
+        } else if (captured) {
+            game.setLastMoveMessage( piece.getOwner().getName() + "이(가) 상대 말을 잡았습니다! 한 번 더 던지세요.");
+        } else if (currentResult == YutResult.YUT || currentResult == YutResult.MO) {
+            game.setLastMoveMessage( piece.getOwner().getName() + "이(가) 윷 또는 모로 추가 턴을 얻었습니다.");
+        } else {
+            game.setLastMoveMessage( piece.getOwner().getName() + "이(가) 말을 이동했습니다. 턴 종료, 다음 플레이어로 넘어갑니다.");
         }
 
-        // 말 완주 후 게임 종료 조건 확인
-        if (game.checkAndHandleWinner()) {
-            return;
-        }
+        // 종료 조건
+        if (game.checkAndHandleWinner()) return;
 
-        // 윷 or 모 or 잡기 → 한 번 더 턴
+        // 추가 턴 조건
         if (currentResult == YutResult.YUT || currentResult == YutResult.MO || captured) {
             game.setState(new WaitingForThrowState(game));
-            System.out.println("[INFO] 추가 턴! (윷/모 또는 말 잡기)");
         } else {
             game.nextTurn(); // 턴 종료 및 다음 플레이어로 전환
         }

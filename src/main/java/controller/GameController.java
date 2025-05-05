@@ -52,48 +52,41 @@ public class GameController {
         game.handleYutThrow(result);
         view.updateYutResult(result);
         view.renderGame(game);
+        view.updateStatus(game.getLastMoveMessage());
     }
 
     // 말 선택
     public void handlePieceSelect(Piece piece) {
         // 현재 턴 플레이어 참조
         Player currentPlayer = game.getCurrentPlayer();
-        view.updateStatus(currentPlayer.getName() + "의 차례입니다. 윷을 던지세요.");
-
         // 말 선택 처리
         boolean captured = game.handlePieceSelect(piece); // 변경 필요 (다음 단계 참고)
         // 말 이동 후 렌더링
-        view.renderGame(game);
-        view.updateStatus("말을 선택하고 이동했습니다.");
+        view.renderGame(game); // 상태 변화 반영
+        view.updateStatus(game.getLastMoveMessage());
 
-        if (captured) {
-            view.updateStatus(currentPlayer.getName() + "이(가) 상대 말을 잡았습니다! 한 번 더 던지세요.");
-        }
 
         // 혹시라도 게임이 다른 이유로 종료됐을 경우
         if (game.isFinished()) {
             String winner = currentPlayer.getName();
             view.showMessage(winner + " wins!");
-            view.updateStatus(winner + "님이 승리했습니다!");
             view.promptRestart(this);
             return;
         }
 
         // 플레이어가 말 전부 도착시켰는지 확인
         if (currentPlayer.hasFinishedAllPieces()) {
-            view.showMessage(currentPlayer.getName() + "님이 모든 말을 도착시켜 승리했습니다!");
-            game.setFinished(true);
             view.showWinner(currentPlayer);
+            game.setFinished(true);
             return;
         }
-
-        // 마지막 렌더링
-        view.renderGame(game);
     }
 
 
     public Game getGame() {
         return game;
     }
+
+
 
 }
