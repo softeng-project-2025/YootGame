@@ -6,23 +6,23 @@ import java.util.List;
 import model.board.Board;
 import model.player.Player;
 import model.state.GameState;
+import model.dto.MoveResult;
 import model.state.WaitingForThrowState;
 import model.yut.YutResult;
 import model.piece.Piece;
 
 public class Game {
 
-
     private List<Player> players;
     private Board board;
     private int currentPlayerIndex;
 
     private GameState currentState;
-
     private boolean isFinished = false;
 
     private transient view.View view; // 인터페이스 형태 추천
     private String lastMoveMessage = "";
+
 
     public Game(Board board, List<Player> players) {
         this.board = board;
@@ -36,17 +36,11 @@ public class Game {
         if (isFinished) return;
         currentState.handleYutThrow(result);
     }
+    public MoveResult handlePieceSelect(Piece piece) {
+        if (isFinished) return new MoveResult("게임이 이미 종료되었습니다.", false, true, getCurrentPlayer(), false);
 
-    public boolean handlePieceSelect(Piece piece) {
-        if (isFinished) return false;
-
-        // 말 이동 및 잡기 여부 판단
-        boolean captured = board.movePiece(piece, currentState.getLastYutResult(), players);
-
-        // 다음 턴 or 유지 등은 상태 패턴에게 위임
-        currentState.handlePieceSelect(piece);
-
-        return captured;
+        MoveResult result = currentState.handlePieceSelectWithResult(piece);
+        return result;
     }
 
     // 플레이어 관련

@@ -2,6 +2,7 @@ package controller;
 
 import model.Game;
 import model.board.Board;
+import model.dto.MoveResult;
 import model.player.Player;
 import model.piece.Piece;
 import model.strategy.PathStrategy;
@@ -57,28 +58,24 @@ public class GameController {
 
     // 말 선택
     public void handlePieceSelect(Piece piece) {
-        // 현재 턴 플레이어 참조
-        Player currentPlayer = game.getCurrentPlayer();
         // 말 선택 처리
-        boolean captured = game.handlePieceSelect(piece); // 변경 필요 (다음 단계 참고)
-        // 말 이동 후 렌더링
-        view.renderGame(game); // 상태 변화 반영
-        view.updateStatus(game.getLastMoveMessage());
+        MoveResult result = game.handlePieceSelect(piece);
 
+        // 말 이동 후 렌더링
+        view.renderGame(game);
+        view.updateStatus(result.getMessage());
 
         // 혹시라도 게임이 다른 이유로 종료됐을 경우
-        if (game.isFinished()) {
-            String winner = currentPlayer.getName();
-            view.showMessage(winner + " wins!");
+        if (result.isGameFinished()) {
+            if (result.getWinner() != null) {
+                view.showWinner(result.getWinner());
+            }
             view.promptRestart(this);
             return;
         }
 
-        // 플레이어가 말 전부 도착시켰는지 확인
-        if (currentPlayer.hasFinishedAllPieces()) {
-            view.showWinner(currentPlayer);
-            game.setFinished(true);
-            return;
+        if (!result.isBonusTurn()) {
+            game.nextTurn(); // 다음 플레이어로 넘어감
         }
     }
 

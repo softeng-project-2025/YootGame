@@ -1,6 +1,7 @@
 package model.state;
 
 import model.Game;
+import model.dto.MoveResult;
 import model.piece.Piece;
 import model.piece.PieceUtil;
 import model.yut.YutResult;
@@ -36,9 +37,10 @@ public class WaitingForThrowState implements GameState {
     }
 
     @Override
-    public void handlePieceSelect(Piece piece) {
-        // 아직 윷을 안 던졌는데 말을 고르려는 상황
-        System.out.println("[WARN] 아직 윷을 던지지 않았습니다!");
+    public MoveResult handlePieceSelectWithResult(Piece piece) {
+        String warning = "아직 윷을 던지지 않았습니다!";
+        System.out.println("[WARN] " + warning);
+        return new MoveResult(warning, false, false, null, false);
     }
 
     @Override

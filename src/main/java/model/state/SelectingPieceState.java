@@ -2,6 +2,7 @@ package model.state;
 
 import model.Game;
 import model.board.Board;
+import model.dto.MoveResult;
 import model.piece.Piece;
 import model.piece.PieceUtil;
 import model.position.Position;
@@ -29,16 +30,11 @@ public class SelectingPieceState implements GameState {
     }
 
     @Override
-    public void handlePieceSelect(Piece piece) {
+    public MoveResult handlePieceSelectWithResult(Piece piece) {
         if (piece.isFinished() || piece.getOwner() != game.getCurrentPlayer()) {
-            game.setLastMoveMessage("잘못된 말 선택입니다.");
-            System.out.println("[WARN] 잘못된 말 선택입니다.");
-            return;
+            return new MoveResult("잘못된 말 선택입니다.", false, false, null, false);
         }
 
-        System.out.println("[INFO] " + piece.getOwner().getName() + " 이(가) 말 " + piece.getId() + "을(를) 이동합니다.");
-
-        // 이동 직전: 같은 위치의 같은 플레이어 말이 있는지 확인
         List<Piece> group = new ArrayList<>();
         group.add(piece);
 
@@ -46,55 +42,53 @@ public class SelectingPieceState implements GameState {
             if (other != piece &&
                     !other.isFinished() &&
                     other.getPosition().equals(piece.getPosition()) &&
-                    other.hasMoved()) { // 이동한 적 있는 말만 그룹 허용
+                    other.hasMoved()) {
                 group.add(other);
             }
         }
 
         PieceUtil.ensureGroupConsistency(group);
-
-        // 이동 처리
         Board board = game.getBoard();
         boolean captured = board.movePiece(piece, currentResult, game.getPlayers());
 
-        // 도착 위치가 끝이라면 완료 처리
-        Position finalPos = board.getPathStrategy().getPath().get(
-                board.getPathStrategy().getPath().size() - 1);
+        Position finalPos = board.getPathStrategy().getPath()
+                .get(board.getPathStrategy().getPath().size() - 1);
 
-        boolean allAtGoal = group.stream()
-                .allMatch(p -> p.getPosition().equals(finalPos));
-
-
+        boolean allAtGoal = group.stream().allMatch(p -> p.getPosition().equals(finalPos));
         if (allAtGoal) {
-            for (Piece p : group) { // 그룹 상태에서 함께 골인
+            for (Piece p : group) {
                 p.setFinished(true);
-                PieceUtil.resetGroupToSelf(p); // 완주 시 그룹 해제
+                PieceUtil.resetGroupToSelf(p);
             }
-            game.setLastMoveMessage( piece.getOwner().getName() + "의 말이 골인했습니다!");
-        } else if (captured) {
-            game.setLastMoveMessage( piece.getOwner().getName() + "이(가) 상대 말을 잡았습니다! 한 번 더 던지세요.");
-        } else if (currentResult == YutResult.YUT || currentResult == YutResult.MO) {
-            game.setLastMoveMessage( piece.getOwner().getName() + "이(가) 윷 또는 모로 추가 턴을 얻었습니다.");
-        } else {
-            game.setLastMoveMessage( piece.getOwner().getName() + "이(가) 말을 이동했습니다. 턴 종료, 다음 플레이어로 넘어갑니다.");
+            return new MoveResult(piece.getOwner().getName() + "의 말이 골인했습니다!",
+                    false, game.checkAndHandleWinner(), game.isFinished() ? piece.getOwner() : null, false);
         }
 
-        // 종료 조건
-        if (game.checkAndHandleWinner()) return;
-
-        // 추가 턴 조건
         boolean isYutOrMo = currentResult == YutResult.YUT || currentResult == YutResult.MO;
+        boolean bonusTurn = (captured && !isYutOrMo) || (isYutOrMo && !captured);
 
-        if (captured && !isYutOrMo) {
-            game.setState(new WaitingForThrowState(game)); // 추가 턴 부여
-        } else if (isYutOrMo && !captured) {
-            game.setState(new WaitingForThrowState(game)); // 추가 턴 부여
+        String message;
+        if (captured) {
+            message = piece.getOwner().getName() + "이(가) 상대 말을 잡았습니다!" + (bonusTurn ? " 한 번 더 던지세요." : "");
+        } else if (isYutOrMo) {
+            message = piece.getOwner().getName() + "이(가) 윷 또는 모로 추가 턴을 얻었습니다.";
         } else {
-            game.nextTurn(); // 턴 종료
+            message = piece.getOwner().getName() + "이(가) 말을 이동했습니다. 턴 종료, 다음 플레이어로 넘어갑니다.";
         }
+
+        return new MoveResult(
+                message,
+                captured,
+                game.checkAndHandleWinner(),
+                game.isFinished() ? piece.getOwner() : null,
+                bonusTurn
+        );
     }
+
     @Override
     public YutResult getLastYutResult() {
         return currentResult;
     }
 }
+
+

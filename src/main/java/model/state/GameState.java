@@ -1,5 +1,6 @@
 package model.state;
 
+import model.dto.MoveResult;
 import model.yut.YutResult;
 import model.piece.Piece;
 
@@ -8,7 +9,7 @@ public interface GameState {
     void handleYutThrow(YutResult result);
 
     // 말을 선택했을 때 처리
-    void handlePieceSelect(Piece piece);
+    MoveResult handlePieceSelectWithResult(Piece piece);
 
     default YutResult getLastYutResult() {
         return null;
