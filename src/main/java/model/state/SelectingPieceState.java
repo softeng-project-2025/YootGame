@@ -83,10 +83,14 @@ public class SelectingPieceState implements GameState {
         if (game.checkAndHandleWinner()) return;
 
         // 추가 턴 조건
-        if (currentResult == YutResult.YUT || currentResult == YutResult.MO || captured) {
-            game.setState(new WaitingForThrowState(game));
+        boolean isYutOrMo = currentResult == YutResult.YUT || currentResult == YutResult.MO;
+
+        if (captured && !isYutOrMo) {
+            game.setState(new WaitingForThrowState(game)); // 추가 턴 부여
+        } else if (isYutOrMo && !captured) {
+            game.setState(new WaitingForThrowState(game)); // 추가 턴 부여
         } else {
-            game.nextTurn(); // 턴 종료 및 다음 플레이어로 전환
+            game.nextTurn(); // 턴 종료
         }
     }
     @Override
