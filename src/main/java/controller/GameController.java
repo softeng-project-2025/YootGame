@@ -42,7 +42,7 @@ public class GameController {
         Board board = new Board(pathStrategy);
         List<Player> players = new ArrayList<>();
         for (int i = 1; i <= playerCount; i++) {
-            players.add(new Player("Player " + i, pieceCount, board));
+            players.add(new Player("Player " + i, pieceCount, board, i));
         }
 
         this.game = new Game(board, players);
@@ -62,50 +62,28 @@ public class GameController {
     public void handlePieceSelect(Piece piece) {
         // 현재 턴 플레이어 참조
         Player currentPlayer = game.getCurrentPlayer();
+        view.updateStatus(currentPlayer.getName() + "의 차례입니다. 윷을 던지세요.");
 
         // 말 선택 처리
-        game.handlePieceSelect(piece);
-
+        boolean captured = game.handlePieceSelect(piece); // 변경 필요 (다음 단계 참고)
         // 말 이동 후 렌더링
         view.renderGame(game);
+        view.updateStatus("말을 선택하고 이동했습니다.");
 
-        // 플레이어가 말 전부 도착시켰는지 확인
-        if (currentPlayer.hasFinishedAllPieces()) {
-            System.out.println(currentPlayer.getName() + "님이 모든 말을 도착시켜 승리했습니다!");
-            game.setFinished(true);  // 게임 상태 종료
-            view.showWinner(currentPlayer); // 화면에 승자 표시
-            view.promptRestart(this); // 게임 재시작 여부 묻기
-            return;
+        if (captured) {
+            view.updateStatus(currentPlayer.getName() + "이(가) 상대 말을 잡았습니다! 한 번 더 던지세요.");
         }
 
         // 혹시라도 게임이 다른 이유로 종료됐을 경우
         if (game.isFinished()) {
             String winner = currentPlayer.getName();
             view.showMessage(winner + " wins!");
-            view.promptRestart(this);
-        }
-
-        // 마지막 렌더링
-        view.renderGame(game);
-    }
-
-    public void handlePieceSelect(Piece piece) {
-        Player currentPlayer = game.getCurrentPlayer(); // ← null 방지 위해 명시
-
-        boolean captured = game.handlePieceSelect(piece); // 변경 필요 (다음 단계 참고)
-        view.renderGame(game);
-
-        if (captured) {
-            view.showMessage(currentPlayer.getName() + "이(가) 상대 말을 잡았습니다!");
-        }
-
-        if (game.isFinished()) {
-            String winner = currentPlayer.getName();
-            view.showMessage(winner + " wins!");
+            view.updateStatus(winner + "님이 승리했습니다!");
             view.promptRestart(this);
             return;
         }
 
+        // 플레이어가 말 전부 도착시켰는지 확인
         if (currentPlayer.hasFinishedAllPieces()) {
             view.showMessage(currentPlayer.getName() + "님이 모든 말을 도착시켜 승리했습니다!");
             game.setFinished(true);
@@ -113,6 +91,7 @@ public class GameController {
             return;
         }
 
+        // 마지막 렌더링
         view.renderGame(game);
     }
 

@@ -20,33 +20,43 @@ import java.util.ArrayList;
 
 public class SwingView extends JFrame implements View {
 
+    private final JFrame frame;
     private GameController controller;
     private JLabel resultLabel;
     private JPanel boardPanel;
     private JButton throwButton;
     private JButton restartButton;
     private JComboBox<String> yutChoiceBox;
+    private JLabel statusLabel;
 
 
     public SwingView() {
-        setTitle("YootGame");
-        setSize(800, 600);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setLayout(new BorderLayout());
+        frame = new JFrame("YootGame");
+        frame.setSize(800, 600);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setLayout(new BorderLayout());
 
         initUI();
-        setVisible(true);
+
+        frame.setVisible(true);
+
+    }
+
+    public void updateStatus(String message) {
+        statusLabel.setText(message);
     }
 
     private void initUI() {
         boardPanel = new JPanel();
         boardPanel.setLayout(null);
-        boardPanel.setPreferredSize(new Dimension(600, 600));
+        boardPanel.setPreferredSize(new Dimension(800, 800));
         boardPanel.setBackground(Color.WHITE);
+        JScrollPane scrollPane = new JScrollPane(boardPanel);
+        frame.add(scrollPane, BorderLayout.CENTER);
 
         resultLabel = new JLabel("결과: ");
         resultLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        add(resultLabel, BorderLayout.NORTH);
+        frame.add(resultLabel, BorderLayout.NORTH);
 
         throwButton = new JButton("윷 던지기");
         throwButton.addActionListener(e -> {
@@ -67,15 +77,26 @@ public class SwingView extends JFrame implements View {
             controller.initializeGame(2, 3, "square"); // 기본값 또는 사용자 입력값
         });
 
-        JPanel buttonPanel = new JPanel();
-        buttonPanel.setLayout(new FlowLayout());
+        // 기존 버튼 패널 구성
+        JPanel buttonPanel = new JPanel(new FlowLayout());
         buttonPanel.add(throwButton);
         buttonPanel.add(restartButton);
         yutChoiceBox = new JComboBox<>(new String[]{"랜덤", "도", "개", "걸", "윷", "모", "빽도"});
         buttonPanel.add(yutChoiceBox);
 
-        add(boardPanel, BorderLayout.CENTER);
-        add(buttonPanel, BorderLayout.SOUTH);
+        // 상태 라벨 구성
+        statusLabel = new JLabel("게임을 시작하세요.");
+        statusLabel.setFont(new Font("Arial", Font.BOLD, 16));
+        statusLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        statusLabel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+        // ✅ 새로운 하단 패널에 둘 다 넣기
+        JPanel bottomPanel = new JPanel(new BorderLayout());
+        bottomPanel.add(buttonPanel, BorderLayout.CENTER);
+        bottomPanel.add(statusLabel, BorderLayout.SOUTH);
+
+        frame.add(boardPanel, BorderLayout.CENTER);
+        frame.add(bottomPanel, BorderLayout.SOUTH);
     }
 
     // Controller에서 주입
@@ -107,14 +128,26 @@ public class SwingView extends JFrame implements View {
 
             for (int i = 0; i < piecesAtPosition.size(); i++) {
                 Piece piece = piecesAtPosition.get(i);
+                int playerNum = piece.getOwner().getPlayerNumber();
+                String label = "P" + piece.getOwner().getPlayerNumber() + "-" + piece.getId();
+                JButton pieceButton = new JButton(label);
+                // 1. 플레이어별 색상 구분
+                Color[] playerColors = {Color.CYAN, Color.PINK, Color.ORANGE, Color.MAGENTA};
+                pieceButton.setBackground(playerColors[(playerNum - 1) % playerColors.length]);
+                pieceButton.setOpaque(true); // 버튼 배경색 적용 필수
+                pieceButton.setBorderPainted(false); // 테두리 제거
 
-                JButton pieceButton = new JButton(piece.getOwner().getName().charAt(piece.getOwner().getName().length() - 1) + "-" + piece.getId());
+                // 2. 글꼴 크기 키우기
+                pieceButton.setFont(new Font("Arial", Font.PLAIN, 1)); // 폰트 작게
+                pieceButton.setMargin(new Insets(0, 0, 0, 0)); // 여백 제거
 
+                // 3. 말 정보 툴팁 제공
+                pieceButton.setToolTipText(piece.getOwner().getName() + "의 말 " + piece.getId());
                 // 오프셋 위치 (ex: 6픽셀씩 우하향 이동)
                 int offsetX = baseX + i * 6;
                 int offsetY = baseY + i * 6;
 
-                pieceButton.setBounds(offsetX, offsetY, 40, 40);
+                pieceButton.setBounds(offsetX, offsetY, 60, 60);
                 pieceButton.addActionListener(e -> controller.handlePieceSelect(piece));
 
                 boardPanel.add(pieceButton);
@@ -137,8 +170,10 @@ public class SwingView extends JFrame implements View {
     public void showMessage(String message) {
         JOptionPane.showMessageDialog(this, message);
     }
+
     public void updateYutResult(YutResult result) {
         resultLabel.setText("결과: " + result.name());
+        resultLabel.setForeground(Color.BLUE); // 시각적으로 더 강조
     }
 
     public void promptRestart(GameController controller) {
@@ -151,6 +186,7 @@ public class SwingView extends JFrame implements View {
 
         if (result == JOptionPane.YES_OPTION) {
             controller.initializeGame(2, 3, "square"); // 예시 값
+            resetUI();
         } else {
             throwButton.setEnabled(false);
             showMessage("게임을 종료합니다.");
@@ -164,6 +200,13 @@ public class SwingView extends JFrame implements View {
                 winner.getName() + "님이 모든 말을 도착시켜 승리했습니다!",
                 "게임 종료",
                 JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    public void resetUI() {
+        updateStatus("게임을 시작하세요.");
+        resultLabel.setText("결과: ");
+        restartButton.setEnabled(false);
+        throwButton.setEnabled(true);
     }
 }
 

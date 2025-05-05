@@ -10,9 +10,11 @@ import model.piece.Piece;
 public class Player {
     private final String name;
     private final List<Piece> pieces;
+    private int playerNumber;
 
-    public Player(String name, int pieceCount, Board board) {
+    public Player(String name, int pieceCount, Board board, int playerNumber) {
         this.name = name;
+        this.playerNumber = playerNumber;
         this.pieces = new ArrayList<>();
         Position startPos = board.getPathStrategy().getPath().get(0); // 시작 위치
 
@@ -45,6 +47,10 @@ public class Player {
     // 움직일 수 있는 말이 존재하는지
     public boolean hasMovablePieces() {
         return pieces.stream().anyMatch(p -> !p.isFinished());
+    }
+
+    public int getPlayerNumber() {
+        return playerNumber;
     }
 
 

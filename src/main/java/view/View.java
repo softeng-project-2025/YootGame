@@ -11,4 +11,5 @@ public interface View {
     void updateYutResult(YutResult yutResult);
     void promptRestart(GameController controller);
     void showWinner(Player currentPlayer);
+    void updateStatus(String message);
 }
