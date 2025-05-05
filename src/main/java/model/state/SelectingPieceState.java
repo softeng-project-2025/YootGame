@@ -29,13 +29,8 @@ public class SelectingPieceState implements GameState {
     @Override
     public void handlePieceSelect(Piece piece) {
 
-        if (piece.isFinished()) {
-            System.out.println("[WARN] 이미 완주한 말입니다.");
-            return;
-        }
-
-        if (piece.getOwner() != game.getCurrentPlayer()) {
-            System.out.println("[WARN] 자신의 말만 이동할 수 있습니다.");
+        if (piece.isFinished() || piece.getOwner() != game.getCurrentPlayer()) {
+            System.out.println("[WARN] 잘못된 말 선택입니다.");
             return;
         }
 
@@ -66,6 +61,7 @@ public class SelectingPieceState implements GameState {
 
         boolean allAtGoal = group.stream()
                 .allMatch(p -> p.getPosition().equals(finalPos));
+
 
         if (allAtGoal) {
             for (Piece p : group) { // 그룹 상태에서 함께 골인
