@@ -72,4 +72,12 @@ public class GameMessageFactory {
     public static GameMessage withThrowPrompt(GameMessage base) {
         return new GameMessage(base.getContent() + THROW_PROMPT_SUFFIX, base.getType());
     }
+
+    public static GameMessage gameAlreadyFinishedMessage() {
+        return new GameMessage("게임이 이미 종료되었습니다.", MessageType.INFO);
+    }
+
+    public static GameMessage yutThrownPrompt(String playerName, String resultName) {
+        return new GameMessage(playerName + "이(가) 윷을 던졌습니다: " + resultName + ". 말을 선택하세요.", MessageType.INFO);
+    }
 }

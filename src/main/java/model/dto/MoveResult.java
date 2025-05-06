@@ -26,4 +26,8 @@ public record MoveResult(
         return new MoveResult(false, false, null, false, true);
     }
 
+    public static MoveResult gameOver(Player winner) {
+        return new MoveResult(false, true, winner, false, false);
+    }
+
 }

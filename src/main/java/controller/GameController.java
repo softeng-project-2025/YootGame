@@ -3,6 +3,7 @@ package controller;
 import model.Game;
 import model.board.Board;
 import model.dto.GameMessage;
+import model.dto.MessageType;
 import model.dto.MoveResult;
 import model.player.Player;
 import model.piece.Piece;
@@ -55,24 +56,21 @@ public class GameController {
         view.renderGame(game);    // 초기 화면 렌더링
     }
 
-    // 윷 던지기
+    // 윷 던지기 처리
     public void handleYutThrow(YutResult result) {
-        game.enqueueYutResult(result); // 윷 결과를 게임에 누적 (큐에 추가)
-        view.updateYutResult(result); // View에 현재 누적된 윷 결과 상태 갱신
-
-        GameMessage msg = game.getLastMessage();
-        view.updateStatus(msg.getContent(), msg.getType());
-
-        // 사용자의 다음 액션(말 선택)을 기다리는 상태 유지
-        view.updateStatus(game.getCurrentPlayer().getName() + " 이(가) 윷을 던졌습니다: " + result.getName() + ". 말을 선택하세요.");
+        MoveResult resultAfterThrow = game.handleYutThrow(result); // 상태(State)에 위임
+        view.updateYutResult(result); // 현재 누적 윷 결과 View에 갱신
+        updateViewAfterMove(resultAfterThrow);
     }
 
-    // 말 선택
+    // 말 선택 처리
     public void handlePieceSelect(Piece piece) {
-        // 말 선택 처리
-        MoveResult result = game.handlePieceSelect(piece);
+        MoveResult result = game.handlePieceSelect(piece); // 상태(State)에 위임
+        updateViewAfterMove(result);
+    }
 
-        // 말 이동 후 렌더링
+    // 공통 View 업데이트
+    private void updateViewAfterMove(MoveResult result) {
         view.renderGame(game);
         GameMessage msg = game.getLastMessage();
         view.updateStatus(msg.getContent(), msg.getType());
@@ -82,17 +80,7 @@ public class GameController {
                 view.showWinner(result.winner());
             }
             view.promptRestart(this);
-            return;
-        }
-
-        if (!result.bonusTurn()) {
-            game.nextTurn(); // 다음 플레이어로 넘어감
         }
     }
-
-
-
-
-
 
 }

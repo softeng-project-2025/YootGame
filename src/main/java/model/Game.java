@@ -6,6 +6,7 @@ import java.util.Queue;
 
 import model.board.Board;
 import model.dto.GameMessage;
+import model.dto.GameMessageFactory;
 import model.dto.MessageType;
 import model.player.Player;
 import model.state.GameState;
@@ -36,25 +37,17 @@ public class Game {
     // 턴 진행: 현재 상태에 따라 동작
     public MoveResult handleYutThrow(YutResult result) {
         if (isFinished) {
-            String msg = "게임이 이미 종료되었습니다.";
-            GameMessage message = new GameMessage(msg, MessageType.INFO);
-            this.setLastMessage(message);
-
-            return new MoveResult(false, true, getCurrentPlayer(), false, false);
+            setLastMessage(GameMessageFactory.gameAlreadyFinishedMessage());
+            return MoveResult.gameOver(getCurrentPlayer());
         }
         return currentState.handleYutThrowWithResult(result);
     }
     public MoveResult handlePieceSelect(Piece piece) {
-
         if (isFinished) {
-            String msg = "게임이 이미 종료되었습니다.";
-            GameMessage message = new GameMessage(msg, MessageType.INFO);
-            this.setLastMessage(message);
-            return new MoveResult( false, true, getCurrentPlayer(), false, false);
+            setLastMessage(GameMessageFactory.gameAlreadyFinishedMessage());
+            return MoveResult.gameOver(getCurrentPlayer());
         }
-
-        MoveResult result = currentState.handlePieceSelectWithResult(piece);
-        return result;
+        return currentState.handlePieceSelectWithResult(piece);
     }
 
     // 플레이어 관련
