@@ -13,7 +13,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 //게임을 진행하는 시나리오에 관한 테스트 케이스
-public class StartGame {
+public class StartGameTest {
     private Game game;
     private Player p1, p2;
     private Board board;
@@ -21,8 +21,8 @@ public class StartGame {
     @BeforeEach
     public void setUp() {
         board = new Board(new SquarePathStrategy());
-        p1 = new Player("Player1", 4, board);
-        p2 = new Player("Player2", 4, board);
+        p1 = new Player("Player1", 4, board, 1);
+        p2 = new Player("Player2", 4, board, 2);
         List<Player> players = Arrays.asList(p1, p2);
         game = new Game(board, players);
     }

@@ -1,6 +1,7 @@
 package model.board;
 
 import model.piece.Piece;
+import model.piece.PieceUtil;
 import model.player.Player;
 import model.position.Position;
 import model.yut.YutResult;
@@ -18,8 +19,8 @@ public class Board {
     }
 
     // Piece가 현재 위치에서 YutResult에 따라 다음 위치로 이동
-    public Position getNextPosition(Position current, YutResult result) {
-        return pathStrategy.getNextPosition(current, result);
+    public Position getNextPosition(Piece piece, YutResult result) {
+        return pathStrategy.getNextPosition(piece, result);
     }
 
     public PathStrategy getPathStrategy() {
@@ -34,10 +35,28 @@ public class Board {
         List<Piece> group = piece.getGroup().isEmpty() ? List.of(piece) : piece.getGroup();
         boolean captured = false;
 
+
         for (Piece p : group) {
-            Position newPos = pathStrategy.getNextPosition(p.getPosition(), result);
-            p.setPosition(newPos);
-            p.setMoved(); // 이동한 말로 표시
+            if (p.getCustomPath() == null) {
+                PieceUtil.initializePath(p, pathStrategy);
+            }
+            Position newPos;
+            if (result.getStep() < 0) {
+                newPos = pathStrategy.getPreviousPosition(p.getPosition(), Math.abs(result.getStep()));
+                p.setPosition(newPos);
+                p.advancePathIndex(result.getStep());
+            } else {
+                newPos = pathStrategy.getNextPosition(p, result);
+                p.setPosition(newPos);
+                p.advancePathIndex(result.getStep());
+
+                // 도착 체크 후 종료 처리 추가
+                if (p.getCustomPath() != null && p.getPathIndex() == p.getCustomPath().size() - 1) {
+                    p.setFinished(true);
+                }
+            }
+            p.setMoved();// 이동한 말로 표시
+
 
             // 잡기: 같은 칸에 있는 상대 말들을 출발점으로
             for (Player otherPlayer : players) {
@@ -49,10 +68,7 @@ public class Board {
                             // 잡은 말이 속한 그룹 전체 해제 + 출발점 이동
                             List<Piece> capturedGroup = other.getGroup().isEmpty() ? List.of(other) : other.getGroup();
                             for (Piece capturedp : capturedGroup) {
-                                capturedp.setPosition(pathStrategy.getPath().get(0)); // 출발점
-                                List<Piece> soloGroup = new ArrayList<>();
-                                soloGroup.add(capturedp);
-                                capturedp.setGroup(soloGroup);
+                                PieceUtil.resetPieceState(capturedp, pathStrategy);
                             }
 
                             captured = true;
@@ -60,8 +76,25 @@ public class Board {
                     }
                 }
             }
+
+            if (newPos.getIndex() == 28) {
+                p.setPassedCenter(true);
+            }
+
         }
-        
+        // 이동 완료 후 같은 위치의 같은 플레이어 말들끼리 자동 그룹 형성
+        for (Piece p : group) {
+
+            List<Piece> autoGroup = new ArrayList<>();
+            for (Piece candidate : p.getOwner().getPieces()) {
+                if (!candidate.isFinished() &&
+                        candidate.getPosition().equals(p.getPosition())) {
+                    autoGroup.add(candidate);
+                }
+            }
+            // 그룹 무결성 보장
+            PieceUtil.ensureGroupConsistency(autoGroup);
+        }
         return captured;
     }
 }

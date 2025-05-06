@@ -3,7 +3,7 @@ package model;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 //말이 움직이는 모든 시나리오에 관한 테스트 케이스
-public class PieceMove {
+public class PieceMoveTest {
     /* 테스트 케이스 0: precondition
      * 사용자가 선택한 말이 움직이는지
      */
