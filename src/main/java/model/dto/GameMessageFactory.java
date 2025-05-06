@@ -1,5 +1,6 @@
 package model.dto;
 
+import model.piece.Piece;
 import model.player.Player;
 
 public class GameMessageFactory {
@@ -59,15 +60,15 @@ public class GameMessageFactory {
     }
 
     public static GameMessage withNextResultPrompt(GameMessage base) {
-        return new GameMessage(base.getContent() + SUFFIX_NEXT_RESULT, base.getType());
+        return new GameMessage(base.content() + SUFFIX_NEXT_RESULT, base.type());
     }
 
     public static GameMessage withNextTurnPrompt(GameMessage base) {
-        return new GameMessage(base.getContent() + SUFFIX_NEXT_TURN, base.getType());
+        return new GameMessage(base.content() + SUFFIX_NEXT_TURN, base.type());
     }
 
     public static GameMessage withThrowPrompt(GameMessage base) {
-        return new GameMessage(base.getContent() + SUFFIX_THROW_PROMPT, base.getType());
+        return new GameMessage(base.content() + SUFFIX_THROW_PROMPT, base.type());
     }
 
 
@@ -100,5 +101,67 @@ public class GameMessageFactory {
 
     private static GameMessage warn(String msg) {
         return new GameMessage(msg, MessageType.WARN);
+    }
+
+    // 말 이동 메시지
+    public static GameMessage moveMessage(Piece movedPiece) {
+        return info(movedPiece.getOwner().getName() + SUFFIX_MOVE);
+    }
+
+    // 상대 말을 잡은 메시지 (+ 보너스 턴 여부 반영)
+    public static GameMessage captureMessage(Piece capturedPiece, boolean bonusTurn) {
+        String base = capturedPiece.getOwner().getName() + SUFFIX_CAPTURE;
+        return info(bonusTurn ? base + SUFFIX_BONUS_TURN : base);
+    }
+
+    // 승자 메시지
+    public static GameMessage winnerMessage(Player winner) {
+        return new GameMessage(winner.getName() + "님이 승리하셨습니다!", MessageType.GAME_OVER);
+    }
+
+    // MoveResult 기반 단일 진입점
+    public static GameMessage fromMoveResult(MoveResult result) {
+        GameMessage base;
+
+        // 1. 기본 메시지: 행동 결과
+        if (result.gameEnded()) {
+            if (result.winner() != null) {
+                base = winnerMessage(result.winner());
+            } else {
+                base = gameAlreadyFinishedMessage();
+            }
+        } else if (result.captured()) {
+            base = captureMessage(result.movedPiece().getOwner().getName(), result.bonusTurn());
+        } else {
+            base = moveMessage(result.movedPiece().getOwner().getName());
+        }
+
+        // 2. 후속 메시지 조립 (행동 유도)
+        if (result.turnSkipped()) {
+            base = withNextTurnPrompt(base); // 말 이동할 수 없었음
+        } else if (result.hasPendingYutResults()) {
+            base = withNextResultPrompt(base); //큐에 남은 윷 결과 처리
+        } else if (result.bonusTurn()) {
+            base = withThrowPrompt(base); // 윷/모 or 잡기
+        } else if (!result.gameEnded()) {
+            base = withNextTurnPrompt(base);
+        }
+
+        return base;
+    }
+
+    public static GameMessage fromFailResult(MoveResult result) {
+        return switch (result.failType()) {
+            case INVALID_SELECTION -> invalidSelectionMessage();
+            case ALREADY_THROWN -> alreadyThrownMessage();
+            case NO_RESULT -> noResultMessage();
+            case THROW_REQUIRED -> throwRequiredMessage();
+            case GAME_ENDED -> gameAlreadyFinishedMessage();
+            default -> new GameMessage("알 수 없는 오류가 발생했습니다.", MessageType.WARN);
+        };
+    }
+
+    public static void log(GameMessage msg) {
+        System.out.println("[GameMessage][" + msg.type() + "] " + msg.content());
     }
 }

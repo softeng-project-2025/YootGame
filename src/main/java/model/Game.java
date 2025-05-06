@@ -5,9 +5,6 @@ import java.util.List;
 import java.util.Queue;
 
 import model.board.Board;
-import model.dto.GameMessage;
-import model.dto.GameMessageFactory;
-import model.dto.MessageType;
 import model.player.Player;
 import model.state.GameState;
 import model.dto.MoveResult;
@@ -23,7 +20,6 @@ public class Game {
 
     private GameState currentState;
     private boolean isFinished = false;
-    private GameMessage lastMessage;
 
     private final Queue<YutResult> yutQueue = new LinkedList<>();
 
@@ -37,14 +33,12 @@ public class Game {
     // 턴 진행: 현재 상태에 따라 동작
     public MoveResult handleYutThrow(YutResult result) {
         if (isFinished) {
-            setLastMessage(GameMessageFactory.gameAlreadyFinishedMessage());
             return MoveResult.gameOver(getCurrentPlayer());
         }
         return currentState.handleYutThrowWithResult(result);
     }
     public MoveResult handlePieceSelect(Piece piece) {
         if (isFinished) {
-            setLastMessage(GameMessageFactory.gameAlreadyFinishedMessage());
             return MoveResult.gameOver(getCurrentPlayer());
         }
         return currentState.handlePieceSelectWithResult(piece);
@@ -96,13 +90,6 @@ public class Game {
 
     public List<Player> getPlayers() {
         return players;
-    }
-
-    public void setLastMessage(GameMessage message) {
-        this.lastMessage = message;
-    }
-    public GameMessage getLastMessage() {
-        return this.lastMessage;
     }
 
     public Queue<YutResult> getYutQueue() {

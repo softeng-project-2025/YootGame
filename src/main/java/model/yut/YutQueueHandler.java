@@ -16,10 +16,6 @@ public class YutQueueHandler {
     }
 
     public static YutResult dequeueResult(Game game) {
-        YutResult result = game.dequeueYutResult();
-        if (result == null) {
-            game.setLastMessage(new GameMessage("적용할 윷 결과가 없습니다.", MessageType.WARN));
-        }
-        return result;
+        return game.dequeueYutResult(); // 메시지 설정 제거
     }
 }
