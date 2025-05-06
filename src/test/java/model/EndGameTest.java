@@ -25,8 +25,8 @@ public class EndGameTest {
     @Test
     void testPlayerWinsWhenAllPiecesArrived() {
         board = new Board(new SquarePathStrategy());
-        p1 = new Player("Player1", 2, board);
-        p2 = new Player("Player2", 2, board);
+        p1 = new Player("Player1", 2, board, 1);
+        p2 = new Player("Player2", 2, board, 2);
         game = new Game(board, Arrays.asList(p1, p2));
 
         // 모든 말의 위치를 마지막 바로 전 칸으로 이동
