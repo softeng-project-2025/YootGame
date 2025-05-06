@@ -17,5 +17,7 @@ public interface PathStrategy {
      */
     List<Position> getPath();
 
+    List<Position> getAllPositions();
+
     Position getPreviousPosition(Position current, int steps);
 }
