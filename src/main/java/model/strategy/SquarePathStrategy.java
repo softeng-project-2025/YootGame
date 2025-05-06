@@ -13,6 +13,7 @@ import model.piece.PathType;
 public class SquarePathStrategy implements PathStrategy {
 
     private final Map<Integer, Position> positionPool = new HashMap<>();
+    private final List<Position> allPositions;
     private final List<Position> outerPath;
     private final List<Position> pathFrom5;
     private final List<Position> pathFrom10;
@@ -20,6 +21,7 @@ public class SquarePathStrategy implements PathStrategy {
     public static final int CENTER_INDEX = 28;
 
     public SquarePathStrategy() {
+        allPositions = createAllPositions();
         outerPath = createOuterPath();
         pathFrom5 = createDiagonalPathFrom5(false);
         pathFrom10 = createDiagonalPathFrom10();
@@ -90,56 +92,54 @@ public class SquarePathStrategy implements PathStrategy {
         return outerPath;
     }
 
+    public List<Position> getAllPositions() {
+        return allPositions;
+    }
 
 
-    private List<Position> createSquarePath() {
+
+    private List<Position> createAllPositions() {
         List<Position> positions = new ArrayList<>();
 
-        // 외곽 0~19 (시작: 오른쪽 하단 → 위로 반시계방향)
-        int[][] outerCoords = {
-                {500, 500}, // 0
-                {500, 400}, // 1
-                {500, 300}, // 2
-                {500, 200}, // 3
-                {500, 100}, // 4
-                {400, 100}, // 5 - 대각선 진입점 A
-                {300, 100}, // 6
-                {200, 100}, // 7
-                {100, 100}, // 8
-                {100, 200}, // 9
-                {100, 300}, // 10 - 대각선 진입점 B
-                {100, 400}, // 11
-                {100, 500}, // 12
-                {200, 500}, // 13
-                {300, 500}, // 14
-                {400, 500}, // 15
-                {400, 400}, // 16
-                {400, 300}, // 17
-                {400, 200}, // 18
-                {400, 100}  // 19
+        int[][] allCoords = {
+                {600, 600},
+                {600, 480},
+                {600, 360},
+                {600, 240},
+                {600, 120},
+                {600, 0},
+                {480, 0},
+                {360, 0},
+                {240, 0},
+                {120, 0},
+                {0, 0},
+                {0, 120},
+                {0, 240},
+                {0, 360},
+                {0, 480},
+                {0, 600},
+                {120, 600},
+                {240, 600},
+                {360, 600},
+                {480, 600}, // 19
+                {500, 100},
+                {400, 200},
+                {100, 100},
+                {200, 200},
+                {200, 400},
+                {100, 500},
+                {400, 400},
+                {500, 500},
+                {300, 300}, // 28, center
         };
 
-        for (int i = 0; i < outerCoords.length; i++) {
-            int x = outerCoords[i][0];
-            int y = outerCoords[i][1];
-            boolean isDiagonalEntry = (i == 5 || i == 10);
-            positions.add(new Position(i, x, y, false, isDiagonalEntry));
+        for (int i = 0; i < allCoords.length; i++) {
+            int x = allCoords[i][0];
+            int y = allCoords[i][1];
+            boolean isVertex = (i == 0 || i == 5 || i == 10 || i == 15);
+            boolean isCenter = (i == 28);
+            positions.add(new Position(i, x, y, isCenter, isVertex));
         }
-
-        // 대각선 진입 (5번 진입 시)
-        positions.add(new Position(20, 300, 200)); // ↙
-        positions.add(new Position(21, 200, 300));
-        positions.add(new Position(28, 300, 300, true)); // 중심
-
-        // 10번 진입 시
-        positions.add(new Position(22, 200, 200));
-        positions.add(new Position(23, 300, 200));
-
-        // 중심 → 출구
-        positions.add(new Position(24, 300, 400));
-        positions.add(new Position(25, 400, 400));
-        positions.add(new Position(26, 400, 300));
-        positions.add(new Position(27, 500, 300));
 
         return positions;
     }
