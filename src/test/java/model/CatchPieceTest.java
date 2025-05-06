@@ -39,8 +39,8 @@ public class CatchPieceTest {
      *  곧바로 말을 선택할 수 있도록 해준다.
      */
     private void throwAndSelect(YutResult result, Piece piece) {
-        game.handleYutThrow(result);                          // 윷 결과를 큐에 적재 :contentReference[oaicite:0]{index=0}:contentReference[oaicite:1]{index=1}
-        game.setState(new SelectingPieceState(game, result)); // 상태 수동 전환 :contentReference[oaicite:2]{index=2}:contentReference[oaicite:3]{index=3}
+        game.handleYutThrow(result);                          // 윷 결과를 큐에 적재
+        game.setState(new SelectingPieceState(game, result)); // 상태 수동 전환
         game.handlePieceSelect(piece);                        // 실제 이동 수행
     }
 
