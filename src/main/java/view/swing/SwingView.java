@@ -32,7 +32,7 @@ public class SwingView extends JFrame implements View {
 
     public SwingView() {
         frame = new JFrame("YootGame");
-        frame.setSize(800, 600);
+        frame.setSize(1200, 1000);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setLayout(new BorderLayout());
     }
@@ -123,7 +123,7 @@ public class SwingView extends JFrame implements View {
         if (boardPanel == null) {                             // ★ 보드가 아직 없을 때만 생성
             boardPanel = new DrawBoard(game.getBoard().getPathStrategy());
             boardPanel.setLayout(null);
-            boardPanel.setPreferredSize(new Dimension(800, 800));
+//            boardPanel.setPreferredSize(new Dimension(800, 800));
             boardPanel.setBackground(Color.WHITE);
             JScrollPane scrollPane = new JScrollPane(boardPanel);
             frame.add(scrollPane, BorderLayout.CENTER);
