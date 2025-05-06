@@ -20,12 +20,15 @@ public class DrawBoard extends JPanel {
 
         java.util.List<model.position.Position> allPositions = pathStrategy.getAllPositions();
 
-        for(model.position.Position position : allPositions) {
-            int x = position.getX();
-            int y = position.getY();
-            int r = (position.isCenter() || position.isDiagonalEntry()) ? 30 : 20;
+        int marginX = 70;
+        int marginY = (getHeight() - 600) / 2;
 
-            g2.fillOval(x - r, y - r, r * 2, r * 2);
+        for(model.position.Position position : allPositions) {
+            int r = (position.isCenter() || position.isDiagonalEntry()) ? 30 : 20;
+            int x = position.getX() + marginX - r;
+            int y = position.getY() + marginY - r;
+
+            g2.fillOval(x, y, r * 2, r * 2);
         }
     }
 }
