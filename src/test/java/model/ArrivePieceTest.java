@@ -91,7 +91,41 @@ public class ArrivePieceTest {
     /* 테스트 케이스 3: 사용자의 업힌 말이 도착점을 통과함.
      * 사용자의 piece 수가 업힌 말 수만큼 줄어드는지
      */
+    @Test
+    void testGroupedPiecesArriveTogether() {
+        List<Position> path = board.getPathStrategy().getPath();
+        Position almostFinish = path.get(path.size() - 2); // 도착 직전
+        Position secondLast = path.get(path.size() - 3); // 업히기 위해 한 칸 전
 
+        // 두 말 같은 위치로 이동 → 그룹핑
+        Piece p1a = p1.getPieces().get(0);
+        Piece p1b = p1.getPieces().get(1);
+        p1a.setPosition(secondLast);
+        p1b.setPosition(secondLast);
+
+        // 그룹핑 시뮬레이션
+        game.handleYutThrow(YutResult.DO); // 한 칸 이동
+        game.handlePieceSelect(p1a); // 그룹 형성 및 이동
+
+        // 도착 직전 위치로 이동됨
+        assertEquals(almostFinish.getIndex(), p1a.getPosition().getIndex(), "업힌 그룹이 도착 직전까지 이동했어야 함");
+        assertEquals(almostFinish.getIndex(), p1b.getPosition().getIndex(), "업힌 그룹이 함께 이동해야 함");
+
+        // 다음 이동으로 도착점 통과
+        game.handleYutThrow(YutResult.DO); // 한 칸 이동
+        game.handlePieceSelect(p2.getPieces().get(0)); // 그룹 형성 및 이동
+        game.handleYutThrow(YutResult.GEOL);
+        game.handlePieceSelect(p1a);
+
+        // 그룹 내 모든 말이 도착했는지 확인
+        assertTrue(p1a.isFinished(), "첫 번째 업힌 말이 완주 상태여야 함");
+        assertFalse(p1.getPieces().get(2).isFinished(),"다른 말은 무관해야 함");
+        assertTrue(p1b.isFinished(), "두 번째 업힌 말도 완주 상태여야 함");
+
+        // 남은 말 수 = 전체 말 수 - 도착 말 수
+        long remaining = p1.getPieces().stream().filter(p -> !p.isFinished()).count();
+        assertEquals(2, remaining, "2개의 말이 완주했으므로 남은 말은 2개여야 함");
+    }
 
 
 }
