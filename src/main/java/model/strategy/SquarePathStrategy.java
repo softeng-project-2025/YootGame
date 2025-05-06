@@ -136,9 +136,9 @@ public class SquarePathStrategy implements PathStrategy {
         for (int i = 0; i < allCoords.length; i++) {
             int x = allCoords[i][0];
             int y = allCoords[i][1];
-            boolean isDiagonalEntry = (i == 5 || i == 10);
+            boolean isVertex = (i == 0 || i == 5 || i == 10 || i == 15);
             boolean isCenter = (i == 28);
-            positions.add(new Position(i, x, y, isCenter, isDiagonalEntry));
+            positions.add(new Position(i, x, y, isCenter, isVertex));
         }
 
         return positions;
