@@ -13,6 +13,7 @@ import model.piece.PathType;
 public class SquarePathStrategy implements PathStrategy {
 
     private final Map<Integer, Position> positionPool = new HashMap<>();
+    private final List<Position> allPositions;
     private final List<Position> outerPath;
     private final List<Position> pathFrom5;
     private final List<Position> pathFrom10;
@@ -20,6 +21,7 @@ public class SquarePathStrategy implements PathStrategy {
     public static final int CENTER_INDEX = 28;
 
     public SquarePathStrategy() {
+        allPositions = createAllPositions();
         outerPath = createOuterPath();
         pathFrom5 = createDiagonalPathFrom5(false);
         pathFrom10 = createDiagonalPathFrom10();
@@ -90,33 +92,37 @@ public class SquarePathStrategy implements PathStrategy {
         return outerPath;
     }
 
+    public List<Position> getAllPositions() {
+        return allPositions;
+    }
 
 
-    private List<Position> createSquarePath() {
+
+    private List<Position> createAllPositions() {
         List<Position> positions = new ArrayList<>();
 
         // 외곽 0~19 (시작: 오른쪽 하단 → 위로 반시계방향)
         int[][] outerCoords = {
-                {500, 500}, // 0
-                {500, 400}, // 1
+                {500, 500}, // 0 시작점 (오른쪽 하단)
+                {500, 400}, // 1 위
                 {500, 300}, // 2
                 {500, 200}, // 3
                 {500, 100}, // 4
-                {400, 100}, // 5 - 대각선 진입점 A
-                {300, 100}, // 6
-                {200, 100}, // 7
-                {100, 100}, // 8
-                {100, 200}, // 9
-                {100, 300}, // 10 - 대각선 진입점 B
-                {100, 400}, // 11
-                {100, 500}, // 12
-                {200, 500}, // 13
-                {300, 500}, // 14
-                {400, 500}, // 15
-                {400, 400}, // 16
-                {400, 300}, // 17
-                {400, 200}, // 18
-                {400, 100}  // 19
+                {500,   0}, // 5 ↖ 대각선 진입점
+                {400,   0}, // 6 ←
+                {300,   0}, // 7
+                {200,   0}, // 8
+                {100,   0}, // 9
+                {  0,   0}, // 10 ↙ 대각선 진입점
+                {  0, 100}, // 11 ↓
+                {  0, 200}, // 12
+                {  0, 300}, // 13
+                {  0, 400}, // 14
+                {  0, 500}, // 15 → 우회로 계속
+                {100, 500}, // 16 →
+                {200, 500}, // 17
+                {300, 500}, // 18
+                {400, 500}, // 19
         };
 
         for (int i = 0; i < outerCoords.length; i++) {
@@ -126,20 +132,16 @@ public class SquarePathStrategy implements PathStrategy {
             positions.add(new Position(i, x, y, false, isDiagonalEntry));
         }
 
-        // 대각선 진입 (5번 진입 시)
-        positions.add(new Position(20, 300, 200)); // ↙
-        positions.add(new Position(21, 200, 300));
-        positions.add(new Position(28, 300, 300, true)); // 중심
-
-        // 10번 진입 시
-        positions.add(new Position(22, 200, 200));
-        positions.add(new Position(23, 300, 200));
-
-        // 중심 → 출구
-        positions.add(new Position(24, 300, 400));
-        positions.add(new Position(25, 400, 400));
-        positions.add(new Position(26, 400, 300));
-        positions.add(new Position(27, 500, 300));
+        // 5 → 20 → 21 → 28(중심)
+        positions.add(pos(20, 400, 100));
+        positions.add(pos(21, 300, 200));
+        positions.add(pos(22, 100, 200));
+        positions.add(pos(23, 200, 300));
+        positions.add(pos(24, 200, 400));
+        positions.add(pos(25, 100, 500));
+        positions.add(pos(26, 400, 400));
+        positions.add(pos(27, 500, 400));
+        positions.add(pos(28, 300, 300, true));
 
         return positions;
     }
