@@ -2,16 +2,16 @@ package model.dto;
 
 
 public class GameMessage {
-    private final String text;
+    private final String content;
     private final MessageType type;
 
-    public GameMessage(String text, MessageType type) {
-        this.text = text;
+    public GameMessage(String content, MessageType type) {
+        this.content = content;
         this.type = type;
     }
 
-    public String getText() {
-        return text;
+    public String getContent() {
+        return content;
     }
 
     public MessageType getType() {

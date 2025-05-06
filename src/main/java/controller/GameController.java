@@ -10,7 +10,6 @@ import model.strategy.PathStrategy;
 import model.strategy.SquarePathStrategy;
 import model.yut.YutResult;
 import view.View;
-import view.swing.SwingView; // 필요 시 JavaFXView 등으로 교체 가능
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,10 +17,18 @@ import java.util.List;
 public class GameController {
 
     private Game game;
-    private View view; // 인터페이스
+    private View view;
 
     public GameController(View view) {
         this.view = view;
+    }
+
+    public Game getGame() {
+        return game;
+    }
+
+    public void setGame(Game game) {
+        this.game = game;
     }
 
     // 게임 시작 설정: 플레이어 수, 말 수, 보드 타입
@@ -50,11 +57,11 @@ public class GameController {
 
     // 윷 던지기
     public void handleYutThrow(YutResult result) {
-        // 윷 결과를 게임에 누적 (큐에 추가)
-        game.enqueueYutResult(result);
+        game.enqueueYutResult(result); // 윷 결과를 게임에 누적 (큐에 추가)
+        view.updateYutResult(result); // View에 현재 누적된 윷 결과 상태 갱신
 
-        // View에 현재 누적된 윷 결과 상태 갱신
-        view.updateYutResult(result);
+        GameMessage msg = game.getLastMessage();
+        view.updateStatus(msg.getContent(), msg.getType());
 
         // 사용자의 다음 액션(말 선택)을 기다리는 상태 유지
         view.updateStatus(game.getCurrentPlayer().getName() + " 이(가) 윷을 던졌습니다: " + result.getName() + ". 말을 선택하세요.");
@@ -68,26 +75,23 @@ public class GameController {
         // 말 이동 후 렌더링
         view.renderGame(game);
         GameMessage msg = game.getLastMessage();
-        view.updateStatus(msg.getText(), msg.getType());
+        view.updateStatus(msg.getContent(), msg.getType());
 
-        // 혹시라도 게임이 다른 이유로 종료됐을 경우
-        if (result.isGameFinished()) {
-            if (result.getWinner() != null) {
-                view.showWinner(result.getWinner());
+        if (result.gameEnded()) {
+            if (result.winner() != null) {
+                view.showWinner(result.winner());
             }
             view.promptRestart(this);
             return;
         }
 
-        if (!result.isBonusTurn()) {
+        if (!result.bonusTurn()) {
             game.nextTurn(); // 다음 플레이어로 넘어감
         }
     }
 
 
-    public Game getGame() {
-        return game;
-    }
+
 
 
 
