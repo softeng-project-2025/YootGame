@@ -30,16 +30,11 @@ public class SwingView extends JFrame implements View {
     private JComboBox<String> yutChoiceBox;
     private JLabel statusLabel;
 
-    /** 1) 생성자에서 initUI() 호출을 제거 */
     public SwingView() {
         frame = new JFrame("YootGame");
         frame.setSize(800, 600);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setLayout(new BorderLayout());
-
-        // 👇 컨트롤러가 아직 없으므로 UI 초기화는 보류
-        // initUI();  ❌
-        // frame.setVisible(true); ❌  → UI 초기화 후에 호출
     }
 
     public void showGameSetupDialog() {
@@ -80,9 +75,7 @@ public class SwingView extends JFrame implements View {
         statusLabel.setText(message);
     }
 
-    /** 3) initUI() : 보드 생성 부분 제거 */
     private void initUI() {
-        // 게임 보드는 아직 없으므로 boardPanel 생성 ❌
         resultLabel = new JLabel("결과: ");
         resultLabel.setHorizontalAlignment(SwingConstants.CENTER);
         frame.add(resultLabel, BorderLayout.NORTH);
@@ -120,14 +113,12 @@ public class SwingView extends JFrame implements View {
         frame.add(bottomPanel, BorderLayout.SOUTH);
     }
 
-    /** 2) 컨트롤러 주입 메서드에서 UI를 초기화 */
     public void setController(GameController controller) {
         this.controller = controller;
         initUI();           // 이제 controller가 null이 아님
         frame.setVisible(true); // UI가 완성된 뒤에 화면 표시
     }
 
-    /** renderGame() : 최초 호출 시 보드 생성 & 중앙에 배치 */
     public void renderGame(Game game) {
         if (boardPanel == null) {                             // ★ 보드가 아직 없을 때만 생성
             boardPanel = new DrawBoard(game.getBoard().getPathStrategy());
@@ -141,7 +132,6 @@ public class SwingView extends JFrame implements View {
 
         boardPanel.removeAll();
 
-        // --- 이후 말 그리기 로직은 그대로 ---
         Map<Integer, List<Piece>> positionMap = new HashMap<>();
         for (var player : game.getPlayers()) {
             for (var piece : player.getPieces()) {

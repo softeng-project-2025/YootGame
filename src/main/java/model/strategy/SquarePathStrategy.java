@@ -101,7 +101,6 @@ public class SquarePathStrategy implements PathStrategy {
     private List<Position> createAllPositions() {
         List<Position> positions = new ArrayList<>();
 
-        // 외곽 0~19 (시작: 오른쪽 하단 → 위로 반시계방향)
         int[][] allCoords = {
                 {600, 600},
                 {600, 480},
