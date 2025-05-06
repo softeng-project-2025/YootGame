@@ -12,8 +12,6 @@ import model.yut.YutResult;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.List;
@@ -218,12 +216,11 @@ public class SwingView extends JFrame implements View {
         Color color = switch (type) {
             case INFO -> new Color(33, 150, 243);     // 파랑
             case WARN -> new Color(255, 152, 0);      // 주황
-            case ERROR -> new Color(244, 67, 54);     // 빨강
+            case GAME_OVER, ERROR -> new Color(244, 67, 54);     // 빨강
         };
         String icon = switch (type) {
-            case INFO -> "";
+            case INFO, GAME_OVER, ERROR -> "";
             case WARN -> "⚠️";
-            case ERROR -> "";
         };
 
         statusLabel.setForeground(color); // JLabel 등 UI 컴포넌트 색 변경
