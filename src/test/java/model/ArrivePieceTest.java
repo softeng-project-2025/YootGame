@@ -23,8 +23,8 @@ public class ArrivePieceTest {
     @BeforeEach
     public void setUp() {
         board = new Board(new SquarePathStrategy());
-        p1 = new Player("Player1", 4, board);
-        p2 = new Player("Player2", 4, board);
+        p1 = new Player("Player1", 4, board, 1);
+        p2 = new Player("Player2", 4, board, 2);
         List<Player> players = Arrays.asList(p1, p2);
         game = new Game(board, players);
     }
