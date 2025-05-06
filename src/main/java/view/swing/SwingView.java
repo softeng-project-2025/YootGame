@@ -29,8 +29,6 @@ public class SwingView extends JFrame implements View {
     private JButton restartButton;
     private JComboBox<String> yutChoiceBox;
     private JLabel statusLabel;
-    
-
 
     public SwingView() {
         frame = new JFrame("YootGame");
@@ -83,7 +81,7 @@ public class SwingView extends JFrame implements View {
     }
 
     private void initUI() {
-        boardPanel = new JPanel();
+        boardPanel = new DrawBoard(this.controller.getGame().getBoard().getPathStrategy());
         boardPanel.setLayout(null);
         boardPanel.setPreferredSize(new Dimension(800, 800));
         boardPanel.setBackground(Color.WHITE);
@@ -122,7 +120,7 @@ public class SwingView extends JFrame implements View {
 
         // 상태 라벨 구성
         statusLabel = new JLabel("게임을 시작하세요.");
-        statusLabel.setFont(new Font("Arial", Font.BOLD, 16));
+        statusLabel.setFont(new Font("맑은 고딕", Font.BOLD, 16));
         statusLabel.setHorizontalAlignment(SwingConstants.CENTER);
         statusLabel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
