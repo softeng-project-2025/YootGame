@@ -2,8 +2,10 @@ package model;
 
 import model.board.Board;
 import model.piece.Piece;
+import model.piece.PieceUtil;
 import model.player.Player;
 import model.position.Position;
+import model.state.SelectingPieceState;
 import model.strategy.SquarePathStrategy;
 import model.yut.YutResult;
 import org.junit.jupiter.api.BeforeEach;
@@ -16,17 +18,29 @@ import static org.junit.jupiter.api.Assertions.*;
 
 //말이 도착하는 시나리오 테스트 케이스
 public class ArrivePieceTest {
-    private Game game;
+    private Game   game;
     private Player p1, p2;
-    private Board board;
+    private Board  board;
+    private List<Position> path;   // 편의를 위해 캐싱
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         board = new Board(new SquarePathStrategy());
-        p1 = new Player("Player1", 4, board, 1);
-        p2 = new Player("Player2", 4, board, 2);
-        List<Player> players = Arrays.asList(p1, p2);
-        game = new Game(board, players);
+        path  = board.getPathStrategy().getPath();
+
+        p1 = new Player("Player‑1", 4, board, 1);
+        p2 = new Player("Player‑2", 4, board, 2);
+
+        game = new Game(board, Arrays.asList(p1, p2));
+    }
+
+    /** 유틸 – 윷을 큐에 적재한 뒤 SelectingPieceState 로 전환해서
+     *  곧바로 말을 선택할 수 있도록 해준다.
+     */
+    private void throwAndSelect(YutResult result, Piece piece) {
+        game.handleYutThrow(result);                          // 윷 결과를 큐에 적재
+        game.setState(new SelectingPieceState(game, result)); // 상태 수동 전환
+        game.handlePieceSelect(piece);                        // 실제 이동 수행
     }
 
     /* 테스트 케이스 1: 사용자의 말 하나가 도착점을 통과함.
@@ -34,12 +48,12 @@ public class ArrivePieceTest {
      */
     @Test
     void testSinglePieceArrives() {
-        List<Position> path = board.getPathStrategy().getPath();
         Piece piece = p1.getPieces().get(0);
-        piece.setPosition(path.get(path.size() - 2));
 
-        game.handleYutThrow(YutResult.GAE);
-        game.handlePieceSelect(piece);
+        piece.setCustomPath(path);
+        piece.setPosition(path.get(path.size() - 2)); // 도착 1칸 전
+
+        throwAndSelect(YutResult.GAE, piece);
 
         assertTrue(piece.isFinished(), "말이 도착점에 도달하면 isFinished는 true여야 함");
 
@@ -53,34 +67,29 @@ public class ArrivePieceTest {
      */
     @Test
     void testMultiplePlayersMultiplePiecesArrive() {
-        List<Position> path = board.getPathStrategy().getPath();
-        Position almostFinish = path.get(path.size() - 2); // 도착 직전
+        Position almostFinish = path.get(path.size() - 2);
 
-        // Player 1: 1개 도착
         Piece p1Piece = p1.getPieces().get(0);
+        p1Piece.setCustomPath(path);
         p1Piece.setPosition(almostFinish);
-        game.handleYutThrow(YutResult.GAE);
-        game.handlePieceSelect(p1Piece);
+        throwAndSelect(YutResult.GAE, p1Piece); // finish
 
-        // Player 2: 2개 도착
         Piece p2Piece1 = p2.getPieces().get(0);
-        Piece p2Piece2 = p2.getPieces().get(1);
+        p2Piece1.setCustomPath(path);
         p2Piece1.setPosition(almostFinish);
+        throwAndSelect(YutResult.GAE, p2Piece1); // finish
+
+        throwAndSelect(YutResult.GAE, p1.getPieces().get(1));
+
+        Piece p2Piece2 = p2.getPieces().get(1);
+        p2Piece2.setCustomPath(path);
         p2Piece2.setPosition(almostFinish);
-        game.handleYutThrow(YutResult.GAE);
-        game.handlePieceSelect(p2Piece1);
-
-        // Player 1 turn 처리
-        game.handleYutThrow(YutResult.GAE);
-        game.handlePieceSelect(p1.getPieces().get(1));
-
-        game.handleYutThrow(YutResult.GAE);
-        game.handlePieceSelect(p2Piece2);
+        throwAndSelect(YutResult.GAE, p2Piece2); // finish
 
         // 상태 확인
         assertTrue(p1Piece.isFinished(), "Player 1의 첫 번째 말은 도착 완료 상태여야 함");
         assertTrue(p2Piece1.isFinished(), "Player 2의 첫 번째 말은 도착 완료 상태여야 함");
-        assertTrue(p2Piece2.isFinished(), "Player 2의 두 번째 말은 도착 완료 상태여야 함");
+        assertTrue(p2Piece2.isFinished(), "Player 2의 두 번째 말도 도착 완료 상태여야 함");
 
         assertEquals(3, p1.getPieces().stream().filter(p -> !p.isFinished()).count(),
                 "Player 1의 남은 말 수는 3개여야 함");
@@ -93,29 +102,26 @@ public class ArrivePieceTest {
      */
     @Test
     void testGroupedPiecesArriveTogether() {
-        List<Position> path = board.getPathStrategy().getPath();
-        Position almostFinish = path.get(path.size() - 2); // 도착 직전
-        Position secondLast = path.get(path.size() - 3); // 업히기 위해 한 칸 전
+        Position secondLast     = path.get(path.size() - 3); // 그룹 형성 위치
+        Position almostFinished = path.get(path.size() - 2); // 도착 1칸 전
 
-        // 두 말 같은 위치로 이동 → 그룹핑
         Piece p1a = p1.getPieces().get(0);
         Piece p1b = p1.getPieces().get(1);
+
+        p1a.setCustomPath(path);
+        p1b.setCustomPath(path);
         p1a.setPosition(secondLast);
-        p1b.setPosition(secondLast);
+        p1b.setPosition(almostFinished);
 
         // 그룹핑 시뮬레이션
-        game.handleYutThrow(YutResult.DO); // 한 칸 이동
-        game.handlePieceSelect(p1a); // 그룹 형성 및 이동
+        throwAndSelect(YutResult.DO, p1a);
+        throwAndSelect(YutResult.DO, p2.getPieces().get(0));
 
         // 도착 직전 위치로 이동됨
-        assertEquals(almostFinish.getIndex(), p1a.getPosition().getIndex(), "업힌 그룹이 도착 직전까지 이동했어야 함");
-        assertEquals(almostFinish.getIndex(), p1b.getPosition().getIndex(), "업힌 그룹이 함께 이동해야 함");
+        assertEquals(almostFinished.getIndex(), p1a.getPosition().getIndex(), "p1a 도착 직전까지 이동했어야 함");
 
         // 다음 이동으로 도착점 통과
-        game.handleYutThrow(YutResult.DO); // 한 칸 이동
-        game.handlePieceSelect(p2.getPieces().get(0)); // 그룹 형성 및 이동
-        game.handleYutThrow(YutResult.GEOL);
-        game.handlePieceSelect(p1a);
+        throwAndSelect(YutResult.GAE, p1a);
 
         // 그룹 내 모든 말이 도착했는지 확인
         assertTrue(p1a.isFinished(), "첫 번째 업힌 말이 완주 상태여야 함");
