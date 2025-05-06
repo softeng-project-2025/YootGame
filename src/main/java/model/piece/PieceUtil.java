@@ -1,5 +1,7 @@
 package model.piece;
 
+import model.Game;
+import model.board.Board;
 import model.player.Player;
 import model.strategy.PathStrategy;
 import model.yut.YutResult;
@@ -9,6 +11,20 @@ import java.util.List;
 
 public class PieceUtil {
 
+    public static List<Piece> getMovableGroup(Piece selected, Game game) {
+        List<Piece> group = new ArrayList<>();
+        for (Piece other : selected.getOwner().getPieces()) {
+            if (!other.isFinished() &&
+                    other.getPosition().equals(selected.getPosition()) &&
+                    other.hasMoved()) {
+                group.add(other);
+            }
+        }
+        group.add(selected); // 항상 자신 추가
+        ensureGroupConsistency(group);
+        return group;
+    }
+
     // 그룹 내 모든 Piece가 동일한 참조를 갖도록 설정
     public static void ensureGroupConsistency(List<Piece> group) {
         for (Piece p : group) {
@@ -17,8 +33,16 @@ public class PieceUtil {
     }
 
     // 단독 그룹으로 리셋 (잡힘, 완주)
-    public static void resetGroupToSelf(Piece p) {
-        p.setGroup(List.of(p));
+    public static void resetGroupToSelf(Piece piece) {
+        List<Piece> selfGroup = new ArrayList<>();
+        selfGroup.add(piece);
+        piece.setGroup(selfGroup);
+    }
+
+    public static boolean allFinished(List<Piece> group, Board board) {
+        return group.stream().allMatch(p ->
+                p.getPosition().equals(board.getPathStrategy().getPath().get(board.getPathStrategy().getPath().size() - 1))
+        );
     }
 
     public static void initializePath(Piece piece, PathStrategy strategy) {
@@ -52,4 +76,6 @@ public class PieceUtil {
             return newIndex >= 0; // 빽도일 경우 되돌릴 수 있는지
         }
     }
+
+
 }
