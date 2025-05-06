@@ -2,8 +2,10 @@ package model;
 
 import model.board.Board;
 import model.piece.Piece;
+import model.piece.PieceUtil;
 import model.player.Player;
 import model.position.Position;
+import model.state.SelectingPieceState;
 import model.state.WaitingForThrowState;
 import model.strategy.SquarePathStrategy;
 import model.yut.YutResult;
@@ -11,47 +13,57 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 //말을 잡는 시나리오에 관한 테스트 케이스
 public class CatchPieceTest {
-    private Game game;
+    private Game   game;
     private Player p1, p2;
-    private Board board;
+    private Board  board;
+    private List<Position> path;   // 편의를 위해 캐싱
 
     @BeforeEach
     void setUp() {
         board = new Board(new SquarePathStrategy());
-        p1 = new Player("Player1", 4, board, 1);
-        p2 = new Player("Player2", 4, board, 2);
+        path  = board.getPathStrategy().getPath();
+
+        p1 = new Player("Player‑1", 4, board, 1);
+        p2 = new Player("Player‑2", 4, board, 2);
+
         game = new Game(board, Arrays.asList(p1, p2));
     }
+
+    /** 유틸 – 윷을 큐에 적재한 뒤 SelectingPieceState 로 전환해서
+     *  곧바로 말을 선택할 수 있도록 해준다.
+     */
+    private void throwAndSelect(YutResult result, Piece piece) {
+        game.handleYutThrow(result);                          // 윷 결과를 큐에 적재
+        game.setState(new SelectingPieceState(game, result)); // 상태 수동 전환
+        game.handlePieceSelect(piece);                        // 실제 이동 수행
+    }
+
 
     /* 테스트 케이스 1: 다른 사용자의 말을 잡는 경우
      * 잡힌 말은 출발지로 잘 가는지
      * 잡은 player YutThrowing 기회가 한 번 더 주어지는 지
      */
     @Test
-    void testCatchOpponentPieceGivesExtraTurn() {
-        Piece attacker = p1.getPieces().get(0);
-        Piece victim = p2.getPieces().get(0);
+    void catchSingleOpponentPiece_givesBonusTurn() {
+        Piece attacker = p2.getPieces().get(0);
+        Piece victim   = p1.getPieces().get(0);
 
-        // 두 말 모두 같은 위치로 배치
-        Position middle = board.getPathStrategy().getPath().get(3);
-        victim.setPosition(middle); // 상대방 말 먼저 해당 위치에 존재
-        attacker.setPosition(board.getPathStrategy().getPath().get(2));
+        throwAndSelect(YutResult.DO, victim);
+        throwAndSelect(YutResult.DO, attacker);
 
-        // 잡기
-        game.handleYutThrow(YutResult.DO);
-        game.handlePieceSelect(attacker);
+        // 피해 말은 출발점으로
+        assertEquals(0, victim.getPosition().getIndex(), "잡힌 말은 출발점으로 돌아가야 한다");
 
-        // 잡힌 말 출발점으로 돌아갔는지
-        Position start = board.getPathStrategy().getPath().get(0);
-        assertEquals(start.getIndex(), victim.getPosition().getIndex(), "잡힌 말은 출발점으로 돌아가야 함");
-
-        // 잡은 사람은 추가 턴을 받아야 함
-        assertInstanceOf(WaitingForThrowState.class, game.getState(), "말을 잡았으므로 추가 턴이 주어져야 함");
+        // 추가 턴 : 상태가 WaitingForThrowState 로 돌아와 있어야 함
+        assertInstanceOf(WaitingForThrowState.class, game.getState(),
+                "잡았으므로 추가 턴 상태(WaitingForThrowState)여야 한다");
+        assertEquals(p2, game.getCurrentPlayer(), "말을 잡았기에 Player2의 차례여야 한다");
     }
 
 
@@ -60,33 +72,25 @@ public class CatchPieceTest {
      * 업힌 말들의 그룹화가 풀리는지
      */
     @Test
-    void testCatchRiddenPiecesResetToStartAndUngroup() {
-        Piece p2a = p2.getPieces().get(0);
+    void catchRiddenGroup_resetsBothPiecesAndUngroups() {
         Piece p1a = p1.getPieces().get(0);
         Piece p1b = p1.getPieces().get(1);
+        Piece p2a = p2.getPieces().get(0);
+        // 실행
+        throwAndSelect(YutResult.GEOL, p1a);
+        throwAndSelect(YutResult.DO, p2a);
+        throwAndSelect(YutResult.GEOL, p1b);
 
-        //시나리오
-        game.handleYutThrow(YutResult.GAE);
-        game.handlePieceSelect(p1a);
-        game.handleYutThrow(YutResult.DO);
-        game.handlePieceSelect(p2a);
-        game.handleYutThrow(YutResult.GAE);
-        game.handlePieceSelect(p1b);
-        game.handleYutThrow(YutResult.DO);
-        game.handlePieceSelect(p2a);
+        assertEquals(List.of(p1a,p1b), p1a.getGroup(), "그룹이 생겨야 함");
 
-        // 출발점 위치
-        Position start = board.getPathStrategy().getPath().get(0);
+        throwAndSelect(YutResult.GAE, p2a);
 
-        // victim1과 victim2가 출발점으로 이동했는지
-        assertEquals(start.getIndex(), p1a.getPosition().getIndex(), "잡힌 첫 번째 말은 출발점으로 돌아가야 함");
-        assertEquals(start.getIndex(), p1b.getPosition().getIndex(), "잡힌 두 번째 말도 출발점으로 돌아가야 함");
+        // 두 말 모두 출발점
+        assertEquals(0, p1a.getPosition().getIndex(), "잡힌 첫 번째 말이 출발점으로 돌아가야 함");
+        assertEquals(0, p1b.getPosition().getIndex(), "잡힌 두 번째 말도 출발점으로 돌아가야 함");
 
-        // 그룹이 해제됐는지 (각자 단독 그룹인지)
-        assertEquals(1, p1a.getGroup().size(), "잡힌 말의 그룹이 해제되어야 함");
-        assertEquals(p1a, p1a.getGroup().get(0), "자기 자신만 그룹에 있어야 함");
-
-        assertEquals(1, p1b.getGroup().size(), "잡힌 말의 그룹이 해제되어야 함");
-        assertEquals(p1b, p1b.getGroup().get(0), "자기 자신만 그룹에 있어야 함");
+        // 그룹 해제 → 각 말의 group 은 자기 자신뿐
+        assertEquals(List.of(p1a), p1a.getGroup(), "첫 번째 말 그룹이 해제되어야 함");
+        assertEquals(List.of(p1b), p1b.getGroup(), "두 번째 말 그룹이 해제되어야 함");
     }
 }

@@ -4,6 +4,7 @@ import model.board.Board;
 import model.piece.Piece;
 import model.player.Player;
 import model.position.Position;
+import model.state.SelectingPieceState;
 import model.strategy.SquarePathStrategy;
 import model.yut.YutResult;
 import org.junit.jupiter.api.BeforeEach;
@@ -19,13 +20,23 @@ public class RidePieceTest {
     private Game game;
     private Player p1, p2;
     private Board board;
+    private List<Position> path;
 
     @BeforeEach
     void setUp() {
         board = new Board(new SquarePathStrategy());
+        path = board.getPathStrategy().getPath();
+
         p1 = new Player("Player1", 4, board, 1);
         p2 = new Player("Player2", 4, board, 2);
         game = new Game(board, Arrays.asList(p1, p2));
+    }
+
+    /** 유틸 – 윷을 큐에 적재한 뒤 SelectingPieceState 로 전환해서 곧바로 말을 선택할 수 있도록 한다. */
+    private void throwAndSelect(YutResult result, Piece piece) {
+        game.handleYutThrow(result);
+        game.setState(new SelectingPieceState(game, result));
+        game.handlePieceSelect(piece);
     }
 
     /* 테스트 케이스 1: 말이 업히는 경우.
@@ -36,13 +47,14 @@ public class RidePieceTest {
         Piece p1a = p1.getPieces().get(0);
         Piece p1b = p1.getPieces().get(1);
 
-        //시나리오 진행
-        game.handleYutThrow(YutResult.GAE);
-        game.handlePieceSelect(p1a);
-        game.handleYutThrow(YutResult.GEOL);
-        game.handlePieceSelect(p2.getPieces().get(0));
-        game.handleYutThrow(YutResult.GAE);
-        game.handlePieceSelect(p1b);
+        // 말 1을 한 칸(GAE) 이동
+        throwAndSelect(YutResult.GAE, p1a);  // index 1로 이동
+
+        // 중간에 Player2 턴 (게임 로직상 필요)
+        throwAndSelect(YutResult.DO, p2.getPieces().get(0));
+
+        // 말 2를 한 칸(GAE) 이동 → 같은 위치 (index 1)
+        throwAndSelect(YutResult.GAE, p1b);
 
         // 업힌 말들은 그룹을 공유해야 함
         List<Piece> group = p1a.getGroup();
@@ -64,25 +76,19 @@ public class RidePieceTest {
         Piece p1a = p1.getPieces().get(0);
         Piece p1b = p1.getPieces().get(1);
 
-        //시나리오 진행
-        game.handleYutThrow(YutResult.GAE);
-        game.handlePieceSelect(p1a);
-        game.handleYutThrow(YutResult.GEOL);
-        game.handlePieceSelect(p2.getPieces().get(0));
-        game.handleYutThrow(YutResult.GAE);
-        game.handlePieceSelect(p1b);
-        game.handleYutThrow(YutResult.GEOL);
-        game.handlePieceSelect(p2.getPieces().get(0));
+        // 말 1을 두 칸(GEOL = 3칸) 이동 → index 3
+        throwAndSelect(YutResult.GEOL, p1a);  // index 3
 
-        // 윷 던지고 첫 번째 말 선택 (업히기 처리)
-        game.handleYutThrow(YutResult.GEOL);
-        game.handlePieceSelect(p1a);
+        // 중간 턴
+        throwAndSelect(YutResult.DO, p2.getPieces().get(0));
 
-        // 다음 위치로 이동되었는지 확인
-        // todo getNextPosition method's first argument should be model.position.Position, not model.piece.piece
-        // Position expectedPos = board.getPathStrategy().getNextPosition(board.getPathStrategy().getPath().get(2), YutResult.GEOL);
+        // 말 2를 두 칸(GEOL = 3칸) 이동 → index 3 (같은 위치)
+        throwAndSelect(YutResult.GEOL, p1b);
 
-        // assertEquals(expectedPos.getIndex(), p1a.getPosition().getIndex(), "첫 번째 말 이동 위치 확인");
-        // assertEquals(expectedPos.getIndex(), p1a.getPosition().getIndex(), "업힌 두 번째 말도 같이 이동해야 함");
+        throwAndSelect(YutResult.DO, p2.getPieces().get(0));
+
+        throwAndSelect(YutResult.DO, p1a);
+
+        assertEquals(p1a.getPosition(), p1b.getPosition(), "업힌 말들은 함께 이동해야 함");
     }
 }

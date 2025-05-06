@@ -24,7 +24,8 @@ public class YutThrowerTest {
                             result == YutResult.GAE ||
                             result == YutResult.GEOL ||
                             result == YutResult.YUT ||
-                            result == YutResult.MO,
+                            result == YutResult.MO ||
+                            result == YutResult.BACK_DO,
                     "결과가 유효한 YutResult 여야 함");
         }
     }
