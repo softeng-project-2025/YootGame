@@ -3,6 +3,7 @@ package controller;
 import model.Game;
 import model.board.Board;
 import model.dto.GameMessage;
+import model.dto.GameMessageFactory;
 import model.dto.MessageType;
 import model.dto.MoveResult;
 import model.player.Player;
@@ -60,6 +61,8 @@ public class GameController {
     public void handleYutThrow(YutResult result) {
         MoveResult resultAfterThrow = game.handleYutThrow(result); // 상태(State)에 위임
         view.updateYutResult(result); // 현재 누적 윷 결과 View에 갱신
+        GameMessage prompt = GameMessageFactory.yutThrownPrompt(game.getCurrentPlayer().getName(), result.getName());
+        view.updateStatus(prompt.getContent(), prompt.getType());
         updateViewAfterMove(resultAfterThrow);
     }
 
