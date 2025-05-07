@@ -27,6 +27,12 @@ public class PentagonPathStrategy implements PathStrategy {
     }
 
     @Override
+    public List<Position> getAllVertexPositions() {
+        // TODO: 오각형 모든 좌표 제공 구현
+        throw new UnsupportedOperationException("PentagonPathStrategy path not defined.");
+    }
+
+    @Override
     public Position getPreviousPosition(Position current, int steps){
         // TODO: 오각형 경로 규칙 구현
         throw new UnsupportedOperationException("PentagonPathStrategy path not defined.");

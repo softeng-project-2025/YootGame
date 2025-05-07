@@ -14,6 +14,7 @@ public class SquarePathStrategy implements PathStrategy {
 
     private final Map<Integer, Position> positionPool = new HashMap<>();
     private final List<Position> allPositions;
+    private final List<Position> allVertexPositions;
     private final List<Position> outerPath;
     private final List<Position> pathFrom5;
     private final List<Position> pathFrom10;
@@ -22,6 +23,7 @@ public class SquarePathStrategy implements PathStrategy {
 
     public SquarePathStrategy() {
         allPositions = createAllPositions();
+        allVertexPositions = createAllVertexPositions();
         outerPath = createOuterPath();
         pathFrom5 = createDiagonalPathFrom5(false);
         pathFrom10 = createDiagonalPathFrom10();
@@ -96,7 +98,9 @@ public class SquarePathStrategy implements PathStrategy {
         return allPositions;
     }
 
-
+    public List<Position> getAllVertexPositions() {
+        return allVertexPositions;
+    }
 
     private List<Position> createAllPositions() {
         List<Position> positions = new ArrayList<>();
@@ -139,6 +143,43 @@ public class SquarePathStrategy implements PathStrategy {
             boolean isVertex = (i == 0 || i == 5 || i == 10 || i == 15);
             boolean isCenter = (i == 28);
             positions.add(new Position(i, x, y, isCenter, isVertex));
+        }
+
+        return positions;
+    }
+
+    private List<Position> createAllVertexPositions() {
+        List<Position> positions = new ArrayList<>();
+        int[][] allCoords = {
+                {600, 600},
+                {600, 0},
+
+                {600, 0},
+                {0, 0},
+
+                {0, 0},
+                {0, 600},
+
+                {0, 600},
+                {600, 600},
+
+                {300, 300},
+                {600, 600},
+
+                {300, 300},
+                {600, 0},
+
+                {300, 300},
+                {0, 0},
+
+                {300, 300},
+                {0, 600},
+        };
+
+        for (int i = 0; i < allCoords.length; i++) {
+            int x = allCoords[i][0];
+            int y = allCoords[i][1];
+            positions.add(new Position(i, x, y));
         }
 
         return positions;

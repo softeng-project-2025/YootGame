@@ -19,5 +19,7 @@ public interface PathStrategy {
 
     List<Position> getAllPositions();
 
+    List<Position> getAllVertexPositions();
+
     Position getPreviousPosition(Position current, int steps);
 }
