@@ -29,6 +29,7 @@ public class SwingView extends JFrame implements View {
     private JButton restartButton;
     private JComboBox<String> yutChoiceBox;
     private JLabel statusLabel;
+    private boolean isUiInitialized = false;
 
     public SwingView() {
         frame = new JFrame("YootGame");
@@ -37,6 +38,7 @@ public class SwingView extends JFrame implements View {
         frame.setLayout(new BorderLayout());
     }
 
+    // 실행 시 게임 시작 전 설정하는 창
     public void showGameSetupDialog() {
         JPanel panel = new JPanel(new GridLayout(3, 2));
 
@@ -92,8 +94,8 @@ public class SwingView extends JFrame implements View {
         restartButton = new JButton("다시 시작");
         restartButton.setEnabled(false);
         restartButton.addActionListener(e ->
-        controller.initializeGame(2, 3, "square")
-    );
+            controller.initializeGame(2, 3, "square")
+        );
 
         JPanel buttonPanel = new JPanel(new FlowLayout());
         buttonPanel.add(throwButton);
@@ -115,8 +117,11 @@ public class SwingView extends JFrame implements View {
 
     public void setController(GameController controller) {
         this.controller = controller;
-        initUI();           // 이제 controller가 null이 아님
-        frame.setVisible(true); // UI가 완성된 뒤에 화면 표시
+        if (!isUiInitialized) {
+            initUI();           // 이제 controller가 null이 아님
+            frame.setVisible(true); // UI가 완성된 뒤에 화면 표시
+            isUiInitialized = true;
+        }
     }
 
     public void renderGame(Game game) {
