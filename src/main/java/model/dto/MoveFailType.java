@@ -6,5 +6,6 @@ public enum MoveFailType {
     NO_RESULT,
     THROW_REQUIRED,
     GAME_ENDED,
-    UNKNOWN
+    THROW_NOT_ALLOWED,
+    SELECT_NOT_ALLOWED
 }

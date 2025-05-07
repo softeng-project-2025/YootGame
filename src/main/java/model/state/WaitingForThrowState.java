@@ -1,14 +1,10 @@
 package model.state;
 
 import model.Game;
-import model.dto.GameMessage;
-import model.dto.GameMessageFactory;
-import model.dto.MoveFailType;
 import model.dto.MoveResult;
-import model.piece.Piece;
 import model.yut.YutResult;
 
-public class WaitingForThrowState implements GameState {
+public class WaitingForThrowState implements CanThrowYut {
 
     private final Game game;
 
@@ -19,12 +15,12 @@ public class WaitingForThrowState implements GameState {
     @Override
     public MoveResult handleYutThrowWithResult(YutResult result) {
         game.enqueueYutResult(result);
-        return MoveResult.success(false, false, game.isFinished() ? game.getCurrentPlayer() : null, game);
-    }
-
-    @Override
-    public MoveResult handlePieceSelectWithResult(Piece piece) {
-        return MoveResult.fail(MoveFailType.THROW_REQUIRED);
+        return MoveResult.success(
+                false,
+                false,
+                game.isFinished() ? game.getCurrentPlayer() : null,
+                game
+        );
     }
 
 }
