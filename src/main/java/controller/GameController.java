@@ -5,8 +5,10 @@ import model.board.Board;
 import model.dto.GameMessage;
 import model.dto.GameMessageFactory;
 import model.dto.MoveResult;
+import model.dto.NextStateHint;
 import model.player.Player;
 import model.piece.Piece;
+import model.state.WaitingForThrowState;
 import model.strategy.PathStrategy;
 import model.strategy.SquarePathStrategy;
 import model.yut.YutResult;
@@ -58,31 +60,50 @@ public class GameController {
     // 윷 던지기 처리
     public void handleYutThrow(YutResult result) {
         MoveResult resultAfterThrow = game.handleYutThrow(result); // 상태(State)에 위임
+        game.applyStateTransition(resultAfterThrow); // 상태 전이 Game에게 위임
         view.updateYutResult(result); // 현재 누적 윷 결과 View에 갱신
         updateViewAfterMove(resultAfterThrow); // 메시지 포함 전체 처리
+
     }
 
     // 말 선택 처리
     public void handlePieceSelect(Piece piece) {
         MoveResult result = game.handlePieceSelect(piece); // 상태(State)에 위임
+        game.applyStateTransition(result); // 상태 전이 Game에게 위임
         updateViewAfterMove(result); // 실패/성공 메시지 자동 처리
     }
+
+
 
     // 공통 View 업데이트
     private void updateViewAfterMove(MoveResult result) {
         view.renderGame(game);
 
+        // 메시지 처리
         GameMessage msg = result.isFailure()
                 ? GameMessageFactory.fromFailResult(result)
                 : GameMessageFactory.fromMoveResult(result);
 
         view.updateStatus(msg.content(), msg.type());
 
-        if (result.gameEnded()) {
-            if (result.winner() != null) {
-                view.showWinner(result.winner());
+        // 상태 전이 처리
+        switch (result.nextStateHint()) {
+            case GAME_ENDED -> {
+                game.setFinished(true); // 명시적으로 종료 처리
+                if (result.winner() != null) {
+                    view.showWinner(result.winner());
+                }
+                view.promptRestart(this);
             }
-            view.promptRestart(this);
+            case WAITING_FOR_THROW -> {
+                game.setState(new WaitingForThrowState(game));
+            }
+            case NEXT_TURN -> {
+                game.nextTurn(); // 내부에서 WaitingForThrowState 자동 설정
+            }
+            case STAY -> {
+                // 아무 상태 전이 없음
+            }
         }
     }
 

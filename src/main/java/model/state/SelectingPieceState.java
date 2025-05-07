@@ -9,7 +9,7 @@ import model.yut.YutResult;
 
 import java.util.List;
 
-public class SelectingPieceState implements GameState {
+public class SelectingPieceState implements CanSelectPiece {
 
     private final Game game;
 
@@ -19,12 +19,8 @@ public class SelectingPieceState implements GameState {
     }
 
     @Override
-    public MoveResult handleYutThrowWithResult(YutResult result) {
-        return MoveResult.fail(MoveFailType.ALREADY_THROWN);
-    }
-
-    @Override
     public MoveResult handlePieceSelectWithResult(Piece piece) {
+        // 유효성 검사
         if (piece.isFinished() || piece.getOwner() != game.getCurrentPlayer()) {
             return MoveResult.fail(MoveFailType.INVALID_SELECTION);
         }
@@ -34,38 +30,34 @@ public class SelectingPieceState implements GameState {
             return MoveResult.fail(MoveFailType.NO_RESULT);
         }
 
-        // 그룹 설정
+        // 그룹 이동
         List<Piece> group = PieceUtil.getMovableGroup(piece, game);
-
-        // 이동 처리
         boolean captured = game.getBoard().movePiece(piece, moveResult, game.getPlayers());
 
-        String playerName = piece.getOwner().getName();
+        // 골인 체크
+        var owner = piece.getOwner();
         if (PieceUtil.allFinished(group, game.getBoard())) {
-            for (Piece p : group) {
+            group.forEach(p -> {
                 p.setFinished(true);
                 PieceUtil.resetGroupToSelf(p);
-            }
-            return MoveResult.goal(piece.getOwner(), game);
+            });
+            return MoveResult.goal(owner, game);
         }
 
-        // 추가 턴 조건
+        // 보너스 턴 조건
         boolean isYutOrMo = moveResult == YutResult.YUT || moveResult == YutResult.MO;
         boolean bonusTurn = (captured && !isYutOrMo) || (isYutOrMo && !captured);
+        boolean hasMoreResults = game.hasPendingYutResults();
 
         // 다음 상태 결정
-        if (game.hasPendingYutResults()) {
-            return MoveResult.success(captured, false, game.isFinished() ? piece.getOwner() : null, game, piece, true);
-        }
-
-        if (bonusTurn) {
-            game.setState(new WaitingForThrowState(game));
-            return MoveResult.success(captured, true, game.isFinished() ? piece.getOwner() : null, game, piece, false);
-        }
-
-        // 턴 종료
-        game.nextTurn();
-        return MoveResult.success(captured, false, game.isFinished() ? piece.getOwner() : null, game, piece, false);
+        return MoveResult.success(
+                captured,
+                bonusTurn,
+                game.isFinished() ? owner : null,
+                game,
+                piece,
+                hasMoreResults
+        );
     }
 
 }
