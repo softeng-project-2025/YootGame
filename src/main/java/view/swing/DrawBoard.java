@@ -6,7 +6,7 @@ import javax.swing.*;
 import java.awt.*;
 
 public class DrawBoard extends JPanel {
-    PathStrategy pathStrategy;
+    private final PathStrategy pathStrategy;    // final이 될 수 있다고 해서 일단 붙였는데 문제 생기면 여기 보기
 
     DrawBoard(PathStrategy pathStrategy) {
         this.pathStrategy = pathStrategy;
@@ -24,13 +24,20 @@ public class DrawBoard extends JPanel {
         int marginX = 70;
         int marginY = (getHeight() - 600) / 2;
 
+        // draw line
         for(int i=0; i<allVertexPositions.size(); i+=2) {
-            model.position.Position position1 = allVertexPositions.get(i);
-            model.position.Position position2 = allVertexPositions.get(i+1);
+            model.position.Position p1 = allVertexPositions.get(i);
+            model.position.Position p2 = allVertexPositions.get(i+1);
 
-            g2.drawLine(position1.getX() + marginX, position1.getY() + marginY, position2.getX() + marginX, position2.getY() + marginY);
+            int x1 = p1.getX() + marginX;
+            int y1 = p1.getY() + marginY;
+            int x2 = p2.getX() + marginX;
+            int y2 = p2.getY() + marginY;
+
+            g2.drawLine(x1, y1, x2, y2);
         }
 
+        // draw noon
         for(model.position.Position position : allPositions) {
             if (position.isCenter() || position.isDiagonalEntry()) {
                 drawNoon(position, g2, 30);

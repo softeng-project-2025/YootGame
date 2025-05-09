@@ -23,7 +23,8 @@ public class SwingView extends JFrame implements View {
     private GameController controller;
     private JLabel resultLabel;
     private JPanel boardPanel;
-    private JButton throwButton;
+    private JButton randomThrowButton;
+    private JButton selectThrowButton;
     private JButton restartButton;
     private JComboBox<String> yutChoiceBox;
     private JLabel statusLabel;
@@ -80,13 +81,9 @@ public class SwingView extends JFrame implements View {
         resultLabel.setHorizontalAlignment(SwingConstants.CENTER);
         frame.add(resultLabel, BorderLayout.NORTH);
 
-        throwButton = new JButton("윷 던지기");
-        throwButton.addActionListener(e -> {
-            String choice = (String) yutChoiceBox.getSelectedItem();
-            YutResult result = "랜덤".equals(choice)
-                           ? YutThrower.throwYut()
-                           : YutResult.fromName(choice);
-            controller.throwYut(result);
+        randomThrowButton = new JButton("랜덤 윷 던지기");
+        randomThrowButton.addActionListener(e -> {
+            controller.throwYut();
         });
 
         restartButton = new JButton("다시 시작");
@@ -95,10 +92,19 @@ public class SwingView extends JFrame implements View {
             controller.initializeGame(2, 3, "square")
         );
 
+        selectThrowButton = new JButton("지정 윷 던지기");
+        selectThrowButton.addActionListener(e -> {
+            String choice = (String) yutChoiceBox.getSelectedItem();
+            YutResult result = YutResult.fromName(choice);
+            controller.handleYutThrow(result);
+        });
+
+        yutChoiceBox = new JComboBox<>(new String[]{"도", "개", "걸", "윷", "모", "빽도"});
+
         JPanel buttonPanel = new JPanel(new FlowLayout());
-        buttonPanel.add(throwButton);
+        buttonPanel.add(randomThrowButton);
         buttonPanel.add(restartButton);
-        yutChoiceBox = new JComboBox<>(new String[]{"랜덤", "도", "개", "걸", "윷", "모", "빽도"});
+        buttonPanel.add(selectThrowButton);
         buttonPanel.add(yutChoiceBox);
 
         statusLabel = new JLabel("게임을 시작하세요.");
@@ -123,18 +129,18 @@ public class SwingView extends JFrame implements View {
     }
 
     public void renderGame(Game game) {
-        if (boardPanel == null) {                             // ★ 보드가 아직 없을 때만 생성
+        if (boardPanel == null) {
             boardPanel = new DrawBoard(game.getBoard().getPathStrategy());
             boardPanel.setLayout(null);
-//            boardPanel.setPreferredSize(new Dimension(800, 800));
             boardPanel.setBackground(Color.WHITE);
             JScrollPane scrollPane = new JScrollPane(boardPanel);
             frame.add(scrollPane, BorderLayout.CENTER);
-            frame.validate();                                 // 레이아웃 갱신
+            frame.validate();
         }
 
         boardPanel.removeAll();
 
+        // loading all pieces to HashMap from game
         Map<Integer, List<Piece>> positionMap = new HashMap<>();
         for (var player : game.getPlayers()) {
             for (var piece : player.getPieces()) {
@@ -153,27 +159,27 @@ public class SwingView extends JFrame implements View {
                 Piece piece = piecesAtPosition.get(i);
                 int playerNum = piece.getOwner().getPlayerNumber();
                 String label = "P" + playerNum + "-" + piece.getId();
-                JButton pieceButton = new JButton(label);
 
                 Color[] playerColors = {Color.CYAN, Color.PINK, Color.ORANGE, Color.MAGENTA};
-                pieceButton.setBackground(playerColors[(playerNum - 1) % playerColors.length]);
-                pieceButton.setOpaque(true);
-                pieceButton.setBorderPainted(false);
-                pieceButton.setFont(new Font("Arial", Font.PLAIN, 1));
-                pieceButton.setMargin(new Insets(0, 0, 0, 0));
-                pieceButton.setToolTipText(piece.getOwner().getName() + "의 말 " + piece.getId());
+                Color btnColor = playerColors[(playerNum - 1) % playerColors.length];
 
+                // 위치 겹침 시 살짝씩 치우쳐 놓기
                 int offsetX = baseX + i * 6;
                 int offsetY = baseY + i * 6;
-                pieceButton.setBounds(offsetX, offsetY, 60, 60);
+                Position btnPos = new Position(piece.getPosition().getIndex(), offsetX, offsetY);
+
+                CylinderButton pieceButton = new CylinderButton(btnColor, btnPos, label);
+                pieceButton.setToolTipText(piece.getOwner().getName() + "의 말 " + piece.getId());
                 pieceButton.addActionListener(e -> controller.handlePieceSelect(piece));
 
                 boardPanel.add(pieceButton);
+
             }
         }
 
         boolean finished = game.isFinished();
-        throwButton.setEnabled(!finished);
+        randomThrowButton.setEnabled(!finished);
+        selectThrowButton.setEnabled(!finished);
         restartButton.setEnabled(finished);
 
         boardPanel.revalidate();
@@ -202,7 +208,8 @@ public class SwingView extends JFrame implements View {
             controller.initializeGame(2, 3, "square"); // 예시 값
             resetUI();
         } else {
-            throwButton.setEnabled(false);
+            randomThrowButton.setEnabled(false);
+            selectThrowButton.setEnabled(false);
             showMessage("게임을 종료합니다.");
             System.exit(0); // 게임 종료
         }
@@ -247,6 +254,7 @@ public class SwingView extends JFrame implements View {
         updateStatus("게임을 시작하세요.");
         resultLabel.setText("결과: ");
         restartButton.setEnabled(false);
-        throwButton.setEnabled(true);
+        randomThrowButton.setEnabled(true);
+        selectThrowButton.setEnabled(true);
     }
 }
