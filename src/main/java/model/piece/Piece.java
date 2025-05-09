@@ -9,7 +9,8 @@ import java.util.List;
 public class Piece {
     private Player owner;
     private int id;
-    private Position position;
+    private Position position;          // 현재 말이 있는 위치
+    private Position startPosition;     // 말이 잡히면 돌아갈 위치
     private boolean isGrouped;
     private boolean isFinished;
     private boolean hasMoved = false;
@@ -20,13 +21,17 @@ public class Piece {
     private int pathIndex = 0;
 
 
-    public Piece(Player owner, int id, Position startPos) {
+    public Piece(Player owner, int id, int playerNumber) {
         this.owner = owner;
         this.id = id;
-        this.position = startPos;
         this.isGrouped = false;
         this.isFinished = false;
         this.group = new ArrayList<>(List.of(this));
+
+        int x = 1200 - (4 - playerNumber) * 100;
+        int y = 200 + id * 100;
+        this.position = new Position(0, x, y);
+        this.startPosition = this.position;
     }
 
     public Player getOwner() {
@@ -40,8 +45,6 @@ public class Piece {
     public Position getPosition() {
         return position;
     }
-
-
 
     public boolean isGrouped() {
         return isGrouped;
@@ -94,7 +97,6 @@ public class Piece {
         return customPath;
     }
 
-
     public void setCustomPath(List<Position> path) {
         this.customPath = path;
         updatePathIndex(); // 초기화 후 바로 index 맞춤
@@ -110,8 +112,6 @@ public class Piece {
             this.pathIndex = customPath.size() - 1;
         }
     }
-
-
 
     public void updatePathIndex() {
         if (customPath == null) return;
@@ -138,6 +138,5 @@ public class Piece {
     public void setPathIndex(int index) {
         this.pathIndex = index;
     }
-
 
 }
