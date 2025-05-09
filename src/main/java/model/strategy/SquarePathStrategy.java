@@ -18,6 +18,7 @@ public class SquarePathStrategy implements PathStrategy {
     private final List<Position> outerPath;
     private final List<Position> pathFrom5;
     private final List<Position> pathFrom10;
+    private final List<Position> pathFrom5Center;
 
     public static final int CENTER_INDEX = 28;
 
@@ -25,8 +26,9 @@ public class SquarePathStrategy implements PathStrategy {
         allPositions = createAllPositions();
         allVertexPositions = createAllVertexPositions();
         outerPath = createOuterPath();
-        pathFrom5 = createDiagonalPathFrom5(false);
-        pathFrom10 = createDiagonalPathFrom10();
+        pathFrom5 = createPathFrom5();
+        pathFrom10 = createPathFrom10();
+        pathFrom5Center = createPathFrom5Center();
     }
 
     private Position pos(int index, int x, int y) {
@@ -37,49 +39,71 @@ public class SquarePathStrategy implements PathStrategy {
         return positionPool.computeIfAbsent(index, i -> new Position(i, x, y, isCenter));
     }
 
-    // 경로 기반 이동 로직
+    // 경로 업데이트 & 업데이트된 경로 기반 다음 위치
     @Override
     public Position getNextPosition(Piece piece, YutResult result) {
-        // 대각선 진입 조건
-        if (piece.getPathType() == PathType.OUTER) {
-            if (piece.getPosition().getIndex() == 5 && shouldEnterDiagonalFrom5(piece)) {
-                piece.setPathType(PathType.DIAGONAL_5);
-                piece.setCustomPath(createDiagonalPathFrom5());
-                piece.setPathIndex(1); // 5 → 20
-                return piece.getCustomPath().get(1);
-            }
-            else if (piece.getPosition().getIndex() == 10) {
-                piece.setPathType(PathType.DIAGONAL_10);
-                piece.setCustomPath(createDiagonalPathFrom10());
-                piece.setPathIndex(1); // 10 → 22
-                return piece.getCustomPath().get(1);
-            }
+        PathType pathType = piece.getPathType();
+        int pathIndex = piece.getPathIndex();
+
+        // 모에 있었을 때
+        if (pathIndex == 5) {
+            piece.setPathType(PathType.FROM5);
+            piece.setCustomPath(pathFrom5);
+            piece.setPathIndex(5);
+        }
+
+        // 모에 있었다가 백도 받아서 윷에 있었을 때
+        if (
+                pathType == PathType.FROM5
+                && pathIndex == 4
+        ) {
+            piece.setPathType(PathType.OUTER);
+            piece.setCustomPath(outerPath);
+            piece.setPathIndex(4);
+        }
+
+        // 뒷모에 있었을 때
+        if (pathIndex == 10) {
+            piece.setPathType(PathType.FROM10);
+            piece.setCustomPath(pathFrom10);
+            piece.setPathIndex(10);
+        }
+
+        // 뒷모에 있었다가 백도를 받아서 뒷윷에 있었을 때
+        if (
+                pathType == PathType.FROM10
+                && pathIndex == 9
+        ) {
+            piece.setPathType(PathType.OUTER);
+            piece.setCustomPath(outerPath);
+            piece.setPathIndex(9);
+        }
+
+        // 모도, 모개로 와서 방에 있었을 때
+        if (
+                pathType == PathType.FROM5
+                && pathIndex == 8
+        ) {
+            piece.setPathType(PathType.FROM5CENTER);
+            piece.setCustomPath(pathFrom5Center);
+            piece.setPathIndex(8);
+        }
+
+        // from5이면서 방 들어갔다가 빽도로 나오면 pathFrom5로 변경
+        if (
+                pathType == PathType.FROM5CENTER
+                && pathIndex == 7
+        ) {
+            piece.setPathType(PathType.FROM5);
+            piece.setCustomPath(pathFrom5);
+            piece.setPathIndex(7);
         }
 
         List<Position> path = piece.getCustomPath();
-        int idx = piece.getPathIndex();
-        int nextIdx = idx + result.getStep();
+        pathIndex = piece.getPathIndex();
+        int nextIdx = pathIndex + result.getStep();
 
-        if (nextIdx >= path.size()) {
-            nextIdx = path.size() - 1;
-        }
-
-        Position nextPos = path.get(nextIdx);
-
-        // 중심 도달 시 경로 전환 처리
-        if (!piece.hasPassedCenter() && nextPos.getIndex() == CENTER_INDEX) {
-            piece.setPassedCenter(true); // 상태 플래그 true
-
-            // 중심 도달 후 path 교체
-            if (piece.getPathType() == PathType.DIAGONAL_5) {
-                piece.setCustomPath(createCenterToExitPath());
-                piece.setPathType(PathType.DIAGONAL_5); // 유지
-                piece.setPathIndex(0); // 중심 → 출구 경로 시작점부터
-                return piece.getCustomPath().get(0);
-            }
-        }
-
-        return nextPos;
+        return path.get(nextIdx);
     }
 
     @Override
@@ -102,9 +126,9 @@ public class SquarePathStrategy implements PathStrategy {
         return allVertexPositions;
     }
 
+    // for drawing board's noon
     private List<Position> createAllPositions() {
         List<Position> positions = new ArrayList<>();
-
         int[][] allCoords = {
                 {600, 600},
                 {600, 480},
@@ -141,13 +165,14 @@ public class SquarePathStrategy implements PathStrategy {
             int x = allCoords[i][0];
             int y = allCoords[i][1];
             boolean isVertex = (i == 0 || i == 5 || i == 10 || i == 15);
-            boolean isCenter = (i == 28);
+            boolean isCenter = (i == allCoords.length - 1);
             positions.add(new Position(i, x, y, isCenter, isVertex));
         }
 
         return positions;
     }
 
+    // for drawing board's background line
     private List<Position> createAllVertexPositions() {
         List<Position> positions = new ArrayList<>();
         int[][] allCoords = {
@@ -186,111 +211,110 @@ public class SquarePathStrategy implements PathStrategy {
     }
 
     private List<Position> createOuterPath() {
-
         int[][] coords = {
-                {500, 500}, // 0 시작점 (오른쪽 하단)
-                {500, 400}, // 1 위
-                {500, 300}, // 2
-                {500, 200}, // 3
-                {500, 100}, // 4
-                {500,   0}, // 5 ↖ 대각선 진입점
-                {400,   0}, // 6 ←
-                {300,   0}, // 7
-                {200,   0}, // 8
-                {100,   0}, // 9
-                {  0,   0}, // 10 ↙ 대각선 진입점
-                {  0, 100}, // 11 ↓
-                {  0, 200}, // 12
-                {  0, 300}, // 13
-                {  0, 400}, // 14
-                {  0, 500}, // 15 → 우회로 계속
-                {100, 500}, // 16 →
-                {200, 500}, // 17
-                {300, 500}, // 18
-                {400, 500}, // 19
+                {5000, 5000},   // 출발 전, Piece의 startPos 따로 참고
+                {600, 480},
+                {600, 360},
+                {600, 240},
+                {600, 120},
+                {600, 0},   // 모
+                {480, 0},
+                {360, 0},
+                {240, 0},
+                {120, 0},
+                {0, 0},     // 뒷모
+                {0, 120},
+                {0, 240},
+                {0, 360},
+                {0, 480},
+                {0, 600},   // 찌모
+                {120, 600},
+                {240, 600},
+                {360, 600},
+                {480, 600},
+                {600, 600}, // 참먹이
+                {5000, 5000}    // 탈출
         };
 
+        return createPath(coords);
+    }
+
+    private List<Position> createPathFrom5() {
+        int[][] coords = {
+                {5000, 5000},   // 출발 전, Piece의 startPos 따로 참고
+                {600, 480},
+                {600, 360},
+                {600, 240},
+                {600, 120},
+                {600, 0},
+                {500, 100},
+                {400, 200},
+                {300, 300}, // 28, center
+                {400, 400},
+                {500, 500},
+                {0, 600},
+                {120, 600},
+                {240, 600},
+                {360, 600},
+                {480, 600}, // 19
+                {600, 600}, // 참먹이
+                {5000, 5000}    // 탈출
+        };
+
+        return createPath(coords);
+    }
+
+    private List<Position> createPathFrom10() {
+        int[][] coords = {
+                {5000, 5000},   // 출발 전, Piece의 startPos 따로 참고
+                {600, 480},
+                {600, 360},
+                {600, 240},
+                {600, 120},
+                {600, 0},
+                {480, 0},
+                {360, 0},
+                {240, 0},
+                {120, 0},
+                {0, 0},     // 뒷모
+                {100, 100},
+                {200, 200},
+                {300, 300},
+                {400, 400},
+                {500, 500},
+                {600, 600}, // 참먹이
+                {5000, 5000}    // 탈출
+        };
+
+        return createPath(coords);
+    }
+
+    private List<Position> createPathFrom5Center() {
+        int[][] coords = {
+                {5000, 5000},   // 출발 전, Piece의 startPos 따로 참고
+                {600, 480},
+                {600, 360},
+                {600, 240},
+                {600, 120},
+                {600, 0},
+                {500, 100},
+                {400, 200},
+                {300, 300},
+                {400, 400},
+                {500, 500},
+                {600, 600}, // 참먹이
+                {5000, 5000}    // 탈출
+        };
+
+        return createPath(coords);
+    }
+
+    private List<Position> createPath(int[][] coords) {
         List<Position> path = new ArrayList<>();
         for (int i = 0; i < coords.length; i++) {
             path.add(pos(i, coords[i][0], coords[i][1]));
         }
         return path;
     }
-
-    private List<Position> createDiagonalPathFrom5(boolean passedCenter) {
-        List<Position> path = new ArrayList<>();
-        // 5 → 20 → 21 → 28(중심)
-        path.add(pos(5, 500, 0)); // 시작점
-        path.add(pos(20, 400, 100));
-        path.add(pos(21, 300, 200));
-        path.add(pos(28, 300, 300, true)); // 중심점
-
-        if (passedCenter) {
-            // 중심을 밟았다면: 중심 → 26 → 27 → 0 (출구)
-            path.add(pos(26, 400, 400));
-            path.add(pos(27, 500, 400));
-            path.add(pos(0, 500, 500)); // 종료점
-        } else {
-            // 중심 안 밟음: 24 → 25 → 15 → 16 → 17 → 18 → 19 → 0
-            path.add(pos(24, 200, 400));
-            path.add(pos(25, 100, 500));
-            path.add(pos(15, 0, 500));
-            path.add(pos(16, 100, 500));
-            path.add(pos(17, 200, 500));
-            path.add(pos(18, 300, 500));
-            path.add(pos(19, 400, 500));
-            path.add(pos(0, 500, 500)); // 종료점
-        }
-        return path;
-    }
-    private List<Position> createDiagonalPathFrom10() {
-        List<Position> path = new ArrayList<>();
-        path.add(pos(10, 0, 100));      // 진입점 (왼쪽 중간)
-        path.add(pos(22, 100, 200));    // 대각선 이동
-        path.add(pos(23, 200, 300));
-        path.add(pos(28, 300, 300, true)); // 중심점
-        path.add(pos(26, 400, 400));    // 중심 이후
-        path.add(pos(27, 500, 400));
-        path.add(pos(0, 500, 500));     // 출구
-        return path;
-    }
-
-    private int findIndex(List<Position> path, Position pos) {
-        for (int i = 0; i < path.size(); i++) {
-            if (path.get(i).getIndex() == pos.getIndex()) return i;
-        }
-        return -1;
-    }
-
-    private boolean shouldEnterDiagonalFrom5(Piece piece) {
-        // 중심을 이미 지난 적이 있다면 안 들어감
-        if (piece.hasPassedCenter()) return false;
-
-        // 앞으로 가야 할 거리 계산: OUTER vs DIAGONAL
-        int currentIndex = findIndex(outerPath, piece.getPosition());
-        int outerStepsLeft = outerPath.size() - currentIndex;
-        int diagonalSteps = pathFrom5.size(); // 5 → ... → 0
-
-        return diagonalSteps < outerStepsLeft;
-    }
-
-    private List<Position> createCenterToExitPath() {
-        List<Position> path = new ArrayList<>();
-        path.add(pos(28, 300, 300, true)); // 중심
-        path.add(pos(26, 400, 400));
-        path.add(pos(27, 500, 400));
-        path.add(pos(0, 500, 500)); // 출구
-        return path;
-    }
-
-    private List<Position> createDiagonalPathFrom5() {
-        List<Position> path = new ArrayList<>();
-        path.add(pos(5, 500, 0));
-        path.add(pos(20, 400, 100));
-        path.add(pos(21, 300, 200));
-        path.add(pos(28, 300, 300, true)); // 중심 도달 시 동적으로 교체됨
-        return path;
-    }
-
 
 }
