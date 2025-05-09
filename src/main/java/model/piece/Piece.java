@@ -42,6 +42,10 @@ public class Piece {
         return id;
     }
 
+    public Position getStartPosition() {
+        return startPosition;
+    }
+
     public Position getPosition() {
         return position;
     }
