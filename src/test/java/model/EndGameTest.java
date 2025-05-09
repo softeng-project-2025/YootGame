@@ -1,6 +1,7 @@
 package model;
 
 import model.board.Board;
+import model.manager.GameService;
 import model.piece.Piece;
 import model.player.Player;
 import model.state.SelectingPieceState;
@@ -21,6 +22,7 @@ public class EndGameTest {
     private Player p1, p2;
     private Board  board;
     private List<Position> path;   // 편의를 위해 캐싱
+    private GameService gameService;
 
     @BeforeEach
     void setUp() {
@@ -37,9 +39,9 @@ public class EndGameTest {
      *  곧바로 말을 선택할 수 있도록 해준다.
      */
     private void throwAndSelect(YutResult result, Piece piece) {
-        game.handleYutThrow(result);                          // 윷 결과를 큐에 적재
+        gameService.handleYutThrow(result);                          // 윷 결과를 큐에 적재
         game.setState(new SelectingPieceState(game, result)); // 상태 수동 전환
-        game.handlePieceSelect(piece);                        // 실제 이동 수행
+        gameService.handlePieceSelect(piece);                        // 실제 이동 수행
     }
 
     /* 테스트 케이스1: 한 사용자의 모든 말이 도착점을 통과함.

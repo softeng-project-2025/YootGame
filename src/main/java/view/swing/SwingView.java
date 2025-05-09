@@ -86,7 +86,7 @@ public class SwingView extends JFrame implements View {
             YutResult result = "랜덤".equals(choice)
                            ? YutThrower.throwYut()
                            : YutResult.fromName(choice);
-            controller.handleYutThrow(result);
+            controller.throwYut(result);
         });
 
         restartButton = new JButton("다시 시작");
@@ -230,6 +230,17 @@ public class SwingView extends JFrame implements View {
 
         statusLabel.setForeground(color); // JLabel 등 UI 컴포넌트 색 변경
         statusLabel.setText(icon + message);
+    }
+
+    @Override
+    public void showSelectablePieces(List<Piece> pieces) {
+        StringBuilder sb = new StringBuilder("선택 가능한 말:\n");
+        for (int i = 0; i < pieces.size(); i++) {
+            Piece piece = pieces.get(i);
+            sb.append(i + 1).append(". ")
+                    .append(piece.toString()).append("\n");
+        }
+        JOptionPane.showMessageDialog(null, sb.toString(), "말 선택", JOptionPane.INFORMATION_MESSAGE);
     }
 
     public void resetUI() {

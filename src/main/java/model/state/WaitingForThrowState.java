@@ -13,14 +13,14 @@ public class WaitingForThrowState implements CanThrowYut {
     }
 
     @Override
-    public MoveResult handleYutThrowWithResult(YutResult result) {
-        game.enqueueYutResult(result);
+    public MoveResult handleYutThrow(YutResult result) {
+        game.getTurnResult().add(result);
         return MoveResult.success(
                 false,
                 false,
-                game.isFinished() ? game.getCurrentPlayer() : null,
+                game.isFinished() ? game.getTurnManager().currentPlayer() : null,
                 game
-        );
+        ).withNextStateHint(null); // 상태 전이는 GameService에서 처리
     }
 
 }

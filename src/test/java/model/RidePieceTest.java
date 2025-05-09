@@ -1,6 +1,7 @@
 package model;
 
 import model.board.Board;
+import model.manager.GameService;
 import model.piece.Piece;
 import model.player.Player;
 import model.position.Position;
@@ -21,6 +22,7 @@ public class RidePieceTest {
     private Player p1, p2;
     private Board board;
     private List<Position> path;
+    private GameService gameService;
 
     @BeforeEach
     void setUp() {
@@ -34,9 +36,9 @@ public class RidePieceTest {
 
     /** 유틸 – 윷을 큐에 적재한 뒤 SelectingPieceState 로 전환해서 곧바로 말을 선택할 수 있도록 한다. */
     private void throwAndSelect(YutResult result, Piece piece) {
-        game.handleYutThrow(result);
+        gameService.handleYutThrow(result);
         game.setState(new SelectingPieceState(game, result));
-        game.handlePieceSelect(piece);
+        gameService.handlePieceSelect(piece);
     }
 
     /* 테스트 케이스 1: 말이 업히는 경우.

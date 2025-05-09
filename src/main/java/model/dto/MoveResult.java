@@ -3,7 +3,6 @@ package model.dto;
 import model.Game;
 import model.piece.Piece;
 import model.player.Player;
-import model.state.WaitingForThrowState;
 
 public record MoveResult(
         boolean captured,
@@ -32,17 +31,18 @@ public record MoveResult(
 
     // 정상 이동 - 기본
     public static MoveResult success(boolean captured, boolean bonusTurn, Player winner, Game game) {
-        return new MoveResult(captured, game.isFinished(), winner, bonusTurn, false, null, null, false, hintFor(bonusTurn, false, false));
+        return new MoveResult(captured, game.isFinished(), winner, bonusTurn, false, null, null, false, hintFor(bonusTurn, false, game.isFinished()));
     }
+
 
     // 정상 이동 - movedPiece 포함
     public static MoveResult success(boolean captured, boolean bonusTurn, Player winner, Game game, Piece movedPiece) {
-        return new MoveResult(captured, game.isFinished(), winner, bonusTurn, false, movedPiece, null, false, hintFor(bonusTurn, false, false));
+        return new MoveResult(captured, game.isFinished(), winner, bonusTurn, false, movedPiece, null, false, hintFor(bonusTurn, false, game.isFinished()));
     }
 
     // 정상 이동 - movedPiece + hasPendingYutResults 포함
     public static MoveResult success(boolean captured, boolean bonusTurn, Player winner, Game game, Piece movedPiece, boolean hasPendingYutResults) {
-        return new MoveResult(captured, game.isFinished(), winner, bonusTurn, false, movedPiece, null, hasPendingYutResults, hintFor(bonusTurn, hasPendingYutResults, false));
+        return new MoveResult(captured, game.isFinished(), winner, bonusTurn, false, movedPiece, null, hasPendingYutResults, hintFor(bonusTurn, hasPendingYutResults, game.isFinished()));
     }
 
     // 일반 이동
@@ -73,6 +73,22 @@ public record MoveResult(
         return failType == null;
     }
 
+    public boolean isGameOver() {
+        return gameEnded;
+    }
+
+    public MoveResult withGameOver(boolean gameOver) {
+        return new MoveResult(captured, gameOver, winner, bonusTurn, turnSkipped, movedPiece, failType, hasPendingYutResults, nextStateHint);
+    }
+
+    public MoveResult withWinner(Player newWinner) {
+        return new MoveResult(captured, gameEnded, newWinner, bonusTurn, turnSkipped, movedPiece, failType, hasPendingYutResults, nextStateHint);
+    }
+
+    public MoveResult withNextStateHint(NextStateHint hint) {
+        return new MoveResult(captured, gameEnded, winner, bonusTurn, turnSkipped, movedPiece, failType, hasPendingYutResults, hint);
+    }
+
     // 내부 헬퍼
     private static NextStateHint hintFor(boolean bonusTurn, boolean hasPendingYuts, boolean isFinished) {
         // 보너스 턴 > 큐 있음 > 기본
@@ -80,9 +96,5 @@ public record MoveResult(
         if (bonusTurn) return NextStateHint.WAITING_FOR_THROW;
         if (hasPendingYuts) return NextStateHint.STAY;
         return NextStateHint.NEXT_TURN;
-    }
-
-    public MoveResult withNextStateHint(NextStateHint hint) {
-        return new MoveResult(captured, gameEnded, winner, bonusTurn, turnSkipped, movedPiece, failType, hasPendingYutResults, hint);
     }
 }

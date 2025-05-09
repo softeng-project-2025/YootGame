@@ -1,6 +1,7 @@
 package model;
 
 import model.board.Board;
+import model.manager.GameService;
 import model.piece.Piece;
 import model.piece.PieceUtil;
 import model.player.Player;
@@ -18,10 +19,11 @@ import static org.junit.jupiter.api.Assertions.*;
 
 //말이 도착하는 시나리오 테스트 케이스
 public class ArrivePieceTest {
-    private Game   game;
+    private GameService gameService;
     private Player p1, p2;
     private Board  board;
     private List<Position> path;   // 편의를 위해 캐싱
+    private Game game;
 
     @BeforeEach
     void setUp() {
@@ -31,16 +33,16 @@ public class ArrivePieceTest {
         p1 = new Player("Player‑1", 4, board, 1);
         p2 = new Player("Player‑2", 4, board, 2);
 
-        game = new Game(board, Arrays.asList(p1, p2));
+        Game game = new Game(board, Arrays.asList(p1, p2));
     }
 
     /** 유틸 – 윷을 큐에 적재한 뒤 SelectingPieceState 로 전환해서
      *  곧바로 말을 선택할 수 있도록 해준다.
      */
     private void throwAndSelect(YutResult result, Piece piece) {
-        game.handleYutThrow(result);                          // 윷 결과를 큐에 적재
+        gameService.handleYutThrow(result);                          // 윷 결과를 큐에 적재
         game.setState(new SelectingPieceState(game, result)); // 상태 수동 전환
-        game.handlePieceSelect(piece);                        // 실제 이동 수행
+        gameService.handlePieceSelect(piece);                        // 실제 이동 수행
     }
 
     /* 테스트 케이스 1: 사용자의 말 하나가 도착점을 통과함.

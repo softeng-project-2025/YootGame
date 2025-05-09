@@ -1,6 +1,7 @@
 package model;
 
 import model.board.Board;
+import model.manager.GameService;
 import model.piece.Piece;
 import model.piece.PieceUtil;
 import model.player.Player;
@@ -23,6 +24,7 @@ public class CatchPieceTest {
     private Player p1, p2;
     private Board  board;
     private List<Position> path;   // 편의를 위해 캐싱
+    private GameService gameService;
 
     @BeforeEach
     void setUp() {
@@ -39,9 +41,9 @@ public class CatchPieceTest {
      *  곧바로 말을 선택할 수 있도록 해준다.
      */
     private void throwAndSelect(YutResult result, Piece piece) {
-        game.handleYutThrow(result);                          // 윷 결과를 큐에 적재
+        gameService.handleYutThrow(result);                          // 윷 결과를 큐에 적재
         game.setState(new SelectingPieceState(game, result)); // 상태 수동 전환
-        game.handlePieceSelect(piece);                        // 실제 이동 수행
+        gameService.handlePieceSelect(piece);                        // 실제 이동 수행
     }
 
 
@@ -63,7 +65,7 @@ public class CatchPieceTest {
         // 추가 턴 : 상태가 WaitingForThrowState 로 돌아와 있어야 함
         assertInstanceOf(WaitingForThrowState.class, game.getState(),
                 "잡았으므로 추가 턴 상태(WaitingForThrowState)여야 한다");
-        assertEquals(p2, game.getCurrentPlayer(), "말을 잡았기에 Player2의 차례여야 한다");
+        assertEquals(p2, game.getTurnManager().currentPlayer(), "말을 잡았기에 Player2의 차례여야 한다");
     }
 
 

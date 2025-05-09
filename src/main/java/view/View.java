@@ -2,8 +2,11 @@ package view;
 
 import controller.GameController;
 import model.dto.MessageType;
+import model.piece.Piece;
 import model.player.Player;
 import model.yut.YutResult;
+
+import java.util.List;
 
 public interface View {
     void showMessage(String message);
@@ -14,4 +17,5 @@ public interface View {
     void showWinner(Player currentPlayer);
     void updateStatus(String message);
     void updateStatus(String message, MessageType type);
+    void showSelectablePieces(List<Piece> pieces);
 }
