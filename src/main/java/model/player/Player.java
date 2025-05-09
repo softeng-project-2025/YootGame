@@ -18,7 +18,7 @@ public class Player {
         this.pieces = new ArrayList<>();
         Position startPos = board.getPathStrategy().getPath().get(0); // 시작 위치
 
-        for (int i = 0; i < pieceCount; i++) {
+        for (int i = 1; i <= pieceCount; i++) {
             pieces.add(new Piece(this, i, startPos));
         }
     }
