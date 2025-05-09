@@ -6,7 +6,6 @@ import model.dto.GameMessage;
 import model.dto.GameMessageFactory;
 import model.dto.MoveResult;
 import model.manager.GameService;
-import model.manager.TurnManager;
 import model.player.Player;
 import model.piece.Piece;
 import model.strategy.PathStrategy;

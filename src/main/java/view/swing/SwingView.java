@@ -96,7 +96,7 @@ public class SwingView extends JFrame implements View {
         selectThrowButton.addActionListener(e -> {
             String choice = (String) yutChoiceBox.getSelectedItem();
             YutResult result = YutResult.fromName(choice);
-            controller.handleYutThrow(result);
+            controller.throwYut();
         });
 
         yutChoiceBox = new JComboBox<>(new String[]{"도", "개", "걸", "윷", "모", "빽도"});
@@ -170,7 +170,7 @@ public class SwingView extends JFrame implements View {
 
                 CylinderButton pieceButton = new CylinderButton(btnColor, btnPos, label);
                 pieceButton.setToolTipText(piece.getOwner().getName() + "의 말 " + piece.getId());
-                pieceButton.addActionListener(e -> controller.handlePieceSelect(piece));
+//                pieceButton.addActionListener(e -> controller.applyResultToPiece(piece));
 
                 boardPanel.add(pieceButton);
 
