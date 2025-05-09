@@ -19,7 +19,7 @@ public class Player {
         Position startPos = board.getPathStrategy().getPath().get(0); // 시작 위치
 
         for (int i = 1; i <= pieceCount; i++) {
-            pieces.add(new Piece(this, i, startPos));
+            pieces.add(new Piece(this, i, playerNumber));
         }
     }
 
