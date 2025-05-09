@@ -6,44 +6,78 @@ import javax.swing.*;
 import java.awt.*;
 
 public class CylinderButton extends JButton {
-    Position pos;
 
-    public CylinderButton(Color color, Position pos) {
+    private static final int WIDTH  = 30;  // 버튼 실제 너비
+    private static final int HEIGHT = 20;  // 전체 높이
+    private static final int CAP_H  = 10;  // 상‧하 타원(겉보기 원) 높이
+
+    private Position pos;                 // 말의 실시간 위치
+
+    public CylinderButton(Color color, Position pos, String text) {
+        super(text);                      // 라벨용 텍스트
+        this.pos = pos;
+
         setContentAreaFilled(false);
         setFocusPainted(false);
         setBorderPainted(false);
-        setPreferredSize(new Dimension(30, 20));
+        setForeground(Color.BLACK);
+        setFont(new Font("맑은 고딕", Font.BOLD, 8));
+        setHorizontalTextPosition(SwingConstants.CENTER);
+        setVerticalTextPosition(SwingConstants.CENTER);
+        setPreferredSize(new Dimension(WIDTH, HEIGHT));
         setBackground(color);
-        this.pos = pos;
 
-        int x = pos.getX() - getWidth() / 2;
-        int y = pos.getY() - getHeight() / 2;
-        setBounds(x, y, getWidth(), getHeight());
+        updateBounds();
     }
 
+    /* Position 이 변할 때 호출 */
+    public void setPosition(Position pos) {
+        this.pos = pos;
+        updateBounds();
+        repaint();
+    }
+
+    /* pos 정보를 기준으로 컴포넌트 위치 재계산 */
+    private void updateBounds() {
+        int x = pos.getX() - WIDTH / 2;
+        int y = pos.getY() - HEIGHT / 2;
+        setBounds(x, y, WIDTH, HEIGHT);
+    }
+
+    /* 실린더 커스텀 페인팅 */
     @Override
-    public void paintComponent(Graphics g) {
+    protected void paintComponent(Graphics g) {
         Graphics2D g2 = (Graphics2D) g.create();
-        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+                            RenderingHints.VALUE_ANTIALIAS_ON);
 
-        int w = getWidth();
-        int h = getHeight();
-        int r = h / 2;
+        int rectH = HEIGHT - CAP_H; // 몸통(직사각형) 높이
 
+        // 하단 타원
         g2.setColor(getBackground().darker());
-        g2.fillOval(pos.getX() - w / 2, pos.getY() + h / 2 - r / 2, w, r);
+        g2.fillOval(0, rectH, WIDTH, CAP_H);
         g2.setColor(Color.BLACK);
-        g2.drawOval(pos.getX() - w / 2, pos.getY() + h / 2 - r / 2, w, r);
+        g2.drawOval(0, rectH, WIDTH, CAP_H);
 
+        // 몸통
         g2.setColor(getBackground().darker());
-        g2.fillRect(pos.getX() - w / 2, pos.getY() - h / 2, w, h);
+        g2.fillRect(0, CAP_H / 2, WIDTH, rectH);
         g2.setColor(Color.BLACK);
-        g2.drawRect(pos.getX() - w / 2, pos.getY() - h / 2, w, h);
+        g2.drawRect(0, CAP_H / 2, WIDTH, rectH);
 
+        // 상단 타원
         g2.setColor(getBackground().brighter());
-        g2.fillOval(pos.getX() - w / 2, pos.getY() - h / 2 - r / 2, w, r);
+        g2.fillOval(0, 0, WIDTH, CAP_H);
         g2.setColor(Color.BLACK);
-        g2.drawOval(pos.getX() - w / 2, pos.getY() - h / 2 - r / 2, w, r);
+        g2.drawOval(0, 0, WIDTH, CAP_H);
+
+        // 라벨(텍스트)
+        FontMetrics fm = g2.getFontMetrics();
+        String txt = getText();
+        int txtX = (WIDTH  - fm.stringWidth(txt)) / 2;
+        int txtY = (HEIGHT + fm.getAscent() - fm.getDescent()) / 2 - 1;
+        g2.setColor(getForeground());
+        g2.drawString(txt, txtX, txtY);
 
         g2.dispose();
     }

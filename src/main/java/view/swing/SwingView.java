@@ -160,22 +160,21 @@ public class SwingView extends JFrame implements View {
                 Piece piece = piecesAtPosition.get(i);
                 int playerNum = piece.getOwner().getPlayerNumber();
                 String label = "P" + playerNum + "-" + piece.getId();
-                JButton pieceButton = new JButton(label);
 
                 Color[] playerColors = {Color.CYAN, Color.PINK, Color.ORANGE, Color.MAGENTA};
-                pieceButton.setBackground(playerColors[(playerNum - 1) % playerColors.length]);
-                pieceButton.setOpaque(true);
-                pieceButton.setBorderPainted(false);
-                pieceButton.setFont(new Font("맑은 고딕", Font.PLAIN, 1));
-                pieceButton.setMargin(new Insets(0, 0, 0, 0));
-                pieceButton.setToolTipText(piece.getOwner().getName() + "의 말 " + piece.getId());
+                Color btnColor = playerColors[(playerNum - 1) % playerColors.length];
 
+                // 위치 겹침 시 살짝씩 치우쳐 놓기
                 int offsetX = baseX + i * 6;
                 int offsetY = baseY + i * 6;
-                pieceButton.setBounds(offsetX, offsetY, 60, 60);
+                Position btnPos = new Position(piece.getPosition().getIndex(), offsetX, offsetY);
+
+                CylinderButton pieceButton = new CylinderButton(btnColor, btnPos, label);
+                pieceButton.setToolTipText(piece.getOwner().getName() + "의 말 " + piece.getId());
                 pieceButton.addActionListener(e -> controller.handlePieceSelect(piece));
 
                 boardPanel.add(pieceButton);
+
             }
         }
 
