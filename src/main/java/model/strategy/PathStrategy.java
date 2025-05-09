@@ -21,5 +21,5 @@ public interface PathStrategy {
 
     List<Position> getAllVertexPositions();
 
-    Position getPreviousPosition(Position current, int steps);
+    Position getPreviousPosition(Position current);
 }

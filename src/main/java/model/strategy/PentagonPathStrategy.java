@@ -33,7 +33,7 @@ public class PentagonPathStrategy implements PathStrategy {
     }
 
     @Override
-    public Position getPreviousPosition(Position current, int steps){
+    public Position getPreviousPosition(Position current){
         // TODO: 오각형 경로 규칙 구현
         throw new UnsupportedOperationException("PentagonPathStrategy path not defined.");
     }
