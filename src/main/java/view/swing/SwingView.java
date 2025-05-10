@@ -26,6 +26,7 @@ public class SwingView extends JFrame implements View {
     private JLabel statusLabel;
     private boolean isUiInitialized = false;
 
+
     public SwingView(GameController controller) {
         super("YootGame");
         this.controller = controller;
@@ -86,9 +87,10 @@ public class SwingView extends JFrame implements View {
         restartButton = new JButton("다시 시작");
         restartButton.setEnabled(false);
         restartButton.addActionListener(e ->
-            controller.initializeGame(2, 3, "square")
+            controller.initializeGame()
         );
 
+        yutChoiceBox = new JComboBox<>(YutResult.getNames());
         selectThrowButton = new JButton("지정 윷 던지기");
         selectThrowButton.addActionListener(e -> {
             String choice = (String) yutChoiceBox.getSelectedItem();
@@ -96,7 +98,6 @@ public class SwingView extends JFrame implements View {
             controller.throwYut();
         });
 
-        yutChoiceBox = new JComboBox<>(new String[]{"도", "개", "걸", "윷", "모", "빽도"});
 
         JPanel buttonPanel = new JPanel(new FlowLayout());
         buttonPanel.add(randomThrowButton);
