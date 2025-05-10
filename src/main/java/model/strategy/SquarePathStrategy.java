@@ -12,15 +12,12 @@ import model.piece.PathType;
 
 public class SquarePathStrategy implements PathStrategy {
 
-    private final Map<Integer, Position> positionPool = new HashMap<>();
     private final List<Position> allPositions;
     private final List<Position> allVertexPositions;
     private final List<Position> outerPath;
     private final List<Position> pathFrom5;
     private final List<Position> pathFrom10;
     private final List<Position> pathFrom5Center;
-
-    public static final int CENTER_INDEX = 28;
 
     public SquarePathStrategy() {
         allPositions = createAllPositions();
@@ -29,14 +26,6 @@ public class SquarePathStrategy implements PathStrategy {
         pathFrom5 = createPathFrom5();
         pathFrom10 = createPathFrom10();
         pathFrom5Center = createPathFrom5Center();
-    }
-
-    private Position pos(int index, int x, int y) {
-        return positionPool.computeIfAbsent(index, i -> new Position(i, x, y));
-    }
-
-    private Position pos(int index, int x, int y, boolean isCenter) {
-        return positionPool.computeIfAbsent(index, i -> new Position(i, x, y, isCenter));
     }
 
     // 경로 업데이트 & 업데이트된 경로 기반 다음 위치
@@ -102,26 +91,40 @@ public class SquarePathStrategy implements PathStrategy {
         List<Position> path = piece.getCustomPath();
         pathIndex = piece.getPathIndex();
         int nextIdx = pathIndex + result.getStep();
+        if (nextIdx >= path.size()) {
+            nextIdx = path.size() - 1;
+        }
 
         return path.get(nextIdx);
     }
 
     @Override
-    public Position getPreviousPosition(Position current) {
-        int currentIndex = current.getIndex();
-        int prevIndex = currentIndex - 1;
-        if (prevIndex < 0) return outerPath.get(0); // 출발점보다 뒤로 갈 수 없음
-        return outerPath.get(prevIndex);
+    public Position getPreviousPosition(Piece piece, YutResult result) {
+        int pathIndex = piece.getPathIndex();
+        int prevIndex = pathIndex - 1;
+
+        if (pathIndex == 1) {
+            piece.setPathType(PathType.OUTER);
+            piece.setCustomPath(outerPath);
+            piece.setPathIndex(20);
+            prevIndex = 20;
+        }
+
+        List<Position> path = piece.getCustomPath();
+        return path.get(prevIndex);
     }
 
+    @Override
     public List<Position> getPath() {
         return outerPath;
     }
 
+    @Override
     public List<Position> getAllPositions() {
         return allPositions;
     }
 
+    @Override
     public List<Position> getAllVertexPositions() {
         return allVertexPositions;
     }
@@ -130,26 +133,27 @@ public class SquarePathStrategy implements PathStrategy {
     private List<Position> createAllPositions() {
         List<Position> positions = new ArrayList<>();
         int[][] allCoords = {
-                {600, 600},
+                {5000, 5000},
                 {600, 480},
                 {600, 360},
                 {600, 240},
                 {600, 120},
-                {600, 0},
+                {600, 0},   // 5
                 {480, 0},
                 {360, 0},
                 {240, 0},
                 {120, 0},
-                {0, 0},
+                {0, 0},     // 10
                 {0, 120},
                 {0, 240},
                 {0, 360},
                 {0, 480},
-                {0, 600},
+                {0, 600},   // 15
                 {120, 600},
                 {240, 600},
                 {360, 600},
                 {480, 600}, // 19
+                {600, 600}, // 20
                 {500, 100},
                 {400, 200},
                 {100, 100},
@@ -158,14 +162,15 @@ public class SquarePathStrategy implements PathStrategy {
                 {100, 500},
                 {400, 400},
                 {500, 500},
-                {300, 300}, // 28, center
+                {300, 300}, // 29, center
+                {5000, 5000}
         };
 
         for (int i = 0; i < allCoords.length; i++) {
             int x = allCoords[i][0];
             int y = allCoords[i][1];
-            boolean isVertex = (i == 0 || i == 5 || i == 10 || i == 15);
-            boolean isCenter = (i == allCoords.length - 1);
+            boolean isVertex = (i <= 20 && i % 5 == 0);
+            boolean isCenter = (i == allCoords.length - 2);
             positions.add(new Position(i, x, y, isCenter, isVertex));
         }
 
@@ -312,7 +317,7 @@ public class SquarePathStrategy implements PathStrategy {
     private List<Position> createPath(int[][] coords) {
         List<Position> path = new ArrayList<>();
         for (int i = 0; i < coords.length; i++) {
-            path.add(pos(i, coords[i][0], coords[i][1]));
+            path.add(new Position(i, coords[i][0], coords[i][1]));
         }
         return path;
     }

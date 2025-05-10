@@ -8,7 +8,9 @@ import model.dto.MoveResult;
 import model.manager.GameService;
 import model.player.Player;
 import model.piece.Piece;
+import model.strategy.HexPathStrategy;
 import model.strategy.PathStrategy;
+import model.strategy.PentagonPathStrategy;
 import model.strategy.SquarePathStrategy;
 import model.yut.YutResult;
 import view.View;
@@ -76,7 +78,10 @@ public class GameController {
 
     private PathStrategy resolvePathStrategy(String boardType) {
         return switch (boardType.toLowerCase()) {
-            case "pentagon", "hexagon" -> new SquarePathStrategy(); // TODO: 교체 예정
+            case "square" -> new SquarePathStrategy();
+            case "pentagon" -> new PentagonPathStrategy();
+            case "hexagon" -> new HexPathStrategy();
+            //case "pentagon", "hexagon" -> new SquarePathStrategy(); // TODO: 교체 예정
             default -> new SquarePathStrategy();
         };
     }

@@ -42,7 +42,7 @@ public class Board {
             }
             Position newPos;
             if (result.getStep() < 0) {
-                newPos = pathStrategy.getPreviousPosition(p.getPosition());
+                newPos = pathStrategy.getPreviousPosition(p, result);
                 p.setPosition(newPos);
                 p.advancePathIndex(result.getStep());
             } else {
