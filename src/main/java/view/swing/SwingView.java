@@ -2,8 +2,6 @@ package view.swing;
 
 import model.dto.MessageType;
 import model.player.Player;
-import model.turn.TurnResult;
-import model.yut.YutThrower;
 import view.View;
 import controller.GameController;
 import model.Game;
@@ -19,7 +17,7 @@ import java.util.EnumMap;
 public class SwingView extends JFrame implements View {
 
     private final JFrame frame;
-    private GameController controller;
+    private final GameController controller;
     private JLabel resultLabel;
     private JPanel boardPanel;
     private JButton randomThrowButton;
@@ -35,7 +33,9 @@ public class SwingView extends JFrame implements View {
     private JLabel statusLabel;
     private boolean isUiInitialized = false;
 
-    public SwingView() {
+    public SwingView(GameController controller) {
+        this.controller = controller;
+
         frame = new JFrame("YootGame");
         frame.setSize(1200, 1000);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -154,7 +154,7 @@ public class SwingView extends JFrame implements View {
 
     public void renderGame(Game game) {
         if (boardPanel == null) {
-            boardPanel = new DrawBoard(game.getBoard().getPathStrategy());
+            boardPanel = new DrawBoard(game.getBoard().getStrategy());
             boardPanel.setLayout(null);
             boardPanel.setBackground(Color.WHITE);
             JScrollPane scrollPane = new JScrollPane(boardPanel);
@@ -187,13 +187,13 @@ public class SwingView extends JFrame implements View {
 
     private CylinderButton getPieceButton(Piece piece) {
         Position pos = piece.getPosition();
-        int playerNum = piece.getOwner().getPlayerNumber();
+        int playerNum = piece.getOwner().getId();
         String label = "P" + playerNum + "-" + piece.getId();
 
         Color[] playerColors = {Color.CYAN, Color.PINK, Color.ORANGE, Color.MAGENTA};
         Color btnColor = playerColors[(playerNum - 1) % playerColors.length];
 
-        Position btnPos = new Position(piece.getPosition().getIndex(), pos.getX(), pos.getY());
+        Position btnPos = new Position(piece.getPosition().index(), pos.x(), pos.y());
 
         CylinderButton pieceButton = new CylinderButton(btnColor, btnPos, label);
         pieceButton.setToolTipText(piece.getOwner().getName() + "의 말 " + piece.getId());

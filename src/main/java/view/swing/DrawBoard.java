@@ -29,10 +29,10 @@ public class DrawBoard extends JPanel {
             model.position.Position p1 = allVertexPositions.get(i);
             model.position.Position p2 = allVertexPositions.get(i+1);
 
-            int x1 = p1.getX() + marginX;
-            int y1 = p1.getY() + marginY;
-            int x2 = p2.getX() + marginX;
-            int y2 = p2.getY() + marginY;
+            int x1 = p1.x() + marginX;
+            int y1 = p1.x() + marginY;
+            int x2 = p2.x() + marginX;
+            int y2 = p2.y() + marginY;
 
             g2.drawLine(x1, y1, x2, y2);
         }
@@ -50,8 +50,8 @@ public class DrawBoard extends JPanel {
         int marginX = 70;
         int marginY = (getHeight() - 600) / 2;
 
-        int x = position.getX() + marginX - r;
-        int y = position.getY() + marginY - r;
+        int x = position.x() + marginX - r;
+        int y = position.y() + marginY - r;
 
         g2.setColor(Color.WHITE);
         g2.fillOval(x, y, r * 2, r * 2);

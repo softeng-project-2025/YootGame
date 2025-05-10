@@ -1,100 +1,52 @@
 package model.board;
 
+import exception.InvalidMoveException;
 import model.piece.Piece;
 import model.piece.PieceUtil;
-import model.player.Player;
 import model.position.Position;
 import model.yut.YutResult;
 import model.strategy.PathStrategy;
 
-import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
+// Board: 순수 이동 계산 및 적용만 담당합니다.
 public class Board {
 
-    private PathStrategy pathStrategy;
+    private PathStrategy strategy;
 
-    public Board(PathStrategy pathStrategy) {
-        this.pathStrategy = pathStrategy;
+    public Board(PathStrategy strategy) {
+        this.strategy = strategy;
     }
 
-    // Piece가 현재 위치에서 YutResult에 따라 다음 위치로 이동
-    public Position getNextPosition(Piece piece, YutResult result) {
-        return pathStrategy.getNextPosition(piece, result);
+    public PathStrategy getStrategy() {
+        return strategy;
     }
 
-    public PathStrategy getPathStrategy() {
-        return pathStrategy;
+    public void setStrategy(PathStrategy strategy) {
+        this.strategy = strategy;
     }
 
-    public void setPathStrategy(PathStrategy pathStrategy) {
-        this.pathStrategy = pathStrategy;
-    }
-
-    public boolean movePiece(Piece piece, YutResult result, List<Player> players) {
-        List<Piece> group = piece.getGroup().isEmpty() ? List.of(piece) : piece.getGroup();
-        boolean captured = false;
-
-
-        for (Piece p : group) {
-            if (p.getCustomPath() == null) {
-                PieceUtil.initializePath(p, pathStrategy);
-            }
-            Position newPos;
-            if (result.getStep() < 0) {
-                newPos = pathStrategy.getPreviousPosition(p, result);
-                p.setPosition(newPos);
-                p.advancePathIndex(result.getStep());
-            } else {
-                newPos = pathStrategy.getNextPosition(p, result);
-                p.setPosition(newPos);
-                p.advancePathIndex(result.getStep());
-
-                // 도착 체크 후 종료 처리 추가
-                if (p.getCustomPath() != null && p.getPathIndex() == p.getCustomPath().size() - 1) {
-                    p.setFinished(true);
-                }
-            }
-            p.setMoved();// 이동한 말로 표시
-
-
-            // 잡기: 같은 칸에 있는 상대 말들을 출발점으로
-            for (Player otherPlayer : players) {
-                if (otherPlayer != piece.getOwner()) {
-                    for (Piece other : otherPlayer.getPieces()) {
-                        if (!other.isFinished() &&
-                                other.getPosition().getIndex() == newPos.getIndex()) {
-
-                            // 잡은 말이 속한 그룹 전체 해제 + 출발점 이동
-                            List<Piece> capturedGroup = other.getGroup().isEmpty() ? List.of(other) : other.getGroup();
-                            for (Piece capturedp : capturedGroup) {
-                                PieceUtil.resetPieceState(capturedp, pathStrategy);
-                            }
-
-                            captured = true;
-                        }
-                    }
-                }
-            }
-
-            if (newPos.getIndex() == 28) {
-                p.setPassedCenter(true);
-            }
-
+    // 주어진 Piece를 result만큼 이동시킬 다음 위치를 계산합니다.
+    public Position computeNextPosition(Piece piece, YutResult result) {
+        if (piece.isFinished()) {
+            throw new InvalidMoveException("완주된 말은 이동할 수 없습니다.");
         }
-        // 이동 완료 후 같은 위치의 같은 플레이어 말들끼리 자동 그룹 형성
-        for (Piece p : group) {
-
-            List<Piece> autoGroup = new ArrayList<>();
-            for (Piece candidate : p.getOwner().getPieces()) {
-                if (!candidate.isFinished() &&
-                        candidate.getPosition().equals(p.getPosition())) {
-                    autoGroup.add(candidate);
-                }
-            }
-            // 그룹 무결성 보장
-            PieceUtil.ensureGroupConsistency(autoGroup);
+        // 경로 초기화
+        if (piece.getCustomPath() == null) {
+            PieceUtil.initializePath(piece, strategy);
         }
-        return captured;
+        // 이전/다음 위치 계산
+        return result.getStep() < 0
+                ? strategy.getPreviousPosition(piece.getPosition())
+                : strategy.getNextPosition(piece, result);
     }
+
+    // computeNextPosition 결과를 꺼내 Piece 상태를 업데이트합니다.
+    public void applyMovement(Piece piece, Position newPos, YutResult result) {
+        piece.moveTo(newPos, result.getStep());
+    }
+
+
 }

@@ -1,7 +1,7 @@
 package model;
 
 import model.board.Board;
-import model.manager.GameService;
+import model.service.GameService;
 import model.piece.Piece;
 import model.player.Player;
 import model.position.Position;
@@ -27,7 +27,7 @@ public class RidePieceTest {
     @BeforeEach
     void setUp() {
         board = new Board(new SquarePathStrategy());
-        path = board.getPathStrategy().getPath();
+        path = board.getStrategy().getPath();
 
         p1 = new Player("Player1", 4, board, 1);
         p2 = new Player("Player2", 4, board, 2);

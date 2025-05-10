@@ -1,4 +1,4 @@
-package model.manager;
+package model.service;
 
 import model.Game;
 import model.dto.MoveFailType;
@@ -6,6 +6,7 @@ import model.dto.MoveResult;
 import model.dto.NextStateHint;
 import model.piece.Piece;
 import model.piece.PieceUtil;
+import model.player.Player;
 import model.state.CanSelectPiece;
 import model.state.CanThrowYut;
 import model.state.WaitingForThrowState;
@@ -14,11 +15,12 @@ import model.yut.YutThrower;
 
 import java.util.List;
 
+// GameService: 한 턴 단위로 게임 흐름(윷 던지기→이동→캡처→그룹→턴 전환→승리 검사)을 관리합니다.
 public class GameService {
     private final Game game;
 
-    public GameService(Game game) {
-        this.game = game;
+    public GameService(Game initialGame) {
+        this.game = initialGame;
     }
 
     // 1. 턴 시작 시 초기화
@@ -27,7 +29,7 @@ public class GameService {
     }
 
     // 2. 윷 던지기: 결과 누적
-    public YutResult throwAndAccumulate() {
+    public YutResult throwAndUpdate() {
         YutResult result = throwYut();
         game.getTurnResult().add(result);
         return result;
@@ -85,7 +87,7 @@ public class GameService {
         switch (hint) {
             case WAITING_FOR_THROW -> game.setState(new WaitingForThrowState(game));
             case NEXT_TURN -> {
-                game.getTurnManager().nextTurn();
+                Player player = game.getTurnManager().nextTurn();
                 game.clearTurnResult();
                 game.setState(new WaitingForThrowState(game));
             }
