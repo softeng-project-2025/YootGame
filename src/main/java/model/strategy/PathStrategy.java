@@ -12,7 +12,7 @@ public interface PathStrategy {
      */
     Position getNextPosition(Piece piece, YutResult result);;
 
-    Position getPreviousPosition(Position current);
+    Position getPreviousPosition(Piece piece, YutResult result);
     /**
      * 전체 경로(Position 리스트) 반환 (초기화, 렌더링용)
      */

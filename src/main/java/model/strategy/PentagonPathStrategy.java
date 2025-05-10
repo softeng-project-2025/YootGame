@@ -99,11 +99,19 @@ public class PentagonPathStrategy implements PathStrategy {
     }
 
     @Override
-    public Position getPreviousPosition(Position current) {
-        int currentIndex = current.getIndex();
-        int prevIndex = currentIndex - 1;
-        if (prevIndex < 0) return outerPath.get(0); // 출발점보다 뒤로 갈 수 없음
-        return outerPath.get(prevIndex);
+    public Position getPreviousPosition(Piece piece, YutResult result) {
+        int pathIndex = piece.getPathIndex();
+        int prevIndex = pathIndex - 1;
+
+        if (pathIndex == 1) {
+            piece.setPathType(PathType.OUTER);
+            piece.setCustomPath(outerPath);
+            piece.setPathIndex(25);
+            prevIndex = 25;
+        }
+
+        List<Position> path = piece.getCustomPath();
+        return path.get(prevIndex);
     }
 
     @Override
