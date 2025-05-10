@@ -12,10 +12,7 @@ import model.yut.YutResult;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.Map;
-import java.util.HashMap;
 import java.util.List;
-import java.util.ArrayList;
 
 public class SwingView extends JFrame implements View {
 
@@ -140,40 +137,13 @@ public class SwingView extends JFrame implements View {
 
         boardPanel.removeAll();
 
-        // loading all pieces to HashMap from game
-        Map<Integer, List<Piece>> positionMap = new HashMap<>();
-        for (var player : game.getPlayers()) {
-            for (var piece : player.getPieces()) {
-                int idx = piece.getPosition().getIndex();
-                positionMap.computeIfAbsent(idx, k -> new ArrayList<>()).add(piece);
-            }
-        }
-
-        for (List<Piece> piecesAtPosition : positionMap.values()) {
-            if (piecesAtPosition.isEmpty()) continue;
-            Position pos = piecesAtPosition.get(0).getPosition();
-            int baseX = pos.getX();
-            int baseY = pos.getY();
-
-            for (int i = 0; i < piecesAtPosition.size(); i++) {
-                Piece piece = piecesAtPosition.get(i);
-                int playerNum = piece.getOwner().getPlayerNumber();
-                String label = "P" + playerNum + "-" + piece.getId();
-
-                Color[] playerColors = {Color.CYAN, Color.PINK, Color.ORANGE, Color.MAGENTA};
-                Color btnColor = playerColors[(playerNum - 1) % playerColors.length];
-
-                // 위치 겹침 시 살짝씩 치우쳐 놓기
-                int offsetX = baseX + i * 6;
-                int offsetY = baseY + i * 6;
-                Position btnPos = new Position(piece.getPosition().getIndex(), offsetX, offsetY);
-
-                CylinderButton pieceButton = new CylinderButton(btnColor, btnPos, label);
-                pieceButton.setToolTipText(piece.getOwner().getName() + "의 말 " + piece.getId());
-//                pieceButton.addActionListener(e -> controller.applyResultToPiece(piece));
+        // loading all pieces
+        for (Player player : game.getPlayers()) {
+            for (Piece piece : player.getPieces()) {
+                if (piece.isFinished()) continue;
+                CylinderButton pieceButton = getPieceButton(piece);
 
                 boardPanel.add(pieceButton);
-
             }
         }
 
@@ -184,6 +154,24 @@ public class SwingView extends JFrame implements View {
 
         boardPanel.revalidate();
         boardPanel.repaint();
+    }
+
+    private CylinderButton getPieceButton(Piece piece) {
+        Position pos = piece.getPosition();
+        int playerNum = piece.getOwner().getPlayerNumber();
+        String label = "P" + playerNum + "-" + piece.getId();
+
+        Color[] playerColors = {Color.CYAN, Color.PINK, Color.ORANGE, Color.MAGENTA};
+        Color btnColor = playerColors[(playerNum - 1) % playerColors.length];
+
+        Position btnPos = new Position(piece.getPosition().getIndex(), pos.getX(), pos.getY());
+
+        CylinderButton pieceButton = new CylinderButton(btnColor, btnPos, label);
+        pieceButton.setToolTipText(piece.getOwner().getName() + "의 말 " + piece.getId());
+        pieceButton.addActionListener(e ->
+                controller.applyResultToPiece(YutResult.DO, piece)
+        );
+        return pieceButton;
     }
 
     @Override
