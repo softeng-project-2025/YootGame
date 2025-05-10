@@ -1,55 +1,20 @@
 package model.position;
 
-public class Position {
-    private int index; // 경로상의 순서
-    private int x, y;     // 화면상의 y 좌표
-    private boolean isCenter; // 중심점 여부 (오각형, 육각형에서 활용)
-    private boolean isDiagonalEntry;
-
+public record Position(
+        int index, // 경로상의 순서
+        int x,
+        int y,
+        boolean isCenter, // 중심점 여부
+        boolean isDiagonalEntry
+) {
+    // 기본 생성자: 중심, 대각선 입구 플래그는 false로 설정
     public Position(int index, int x, int y) {
         this(index, x, y, false, false);
     }
 
+    // 중심 플래그만 설정하는 생성자
     public Position(int index, int x, int y, boolean isCenter) {
         this(index, x, y, isCenter, false);
     }
-
-    public Position(int index, int x, int y, boolean isCenter, boolean isDiagonalEntry) {
-        this.index = index;
-        this.x = x;
-        this.y = y;
-        this.isCenter = isCenter;
-        this.isDiagonalEntry = isDiagonalEntry;
-    }
-
-    public boolean isCenter() {
-        return isCenter;
-    }
-
-    public boolean isDiagonalEntry() { return isDiagonalEntry; }
-    public int getIndex() { return index; }
-
-    public void setCenter(boolean center) {
-        isCenter = center;
-    }
-
-    public void setX(int x) {
-        this.x = x;
-    }
-
-    public void setY(int y) {
-        this.y = y;
-    }
-
-    public void setIndex(int index) {
-        this.index = index;
-    }
-
-    public int getX() {
-        return x;
-    }
-
-    public int getY() {
-        return y;
-    }
 }
+
