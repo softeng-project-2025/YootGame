@@ -96,11 +96,18 @@ public class SquarePathStrategy implements PathStrategy {
     }
 
     @Override
-    public Position getPreviousPosition(Position current) {
-        int currentIndex = current.getIndex();
-        int prevIndex = currentIndex - 1;
-        if (prevIndex < 0) return outerPath.get(0); // 출발점보다 뒤로 갈 수 없음
-        return outerPath.get(prevIndex);
+    public Position getPreviousPosition(Piece piece, YutResult result) {
+        int pathIndex = piece.getPathIndex();
+        if (pathIndex == 1) {
+            piece.setPathType(PathType.OUTER);
+            piece.setCustomPath(outerPath);
+            piece.setPathIndex(20);
+        }
+
+        List<Position> path = piece.getCustomPath();
+        pathIndex = piece.getPathIndex();
+
+        return path.get(pathIndex - 1);
     }
 
     @Override
