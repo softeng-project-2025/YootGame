@@ -30,4 +30,8 @@ public class TurnManager {
     public List<Player> getPlayers() {
         return players;
     }
+
+    public void reset() {
+        currentPlayerIndex = 0;
+    }
 }
