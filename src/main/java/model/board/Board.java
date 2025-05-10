@@ -1,14 +1,17 @@
 package model.board;
 
+import exception.InvalidMoveException;
 import model.piece.Piece;
 import model.piece.PieceUtil;
 import model.position.Position;
 import model.yut.YutResult;
 import model.strategy.PathStrategy;
+
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+// Board: 순수 이동 계산 및 적용만 담당합니다.
 public class Board {
 
     private PathStrategy strategy;
@@ -25,44 +28,24 @@ public class Board {
         this.strategy = strategy;
     }
 
-    // 선택된 Piece와 그 그룹의 다음 위치를 계산합니다 (부작용 없음).
-    public Map<Piece, Position> computeNextPositions(Piece piece, YutResult result) {
-        List<Piece> group = piece.getGroup().isEmpty()
-                ? List.of(piece)
-                : piece.getGroup();
-        Map<Piece, Position> nextPositions = new LinkedHashMap<>();
-
-        for (Piece p : group) {
-            // Path 초기화
-            if (p.getCustomPath() == null) {
-                PieceUtil.initializePath(p, strategy);
-            }
-            // 다음 위치 계산
-            Position next = result.getStep() < 0
-                    ? strategy.getPreviousPosition(p.getPosition())
-                    : strategy.getNextPosition(p, result);
-
-            nextPositions.put(p, next);
+    // 주어진 Piece를 result만큼 이동시킬 다음 위치를 계산합니다.
+    public Position computeNextPosition(Piece piece, YutResult result) {
+        if (piece.isFinished()) {
+            throw new InvalidMoveException("완주된 말은 이동할 수 없습니다.");
         }
-        return nextPositions;
+        // 경로 초기화
+        if (piece.getCustomPath() == null) {
+            PieceUtil.initializePath(piece, strategy);
+        }
+        // 이전/다음 위치 계산
+        return result.getStep() < 0
+                ? strategy.getPreviousPosition(piece.getPosition())
+                : strategy.getNextPosition(piece, result);
     }
 
-    // computeNextPositions로 계산된 위치를 실제 Piece에 적용합니다.
-    public void applyMovement(Map<Piece, Position> nextPositions, YutResult result) {
-        for (var entry : nextPositions.entrySet()) {
-            Piece p   = entry.getKey();
-            Position pos = entry.getValue();
-
-            p.setPosition(pos);
-            p.advancePathIndex(result.getStep());
-
-            // 경로 끝 도달 시 완료 처리
-            if (p.getCustomPath() != null
-                    && p.getPathIndex() == p.getCustomPath().size() - 1) {
-                p.setFinished(true);
-            }
-            p.setMoved(true);
-        }
+    // computeNextPosition 결과를 꺼내 Piece 상태를 업데이트합니다.
+    public void applyMovement(Piece piece, Position newPos, YutResult result) {
+        piece.moveTo(newPos, result.getStep());
     }
 
 

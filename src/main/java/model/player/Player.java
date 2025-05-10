@@ -12,6 +12,13 @@ import model.piece.Piece;
 
 // Player: 플레이어 정보와 소유 말(Piece) 리스트를 관리합니다.
 public class Player {
+    // 화면 배치 관련 상수
+    private static final int BASE_X_OFFSET     = 1200;
+    private static final int MAX_PLAYER_COUNT  = 4;
+    private static final int PLAYER_SPACING_X  = 100;
+    private static final int BASE_Y_OFFSET     = 200;
+    private static final int PIECE_SPACING_Y   = 100;
+
     private final int id;
     private final String name;
     private final List<Piece> pieces;
@@ -23,16 +30,16 @@ public class Player {
 
         // 각 말별 분산된 시작 위치 계산
         // 가로 위치는 플레이어 ID에 따라, 세로 위치는 말 번호별로 오프셋 적용
-        int baseX = 1200 - (4 - id) * 100;
-        int baseY = 200;
-        int offsetY = 100;
+        // 각 말별 분산된 시작 위치 계산
+        int baseX = BASE_X_OFFSET - (MAX_PLAYER_COUNT - id) * PLAYER_SPACING_X;
+        int baseY = BASE_Y_OFFSET;
 
         this.pieces = IntStream.rangeClosed(1, pieceCount)
                 .mapToObj(i -> {
                     Position startPos = new Position(
                             /* index */ 0,
                             /* x */ baseX,
-                            /* y */ baseY + (i - 1) * offsetY
+                            /* y */ baseY + (i - 1) * PIECE_SPACING_Y
                     );
                     return new Piece(this, i, startPos);
                 })

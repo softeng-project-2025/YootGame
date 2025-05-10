@@ -2,6 +2,8 @@ package model.piece;
 
 import model.player.Player;
 import model.position.Position;
+
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -25,53 +27,24 @@ public class Piece {
         this.startPosition = Objects.requireNonNull(startPosition);
         this.position = startPosition;
         this.pathType = PathType.OUTER;
-        this.customPath = null;
+        this.customPath = Collections.emptyList(); // 빈 리스트로 초기화
         this.pathIndex = 0;
         this.finished = false;
         this.moved = false;
         this.passedCenter = false;
     }
 
+    public Player getOwner() { return owner; }
+    public int getId() { return id; }
+    public Position getPosition() { return position; }
+    public Position getStartPosition() { return startPosition; }
+    public boolean isFinished() { return finished; }
+    public boolean hasMoved() { return moved; }
+    public boolean hasPassedCenter() { return passedCenter; }
+    public PathType getPathType() { return pathType; }
+    public List<Position> getCustomPath() { return Collections.unmodifiableList(customPath); }
+    public int getPathIndex() { return pathIndex; }
 
-    public Player getOwner() {
-        return owner;
-    }
-
-    public int getId() {
-        return id;
-    }
-
-    public Position getPosition() {
-        return position;
-    }
-
-    public Position getStartPosition() {
-        return startPosition;
-    }
-
-    public boolean isFinished() {
-        return finished;
-    }
-
-    public boolean hasMoved() {
-        return moved;
-    }
-
-    public boolean hasPassedCenter() {
-        return passedCenter;
-    }
-
-    public PathType getPathType() {
-        return pathType;
-    }
-
-    public List<Position> getCustomPath() {
-        return customPath;
-    }
-
-    public int getPathIndex() {
-        return pathIndex;
-    }
 
     // 사용자 정의 경로 설정
     public void setCustomPath(List<Position> customPath) {
@@ -79,17 +52,7 @@ public class Piece {
         this.pathIndex = findIndexForPosition(this.position); // 초기화 후 바로 index 맞춤
     }
 
-    // 현재 위치에 대응하는 customPath 인덱스를 찾습니다.
-    private int findIndexForPosition(Position pos) {
-        for (int i = 0; i < customPath.size(); i++) {
-            if (customPath.get(i).index() == pos.index()) {
-                return i;
-            }
-        }
-        return 0;
-    }
-
-    // 한 턴 이동: 새로운 위치와 스텝 수로 상태 업데이트
+    // 한 턴 이동: 새로운 위치와 스텝 수로 상태 업데이트 // 중앙 통과 표시
     public void moveTo(Position newPosition, int step) {
         Objects.requireNonNull(newPosition);
         this.position = newPosition;
@@ -119,11 +82,20 @@ public class Piece {
         this.position = startPosition;
         this.finished = false;
         this.moved = false;
-
         this.passedCenter = false;
         this.pathType = PathType.OUTER;
-        this.customPath = null;
+        this.customPath = Collections.emptyList();
         this.pathIndex = 0;
+    }
+
+    // 현재 위치에 대응하는 customPath 인덱스를 찾습니다.
+    private int findIndexForPosition(Position pos) {
+        for (int i = 0; i < customPath.size(); i++) {
+            if (customPath.get(i).index() == pos.index()) {
+                return i;
+            }
+        }
+        return 0;
     }
 
 }
