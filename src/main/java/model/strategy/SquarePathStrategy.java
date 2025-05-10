@@ -12,15 +12,12 @@ import model.piece.PathType;
 
 public class SquarePathStrategy implements PathStrategy {
 
-    private final Map<Integer, Position> positionPool = new HashMap<>();
     private final List<Position> allPositions;
     private final List<Position> allVertexPositions;
     private final List<Position> outerPath;
     private final List<Position> pathFrom5;
     private final List<Position> pathFrom10;
     private final List<Position> pathFrom5Center;
-
-    public static final int CENTER_INDEX = 28;
 
     public SquarePathStrategy() {
         allPositions = createAllPositions();
@@ -29,14 +26,6 @@ public class SquarePathStrategy implements PathStrategy {
         pathFrom5 = createPathFrom5();
         pathFrom10 = createPathFrom10();
         pathFrom5Center = createPathFrom5Center();
-    }
-
-    private Position pos(int index, int x, int y) {
-        return positionPool.computeIfAbsent(index, i -> new Position(i, x, y));
-    }
-
-    private Position pos(int index, int x, int y, boolean isCenter) {
-        return positionPool.computeIfAbsent(index, i -> new Position(i, x, y, isCenter));
     }
 
     // 경로 업데이트 & 업데이트된 경로 기반 다음 위치
@@ -312,7 +301,7 @@ public class SquarePathStrategy implements PathStrategy {
     private List<Position> createPath(int[][] coords) {
         List<Position> path = new ArrayList<>();
         for (int i = 0; i < coords.length; i++) {
-            path.add(pos(i, coords[i][0], coords[i][1]));
+            path.add(new Position(i, coords[i][0], coords[i][1]));
         }
         return path;
     }
