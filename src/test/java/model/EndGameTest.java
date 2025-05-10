@@ -1,12 +1,13 @@
 package model;
 
 import model.board.Board;
-import model.manager.GameService;
+import model.service.GameService;
 import model.piece.Piece;
 import model.player.Player;
 import model.state.SelectingPieceState;
 import model.strategy.SquarePathStrategy;
 import model.position.Position;
+import model.manager.VictoryManager;
 import model.yut.YutResult;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -27,7 +28,7 @@ public class EndGameTest {
     @BeforeEach
     void setUp() {
         board = new Board(new SquarePathStrategy());
-        path  = board.getPathStrategy().getPath();
+        path  = board.getStrategy().getPath();
 
         p1 = new Player("Player‑1", 2, board, 1);
         p2 = new Player("Player‑2", 2, board, 2);
@@ -68,8 +69,8 @@ public class EndGameTest {
         //디버깅용 이었던 것
         //assertEquals(0, p1.getPieces().get(1).getPosition().getIndex(), "잘 이동 되었는가 p1a");
         //assertEquals(0, p1.getPieces().get(0).getPosition().getIndex(), "잘 이동 되었는가 p1b");
-        assertFalse(p2.hasFinishedAllPieces(), "Player2는 말을 도착시키지 않았기 때문에 승리하지 않아야 함");
-        assertTrue(p1.hasFinishedAllPieces(), "Player1의 모든 말이 도착했기 때문에 승리 조건이 만족되어야 함");
+        assertFalse(VictoryManager.hasPlayerWon(p2), "Player2는 말을 도착시키지 않았기 때문에 승리하지 않아야 함");
+        assertTrue(VictoryManager.hasPlayerWon(p1), "Player1의 모든 말이 도착했기 때문에 승리 조건이 만족되어야 함");
     }
 
 }

@@ -41,7 +41,7 @@ public class PieceUtil {
 
     public static boolean allFinished(List<Piece> group, Board board) {
         return group.stream().allMatch(p ->
-                p.getPosition().equals(board.getPathStrategy().getPath().get(board.getPathStrategy().getPath().size() - 1))
+                p.getPosition().equals(board.getStrategy().getPath().get(board.getStrategy().getPath().size() - 1))
         );
     }
 
@@ -53,7 +53,7 @@ public class PieceUtil {
 
     public static void resetPieceState(Piece piece, PathStrategy pathStrategy) {
         piece.setPosition(pathStrategy.getPath().get(0)); // 출발점
-        piece.resetPath(); // customPath, index, pathType, hasPassedCenter 초기화
+        piece.resetToStart(); // customPath, index, pathType, hasPassedCenter 초기화
         piece.setFinished(false);
         resetGroupToSelf(piece); // 그룹도 초기화
     }

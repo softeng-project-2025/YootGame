@@ -5,7 +5,7 @@ import model.board.Board;
 import model.dto.GameMessage;
 import model.dto.GameMessageFactory;
 import model.dto.MoveResult;
-import model.manager.GameService;
+import model.service.GameService;
 import model.player.Player;
 import model.piece.Piece;
 import model.strategy.PathStrategy;
@@ -18,11 +18,12 @@ import java.util.List;
 
 public class GameController {
 
-    private Game game;
-    private GameService gameService;
+    private final GameService gameService;
     private final View view;
 
-    public GameController(View view) {
+
+    public GameController(GameService gameService, View view) {
+        this.gameService = gameService;
         this.view = view;
     }
 
@@ -51,6 +52,19 @@ public class GameController {
         showSelectablePieces();
         view.renderGame(game);
     }
+
+    public void onRandomThrow() {
+        MoveResult moveResult = gameService.throwAndUpdate();
+        view.render(moveResult);
+        updateViewAfterMove(moveResult);
+    }
+
+    public void onSelectThrow(int pieceId) {
+        MoveResult moveResult = gameService.selectAndMove(pieceId);
+        view.render(moveResult);
+        updateViewAfterMove(moveResult);
+    }
+
 
 
     public void applyResultToPiece(YutResult result, Piece piece) {
@@ -87,14 +101,6 @@ public class GameController {
             players.add(new Player("Player " + i, pieces, board, i));
         }
         return players;
-    }
-
-    public Game getGame() {
-        return game;
-    }
-
-    public void setGame(Game game) {
-        this.game = game;
     }
 
     public void showSelectablePieces() {
