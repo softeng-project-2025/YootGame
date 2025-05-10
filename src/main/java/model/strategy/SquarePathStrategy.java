@@ -103,14 +103,17 @@ public class SquarePathStrategy implements PathStrategy {
         return outerPath.get(prevIndex);
     }
 
+    @Override
     public List<Position> getPath() {
         return outerPath;
     }
 
+    @Override
     public List<Position> getAllPositions() {
         return allPositions;
     }
 
+    @Override
     public List<Position> getAllVertexPositions() {
         return allVertexPositions;
     }
@@ -119,26 +122,27 @@ public class SquarePathStrategy implements PathStrategy {
     private List<Position> createAllPositions() {
         List<Position> positions = new ArrayList<>();
         int[][] allCoords = {
-                {600, 600},
+                {5000, 5000},
                 {600, 480},
                 {600, 360},
                 {600, 240},
                 {600, 120},
-                {600, 0},
+                {600, 0},   // 5
                 {480, 0},
                 {360, 0},
                 {240, 0},
                 {120, 0},
-                {0, 0},
+                {0, 0},     // 10
                 {0, 120},
                 {0, 240},
                 {0, 360},
                 {0, 480},
-                {0, 600},
+                {0, 600},   // 15
                 {120, 600},
                 {240, 600},
                 {360, 600},
                 {480, 600}, // 19
+                {600, 600}, // 20
                 {500, 100},
                 {400, 200},
                 {100, 100},
@@ -147,13 +151,13 @@ public class SquarePathStrategy implements PathStrategy {
                 {100, 500},
                 {400, 400},
                 {500, 500},
-                {300, 300}, // 28, center
+                {300, 300}, // 29, center
         };
 
         for (int i = 0; i < allCoords.length; i++) {
             int x = allCoords[i][0];
             int y = allCoords[i][1];
-            boolean isVertex = (i == 0 || i == 5 || i == 10 || i == 15);
+            boolean isVertex = (i <= 20 && i % 5 == 0);
             boolean isCenter = (i == allCoords.length - 1);
             positions.add(new Position(i, x, y, isCenter, isVertex));
         }
