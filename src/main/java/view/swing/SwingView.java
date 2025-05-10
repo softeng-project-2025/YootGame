@@ -2,6 +2,7 @@ package view.swing;
 
 import model.dto.MessageType;
 import model.player.Player;
+import model.turn.TurnResult;
 import model.yut.YutThrower;
 import view.View;
 import controller.GameController;
@@ -13,6 +14,7 @@ import model.yut.YutResult;
 import javax.swing.*;
 import java.awt.*;
 import java.util.List;
+import java.util.EnumMap;
 
 public class SwingView extends JFrame implements View {
 
@@ -104,12 +106,12 @@ public class SwingView extends JFrame implements View {
             controller.throwYut();
         });
 
-        DoButton = new JButton("도 x {do_cnt}");
-        GaeButton = new JButton("개");
-        GeolButton = new JButton("걸");
-        YutButton = new JButton("윷");
-        MoButton = new JButton("모");
-        BackDoButton = new JButton("빽도");
+        DoButton = new JButton("도 x 0");
+        GaeButton = new JButton("개 x 0");
+        GeolButton = new JButton("걸 x 0");
+        YutButton = new JButton("윷 x 0");
+        MoButton = new JButton("모 x 0");
+        BackDoButton = new JButton("빽도 x 0");
 
         JPanel leftButtons = new JPanel(new FlowLayout(FlowLayout.LEFT));
         leftButtons.add(randomThrowButton);
@@ -171,6 +173,8 @@ public class SwingView extends JFrame implements View {
                 boardPanel.add(pieceButton);
             }
         }
+
+        updateMoveButtons(game.getTurnResult());
 
         boolean finished = game.isFinished();
         randomThrowButton.setEnabled(!finished);
@@ -269,5 +273,26 @@ public class SwingView extends JFrame implements View {
         restartButton.setEnabled(false);
         randomThrowButton.setEnabled(true);
         selectThrowButton.setEnabled(true);
+    }
+
+    public void updateMoveButtons(TurnResult turnResult) {
+        if (turnResult == null) {
+            return;
+        }
+
+        // 윷 결과별 개수를 세기 위한 EnumMap
+        EnumMap<YutResult, Integer> counter = new EnumMap<>(YutResult.class);
+        for (YutResult r : YutResult.values()) counter.put(r, 0);   // 0 으로 초기화
+        for (YutResult r : turnResult.getAvailable()) {
+            counter.merge(r, 1, Integer::sum);
+        }
+
+        // 버튼 텍스트 갱신
+        DoButton.setText(   "도 x "  + counter.get(YutResult.DO));
+        GaeButton.setText(  "개 x "  + counter.get(YutResult.GAE));
+        GeolButton.setText( "걸 x "  + counter.get(YutResult.GEOL));
+        YutButton.setText(  "윷 x "  + counter.get(YutResult.YUT));
+        MoButton.setText(   "모 x "  + counter.get(YutResult.MO));
+        BackDoButton.setText("빽도 x " + counter.get(YutResult.BACK_DO));
     }
 }
