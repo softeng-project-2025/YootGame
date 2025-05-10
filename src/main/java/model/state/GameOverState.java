@@ -11,12 +11,12 @@ public class GameOverState implements CanThrowYut, CanSelectPiece {
     @Override
     public MoveResult handleYutThrow(YutResult result) {
         // 게임 종료 상태에서는 윷 던지기를 허용하지 않습니다.
-        return MoveResult.fail(MoveFailType.GAME_ENDED);
+        return MoveResult.fail(result, MoveFailType.GAME_ENDED);
     }
 
     @Override
     public MoveResult handlePieceSelect(Piece piece, YutResult result) {
         // 게임 종료 상태에서는 말 선택을 허용하지 않습니다.
-        return MoveResult.fail(MoveFailType.GAME_ENDED);
+        return MoveResult.fail(result, MoveFailType.GAME_ENDED);
     }
 }

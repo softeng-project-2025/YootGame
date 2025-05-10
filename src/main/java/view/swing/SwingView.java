@@ -16,7 +16,7 @@ import java.util.List;
 
 public class SwingView extends JFrame implements View {
 
-    private final GameController controller;
+    private GameController controller;
     private JLabel resultLabel;
     private JPanel boardPanel;
     private JButton randomThrowButton;
@@ -27,12 +27,18 @@ public class SwingView extends JFrame implements View {
     private boolean isUiInitialized = false;
 
 
-    public SwingView(GameController controller) {
+    public SwingView() {
         super("YootGame");
-        this.controller = controller;
         this.setSize(1200, 1000);
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setLayout(new BorderLayout());
+    }
+
+    public void setController(GameController ctrl) {
+        this.controller = ctrl;
+        initUI();
+        setVisible(true);
+        isUiInitialized = true;
     }
 
     // 실행 시 게임 시작 전 설정하는 창
@@ -117,14 +123,7 @@ public class SwingView extends JFrame implements View {
         this.add(bottomPanel, BorderLayout.SOUTH);
     }
 
-    public void setController(GameController controller) {
 
-        if (!isUiInitialized) {
-            initUI();           // 이제 controller가 null이 아님
-            this.setVisible(true); // UI가 완성된 뒤에 화면 표시
-            isUiInitialized = true;
-        }
-    }
 
     public void renderGame(Game game) {
         if (boardPanel == null) {
