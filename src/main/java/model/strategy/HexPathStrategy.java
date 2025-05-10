@@ -158,6 +158,9 @@ public class HexPathStrategy implements PathStrategy {
         List<Position> path = piece.getCustomPath();
         pathIndex = piece.getPathIndex();
         int nextIdx = pathIndex + result.getStep();
+        if (nextIdx >= path.size()) {
+            nextIdx = path.size() - 1;
+        }
 
         return path.get(nextIdx);
     }
@@ -245,8 +248,8 @@ public class HexPathStrategy implements PathStrategy {
         for (int i = 0; i < allCoords.length; i++) {
             int x = allCoords[i][0];
             int y = allCoords[i][1];
-            boolean isVertex = (i <= 25 && i % 5 == 0);
-            boolean isCenter = (i == allCoords.length - 1);
+            boolean isVertex = (i <= 30 && i % 5 == 0);
+            boolean isCenter = (i == allCoords.length - 2);
             positions.add(new Position(i, x, y, isCenter, isVertex));
         }
 
