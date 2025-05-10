@@ -35,7 +35,7 @@ public class HexPathStrategy implements PathStrategy {
     }
 
     @Override
-    public Position getPreviousPosition(Position current){
+    public Position getPreviousPosition(Piece piece, YutResult result){
         // TODO: 육각형 경로 규칙 구현
         throw new UnsupportedOperationException("HexPathStrategy path not defined.");
     }
