@@ -8,10 +8,9 @@ import javax.swing.*;
 public class Main {
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
-            GameController controller = new GameController();
-            SwingView view = new SwingView(controller);
-            view.showGameSetupDialog();
+            SwingView view = new SwingView();
+            GameController ctrl = new GameController(view);
+            view.showGameSetupDialog();  // 여기서 OK 시 ctrl.initializeGame(...) 호출
         });
-
     }
 }

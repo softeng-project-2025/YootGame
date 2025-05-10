@@ -16,6 +16,7 @@ public class WaitingForThrowState implements CanThrowYut {
     public MoveResult handleYutThrow(YutResult result) {
         game.getTurnResult().add(result);
         return MoveResult.success(
+                result,
                 false,
                 false,
                 game.isFinished() ? game.getTurnManager().currentPlayer() : null,

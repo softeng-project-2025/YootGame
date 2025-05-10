@@ -3,6 +3,7 @@ package model.piece;
 import model.player.Player;
 import model.position.Position;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -96,6 +97,18 @@ public class Piece {
             }
         }
         return 0;
+    }
+    // 경로 분기 상태 설정
+    public void setPathType(PathType newType) {
+        this.pathType = Objects.requireNonNull(newType);
+    }
+
+    // 현재 경로에서의 인덱스 설정
+    public void setPathIndex(int index) {
+        if (customPath == null) throw new IllegalStateException("Custom path not initialized");
+        if (index < 0 || index >= customPath.size())
+            throw new IndexOutOfBoundsException("Invalid pathIndex: " + index);
+        this.pathIndex = index;
     }
 
 }

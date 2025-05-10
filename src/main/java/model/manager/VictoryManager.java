@@ -17,5 +17,9 @@ public class VictoryManager {
                 .filter(VictoryManager::hasPlayerWon)
                 .findFirst();
     }
+
+    public static boolean hasGameEnded(List<Player> players) {
+        return players.stream().anyMatch(VictoryManager::hasPlayerWon);
+    }
 }
 

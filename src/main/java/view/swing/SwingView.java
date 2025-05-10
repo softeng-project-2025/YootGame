@@ -1,23 +1,28 @@
 package view.swing;
 
+import model.dto.GameStateDto;
 import model.dto.MessageType;
+import model.dto.GameStateDto.PieceInfo;
+import model.dto.GameStateDto.PlayerInfo;
+import model.piece.Piece;
 import model.player.Player;
+import model.position.Position;
+import model.strategy.PathStrategy;
+import model.yut.YutResult;
 import view.View;
 import controller.GameController;
-import model.Game;
-import model.piece.Piece;
-import model.position.Position;
-import model.yut.YutResult;
 
 import javax.swing.*;
 import java.awt.*;
 import java.util.List;
 import java.util.EnumMap;
 
+/**
+ * Swing 기반 View: GameStateDto를 받아 화면을 렌더링합니다.
+ */
 public class SwingView extends JFrame implements View {
 
-    private final JFrame frame;
-    private final GameController controller;
+    private GameController controller;
     private JLabel resultLabel;
     private JPanel boardPanel;
     private JButton randomThrowButton;
@@ -31,18 +36,161 @@ public class SwingView extends JFrame implements View {
     private JButton BackDoButton;
     private JComboBox<String> yutChoiceBox;
     private JLabel statusLabel;
-    private boolean isUiInitialized = false;
 
-    public SwingView(GameController controller) {
-        this.controller = controller;
-
-        frame = new JFrame("YootGame");
-        frame.setSize(1200, 1000);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setLayout(new BorderLayout());
+    public SwingView() {
+        super("YootGame");
+        setSize(1200, 1000);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLayout(new BorderLayout());
     }
 
-    // 실행 시 게임 시작 전 설정하는 창
+    @Override
+    public void setController(GameController ctrl) {
+        this.controller = ctrl;
+        initUI();
+        setVisible(true);
+    }
+
+    @Override
+    public void renderGame(Object dtoObj) {
+        GameStateDto dto = (GameStateDto) dtoObj;
+        if (boardPanel == null) {
+            boardPanel = new DrawBoard(controller.getCurrentBoardStrategy());
+            boardPanel.setLayout(null);
+            boardPanel.setBackground(Color.WHITE);
+            JScrollPane scrollPane = new JScrollPane(boardPanel);
+            add(scrollPane, BorderLayout.CENTER);
+        }
+        boardPanel.removeAll();
+
+        // PieceInfo 리스트로 버튼 생성
+        for (PieceInfo info : dto.pieces()) {
+            CylinderButton btn = new CylinderButton(
+                    getPlayerColor(info.id()),
+                    new Position(info.id(),info.x(), info.y()),
+                    "P" + info.id()
+            );
+            btn.setEnabled(info.selectable());
+            btn.addActionListener(e -> controller.onSelectPieceById(info.id()));
+            boardPanel.add(btn);
+        }
+
+        boolean gameOver = dto.gameOver();
+        randomThrowButton.setEnabled(!gameOver);
+        selectThrowButton.setEnabled(!gameOver && dto.pieces().stream().anyMatch(PieceInfo::selectable));
+        restartButton.setEnabled(gameOver);
+
+        // 결과 및 상태 표시
+        resultLabel.setText("결과: " + (dto.yutResult() != null ? dto.yutResult().getName() : ""));
+        updateStatus(dto.messageText(), dto.messageType());
+
+        boardPanel.revalidate();
+        boardPanel.repaint();
+    }
+
+    private void initUI() {
+        resultLabel = new JLabel("결과: ", SwingConstants.CENTER);
+        add(resultLabel, BorderLayout.NORTH);
+
+        randomThrowButton = new JButton("랜덤 윷 던지기");
+        randomThrowButton.addActionListener(e -> controller.onRandomThrow());
+
+        selectThrowButton = new JButton("지정 윷 던지기");
+        selectThrowButton.addActionListener(e -> controller.onDesignatedThrow(
+                YutResult.fromName((String) yutChoiceBox.getSelectedItem())
+        ));
+
+        restartButton = new JButton("다시 시작");
+        restartButton.setEnabled(false);
+        restartButton.addActionListener(e -> controller.initializeGameDialog());
+
+        yutChoiceBox = new JComboBox<>(new String[]{"도", "개", "걸", "윷", "모", "빽도"});
+
+        selectThrowButton = new JButton("지정 윷 던지기");
+        selectThrowButton.addActionListener(e -> {
+            String choice = (String) yutChoiceBox.getSelectedItem();
+            YutResult result = YutResult.fromName(choice);
+            controller.throwYut();
+        });
+        yutChoiceBox = new JComboBox<>(YutResult.getNames());
+
+        DoButton = new JButton("도 x 0");
+        GaeButton = new JButton("개 x 0");
+        GeolButton = new JButton("걸 x 0");
+        YutButton = new JButton("윷 x 0");
+        MoButton = new JButton("모 x 0");
+        BackDoButton = new JButton("빽도 x 0");
+
+        JPanel leftButtons = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        leftButtons.add(randomThrowButton);
+        leftButtons.add(restartButton);
+        leftButtons.add(selectThrowButton);
+        leftButtons.add(yutChoiceBox);
+        JPanel buttonPanel = new JPanel(new FlowLayout());
+        buttonPanel.add(randomThrowButton);
+        buttonPanel.add(selectThrowButton);
+        buttonPanel.add(yutChoiceBox);
+        buttonPanel.add(restartButton);
+
+        JPanel rightButtons = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        rightButtons.add(DoButton);
+        rightButtons.add(GaeButton);
+        rightButtons.add(GeolButton);
+        rightButtons.add(YutButton);
+        rightButtons.add(MoButton);
+        rightButtons.add(BackDoButton);
+
+        JPanel buttonPanel = new JPanel(new BorderLayout());
+        buttonPanel.add(leftButtons, BorderLayout.WEST);
+        buttonPanel.add(rightButtons, BorderLayout.EAST);
+
+        statusLabel = new JLabel("게임을 시작하세요.");
+        statusLabel = new JLabel("게임을 시작하세요.", SwingConstants.CENTER);
+        statusLabel.setFont(new Font("맑은 고딕", Font.BOLD, 16));
+        statusLabel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+        JPanel bottomPanel = new JPanel(new BorderLayout());
+        bottomPanel.add(buttonPanel, BorderLayout.CENTER);
+        bottomPanel.add(statusLabel, BorderLayout.SOUTH);
+
+        add(bottomPanel, BorderLayout.SOUTH);
+    }
+
+    @Override
+    public void showMessage(String message) {
+        JOptionPane.showMessageDialog(this, message);
+    }
+
+
+    @Override
+    public void updateStatus(String message, MessageType type) {
+        Color color;
+        switch (type) {
+            case INFO -> color = new Color(33, 150, 243);
+            case WARN -> color = new Color(255, 152, 0);
+            case GAME_OVER, ERROR -> color = new Color(244, 67, 54);
+            default -> color = Color.BLACK;
+        }
+
+        updateMoveButtons(game.getTurnResult());
+
+        boolean finished = game.isFinished();
+        randomThrowButton.setEnabled(!finished);
+        selectThrowButton.setEnabled(!finished);
+        restartButton.setEnabled(finished);
+
+        boardPanel.revalidate();
+        boardPanel.repaint();
+        statusLabel.setForeground(color);
+        statusLabel.setText(message);
+    }
+
+    @Override
+    public void showSelectablePieces(List<Piece> pieces) {
+        // DTO 렌더링으로 대체됨
+    }
+
+    @Override
     public void showGameSetupDialog() {
         JPanel panel = new JPanel(new GridLayout(3, 2));
 
@@ -77,194 +225,26 @@ public class SwingView extends JFrame implements View {
         }
     }
 
-    public void updateStatus(String message) {
-        statusLabel.setText(message);
-    }
-
-    private void initUI() {
-        resultLabel = new JLabel("결과: ");
-        resultLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        frame.add(resultLabel, BorderLayout.NORTH);
-
-        randomThrowButton = new JButton("랜덤 윷 던지기");
-        randomThrowButton.addActionListener(e -> {
-            controller.throwYut();
-        });
-
-        restartButton = new JButton("다시 시작");
-        restartButton.setEnabled(false);
-        restartButton.addActionListener(e ->
-            controller.initializeGame(2, 3, "square")
-        );
-
-        yutChoiceBox = new JComboBox<>(new String[]{"도", "개", "걸", "윷", "모", "빽도"});
-
-        selectThrowButton = new JButton("지정 윷 던지기");
-        selectThrowButton.addActionListener(e -> {
-            String choice = (String) yutChoiceBox.getSelectedItem();
-            YutResult result = YutResult.fromName(choice);
-            controller.throwYut();
-        });
-
-        DoButton = new JButton("도 x 0");
-        GaeButton = new JButton("개 x 0");
-        GeolButton = new JButton("걸 x 0");
-        YutButton = new JButton("윷 x 0");
-        MoButton = new JButton("모 x 0");
-        BackDoButton = new JButton("빽도 x 0");
-
-        JPanel leftButtons = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        leftButtons.add(randomThrowButton);
-        leftButtons.add(restartButton);
-        leftButtons.add(selectThrowButton);
-        leftButtons.add(yutChoiceBox);
-
-        JPanel rightButtons = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        rightButtons.add(DoButton);
-        rightButtons.add(GaeButton);
-        rightButtons.add(GeolButton);
-        rightButtons.add(YutButton);
-        rightButtons.add(MoButton);
-        rightButtons.add(BackDoButton);
-
-        JPanel buttonPanel = new JPanel(new BorderLayout());
-        buttonPanel.add(leftButtons, BorderLayout.WEST);
-        buttonPanel.add(rightButtons, BorderLayout.EAST);
-
-        statusLabel = new JLabel("게임을 시작하세요.");
-        statusLabel.setFont(new Font("맑은 고딕", Font.BOLD, 16));
-        statusLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        statusLabel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-
-        JPanel bottomPanel = new JPanel(new BorderLayout());
-        bottomPanel.add(buttonPanel, BorderLayout.CENTER);
-        bottomPanel.add(statusLabel, BorderLayout.SOUTH);
-
-        frame.add(bottomPanel, BorderLayout.SOUTH);
-    }
-
-    public void setController(GameController controller) {
-        this.controller = controller;
-        if (!isUiInitialized) {
-            initUI();           // 이제 controller가 null이 아님
-            frame.setVisible(true); // UI가 완성된 뒤에 화면 표시
-            isUiInitialized = true;
-        }
-    }
-
-    public void renderGame(Game game) {
-        if (boardPanel == null) {
-            boardPanel = new DrawBoard(game.getBoard().getStrategy());
-            boardPanel.setLayout(null);
-            boardPanel.setBackground(Color.WHITE);
-            JScrollPane scrollPane = new JScrollPane(boardPanel);
-            frame.add(scrollPane, BorderLayout.CENTER);
-            frame.validate();
-        }
-
-        boardPanel.removeAll();
-
-        // loading all pieces
-        for (Player player : game.getPlayers()) {
-            for (Piece piece : player.getPieces()) {
-                if (piece.isFinished()) continue;
-                CylinderButton pieceButton = getPieceButton(piece);
-
-                boardPanel.add(pieceButton);
-            }
-        }
-
-        updateMoveButtons(game.getTurnResult());
-
-        boolean finished = game.isFinished();
-        randomThrowButton.setEnabled(!finished);
-        selectThrowButton.setEnabled(!finished);
-        restartButton.setEnabled(finished);
-
-        boardPanel.revalidate();
-        boardPanel.repaint();
-    }
-
-    private CylinderButton getPieceButton(Piece piece) {
-        Position pos = piece.getPosition();
-        int playerNum = piece.getOwner().getId();
-        String label = "P" + playerNum + "-" + piece.getId();
-
-        Color[] playerColors = {Color.CYAN, Color.PINK, Color.ORANGE, Color.MAGENTA};
-        Color btnColor = playerColors[(playerNum - 1) % playerColors.length];
-
-        Position btnPos = new Position(piece.getPosition().index(), pos.x(), pos.y());
-
-        CylinderButton pieceButton = new CylinderButton(btnColor, btnPos, label);
-        pieceButton.setToolTipText(piece.getOwner().getName() + "의 말 " + piece.getId());
-        pieceButton.addActionListener(e ->
-                controller.applyResultToPiece(YutResult.DO, piece)
-        );
-        return pieceButton;
-    }
-
-    @Override
-    public void showMessage(String message) {
-        JOptionPane.showMessageDialog(this, message);
-    }
-
-    public void updateYutResult(YutResult result) {
-        resultLabel.setText("결과: " + result.name());
-        resultLabel.setForeground(Color.BLUE); // 시각적으로 더 강조
-    }
-
-    public void promptRestart(GameController controller) {
-        int result = JOptionPane.showConfirmDialog(
-                this,
-                "게임을 다시 시작할까요?",
-                "게임 종료",
-                JOptionPane.YES_NO_OPTION
-        );
-
-        if (result == JOptionPane.YES_OPTION) {
-            controller.initializeGame(2, 3, "square"); // 예시 값
-            resetUI();
-        } else {
-            randomThrowButton.setEnabled(false);
-            selectThrowButton.setEnabled(false);
-            showMessage("게임을 종료합니다.");
-            System.exit(0); // 게임 종료
-        }
-    }
-
     @Override
     public void showWinner(Player winner) {
-        JOptionPane.showMessageDialog(null,
-                winner.getName() + "님이 모든 말을 도착시켜 승리했습니다!",
+        JOptionPane.showMessageDialog(this,
+                winner.getName() + "님이 모두 도착해 승리했습니다!",
                 "게임 종료",
                 JOptionPane.INFORMATION_MESSAGE);
     }
 
     @Override
-    public void updateStatus(String message, MessageType type) {
-        Color color = switch (type) {
-            case INFO -> new Color(33, 150, 243);     // 파랑
-            case WARN -> new Color(255, 152, 0);      // 주황
-            case GAME_OVER, ERROR -> new Color(244, 67, 54);     // 빨강
-        };
-        String icon = switch (type) {
-            case INFO, GAME_OVER, ERROR -> "";
-            case WARN -> "⚠️";
-        };
-
-        statusLabel.setForeground(color); // JLabel 등 UI 컴포넌트 색 변경
-        statusLabel.setText(icon + message);
+    public void promptRestart(GameController controller) {
+        int sel = JOptionPane.showConfirmDialog(
+                this, "게임을 다시 시작할까요?", "게임 종료",
+                JOptionPane.YES_NO_OPTION);
+        if (sel == JOptionPane.YES_OPTION) controller.initializeGameDialog();
+        else System.exit(0);
     }
 
-    @Override
-    public void showSelectablePieces(List<Piece> pieces) {
-        StringBuilder sb = new StringBuilder("선택 가능한 말:\n");
-        for (int i = 0; i < pieces.size(); i++) {
-            Piece piece = pieces.get(i);
-            sb.append(i + 1).append(". ")
-                    .append(piece.toString()).append("\n");
-        }
-        JOptionPane.showMessageDialog(null, sb.toString(), "말 선택", JOptionPane.INFORMATION_MESSAGE);
+    private Color getPlayerColor(int pieceId) {
+        Color[] colors = {Color.CYAN, Color.PINK, Color.ORANGE, Color.MAGENTA};
+        return colors[(pieceId - 1) % colors.length];
     }
 
     public void resetUI() {

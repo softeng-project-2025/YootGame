@@ -7,9 +7,6 @@ import model.position.Position;
 import model.yut.YutResult;
 import model.strategy.PathStrategy;
 
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
 
 // Board: 순수 이동 계산 및 적용만 담당합니다.
 public class Board {
@@ -28,25 +25,23 @@ public class Board {
         this.strategy = strategy;
     }
 
-    // 주어진 Piece를 result만큼 이동시킬 다음 위치를 계산합니다.
-    public Position computeNextPosition(Piece piece, YutResult result) {
+    public Position movePiece(Piece piece, YutResult result) {
         if (piece.isFinished()) {
             throw new InvalidMoveException("완주된 말은 이동할 수 없습니다.");
         }
         // 경로 초기화
         if (piece.getCustomPath() == null) {
-            PieceUtil.initializePath(piece, strategy);
+            piece.resetToStart();
         }
-        // 이전/다음 위치 계산
-        return result.getStep() < 0
+        // 다음 위치 계산
+        Position next = result.getStep() < 0
                 ? strategy.getPreviousPosition(piece.getPosition())
                 : strategy.getNextPosition(piece, result);
+        // 위치 업데이트
+        piece.moveTo(next, result.getStep());
+        return next;
     }
 
-    // computeNextPosition 결과를 꺼내 Piece 상태를 업데이트합니다.
-    public void applyMovement(Piece piece, Position newPos, YutResult result) {
-        piece.moveTo(newPos, result.getStep());
-    }
 
 
 }

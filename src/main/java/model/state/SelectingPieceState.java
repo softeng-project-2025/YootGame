@@ -2,81 +2,92 @@ package model.state;
 
 import model.Game;
 import model.dto.*;
+import model.manager.CaptureManager;
+import model.manager.GroupManager;
 import model.manager.VictoryManager;
 import model.piece.Piece;
-import model.piece.PieceUtil;
 import model.turn.TurnResult;
 import model.yut.YutResult;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
+// CanSelectPiece 상태: 사용자가 선택한 윷 결과를 특정 말에 적용하는 책임을 수행합니다.
 public class SelectingPieceState implements CanSelectPiece {
-
     private final Game game;
-
+    private final TurnResult turnResult;
+    private final CaptureManager captureManager;
+    private final GroupManager groupManager;
 
     public SelectingPieceState(Game game) {
         this.game = game;
+        this.turnResult = game.getTurnResult();
+        this.captureManager = new CaptureManager();
+        this.groupManager = new GroupManager();
     }
 
     @Override
-    public MoveResult handlePieceSelect(Piece piece, YutResult selectedResult) {
-        // 유효성 검사
+    public MoveResult handlePieceSelect(Piece piece, YutResult yut) {
+        // 1) 유효성 검사
         if (piece.isFinished() || piece.getOwner() != game.getTurnManager().currentPlayer()) {
-            return MoveResult.fail(MoveFailType.INVALID_SELECTION);
+            return MoveResult.fail(yut, MoveFailType.INVALID_SELECTION);
+        }
+        List<YutResult> pending = turnResult.getPending();
+        if (!pending.contains(yut)) {
+            return MoveResult.fail(yut, MoveFailType.NO_RESULT);
         }
 
-        TurnResult turnResult = game.getTurnResult();
-        if (!turnResult.getAvailable().contains(selectedResult)) {
-            return MoveResult.fail(MoveFailType.NO_RESULT);
+        // 2) 기록 & 이동
+        turnResult.apply(yut, piece);
+        // 통합된 movePiece 사용: 실제 이동 및 내부 처리
+        // 반환된 Position이 이동 후 위치
+        var newPos = game.getBoard().movePiece(piece, yut);
+
+        // 3) 캡처 처리
+        Map<Piece, List<Piece>> captures = captureManager.handleCaptures(
+                List.of(piece), game.getPlayers());
+        boolean didCapture = captures.containsKey(piece);
+
+        // 4) 그룹핑 처리
+        List<Piece> allPieces = game.getPlayers().stream()
+                .flatMap(p -> p.getPieces().stream())
+                .collect(Collectors.toList());
+        boolean didGroup = groupManager.computeGroups(allPieces)
+                .containsKey(new GroupManager.GroupKey(piece.getOwner(), newPos));
+
+        // 5) 승리 검사
+        boolean isGameOver = VictoryManager.hasPlayerWon(piece.getOwner());
+        if (isGameOver) {
+            game.transitionTo(new GameOverState());
+            return MoveResult.gameOver(yut, piece.getOwner())
+                    .withNextStateHint(NextStateHint.GAME_ENDED);
         }
 
-        turnResult.apply(selectedResult, piece);
+        // 6) 다음 상태 힌트 계산
+        boolean bonusTurn = (yut == YutResult.YUT || yut == YutResult.MO) ^ didCapture;
+        boolean hasMore = turnResult.hasPending();
+        NextStateHint hint = bonusTurn ? NextStateHint.WAITING_FOR_THROW
+                : hasMore  ? NextStateHint.STAY
+                : NextStateHint.NEXT_TURN;
 
-        // 그룹 이동
-        List<Piece> group = PieceUtil.getMovableGroup(piece, game);
-        boolean captured = game.getBoard().movePiece(piece, selectedResult, game.getPlayers());
-
-        // 골인 체크
-        var owner = piece.getOwner();
-        if (PieceUtil.allFinished(group, game.getBoard())) {
-            group.forEach(p -> {
-                p.setFinished(true);
-                PieceUtil.resetGroupToSelf(p);
-            });
+        // 7) 상태 전이 및 턴 전환
+        if (hint == NextStateHint.NEXT_TURN) {
+            game.startTurn();
+            game.getTurnManager().nextTurn();
         }
+        game.transitionTo(new WaitingForThrowState(game));
 
-        // 승리 조건 확인
-        boolean isGameOver = VictoryManager.hasPlayerWon(owner);
-
-        // 보너스 턴 조건
-        boolean isYutOrMo = selectedResult == YutResult.YUT || selectedResult == YutResult.MO;
-        boolean bonusTurn = (captured && !isYutOrMo) || (isYutOrMo && !captured);
-        boolean hasMoreResults = turnResult.hasPending();
-
-        // 다음 상태 결정
-        MoveResult result = MoveResult.success(
-                captured,
+        // 8) MoveResult 반환
+        return MoveResult.success(
+                yut,
+                didCapture,
                 bonusTurn,
-                isGameOver ? owner : null,
+                game.getTurnManager().currentPlayer(),
                 game,
                 piece,
-                hasMoreResults
-        );
-
-        // 상태 전이 힌트 설정
-        if (isGameOver) {
-            result = result
-                    .withGameOver(true)
-                    .withWinner(owner)
-                    .withNextStateHint(NextStateHint.GAME_ENDED);
-        } else if (hasMoreResults) {
-            result = result.withNextStateHint(NextStateHint.STAY);
-        } else {
-            result = result.withNextStateHint(NextStateHint.NEXT_TURN);
-        }
-
-        return result;
+                hasMore
+        ).withNextStateHint(hint);
     }
 
 }
