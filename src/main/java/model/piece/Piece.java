@@ -2,37 +2,36 @@ package model.piece;
 
 import model.player.Player;
 import model.position.Position;
-
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
+// 말 하나의 상태(위치, 경로, 이동 여부 등)만을 관리합니다.
 public class Piece {
     private final Player owner;
     private final int id;
-    private Position position;          // 현재 말이 있는 위치
-    private final Position startPosition;     // 말이 잡히면 돌아갈 위치
-    private boolean isGrouped;
-    private boolean isFinished;
-    private boolean hasMoved = false;
-    private boolean hasPassedCenter = false;
-    private List<Piece> group = new ArrayList<>();
-    private PathType pathType = PathType.OUTER;
-    private List<Position> customPath = null;
-    private int pathIndex = 0;
+    private Position position;
+    private final Position startPosition;
+    private boolean finished;
+    private boolean moved;
+    private boolean passedCenter;
+    private PathType pathType;
+    private List<Position> customPath;
+    private int pathIndex;
 
-
-    public Piece(Player owner, int id, int playerNumber) {
-        this.owner = owner;
+    // 생성자: 시작 위치는 외부에서 계산하여 전달합니다.
+    public Piece(Player owner, int id, Position startPosition) {
+        this.owner = Objects.requireNonNull(owner);
         this.id = id;
-        this.isGrouped = false;
-        this.isFinished = false;
-        this.group = new ArrayList<>(List.of(this));
-
-        int x = 1200 - (4 - playerNumber) * 100;
-        int y = 200 + id * 100;
-        this.position = new Position(0, x, y);
-        this.startPosition = this.position;
+        this.startPosition = Objects.requireNonNull(startPosition);
+        this.position = startPosition;
+        this.pathType = PathType.OUTER;
+        this.customPath = null;
+        this.pathIndex = 0;
+        this.finished = false;
+        this.moved = false;
+        this.passedCenter = false;
     }
+
 
     public Player getOwner() {
         return owner;
@@ -42,105 +41,89 @@ public class Piece {
         return id;
     }
 
-    public Position getStartPosition() {
-        return startPosition;
-    }
-
     public Position getPosition() {
         return position;
     }
 
-    public boolean isGrouped() {
-        return isGrouped;
-    }
-
-    public void setGrouped(boolean grouped) {
-        this.isGrouped = grouped;
+    public Position getStartPosition() {
+        return startPosition;
     }
 
     public boolean isFinished() {
-        return isFinished;
-    }
-
-    public void setFinished(boolean finished) {
-        this.isFinished = finished;
-    }
-
-    public List<Piece> getGroup() {
-        return group;
-    }
-
-    public void setGroup(List<Piece> group) {
-        this.group = group;
-    }
-
-    public void setMoved() {
-        this.hasMoved = true;
+        return finished;
     }
 
     public boolean hasMoved() {
-        return this.hasMoved;
+        return moved;
     }
 
     public boolean hasPassedCenter() {
-        return hasPassedCenter;
-    }
-
-    public void setPassedCenter(boolean hasPassedCenter) {
-        this.hasPassedCenter = hasPassedCenter;
+        return passedCenter;
     }
 
     public PathType getPathType() {
         return pathType;
-    }
-    public void setPathType(PathType pathType) {
-        this.pathType = pathType;
     }
 
     public List<Position> getCustomPath() {
         return customPath;
     }
 
-    public void setCustomPath(List<Position> path) {
-        this.customPath = path;
-        updatePathIndex(); // 초기화 후 바로 index 맞춤
-    }
-
     public int getPathIndex() {
         return pathIndex;
     }
 
-    public void advancePathIndex(int steps) {
-        this.pathIndex += steps;
-        if (this.customPath != null && this.pathIndex >= this.customPath.size()) {
-            this.pathIndex = customPath.size() - 1;
-        }
+    // 사용자 정의 경로 설정
+    public void setCustomPath(List<Position> customPath) {
+        this.customPath = Objects.requireNonNull(customPath);
+        this.pathIndex = findIndexForPosition(this.position); // 초기화 후 바로 index 맞춤
     }
 
-    public void updatePathIndex() {
-        if (customPath == null) return;
+    // 현재 위치에 대응하는 customPath 인덱스를 찾습니다.
+    private int findIndexForPosition(Position pos) {
         for (int i = 0; i < customPath.size(); i++) {
-            if (customPath.get(i).getIndex() == this.position.getIndex()) {
-                this.pathIndex = i;
-                return;
+            if (customPath.get(i).index() == pos.index()) {
+                return i;
             }
         }
+        return 0;
     }
 
-    public void setPosition(Position position) {
-        this.position = position;
-        updatePathIndex(); // 위치 설정 시 pathIndex 자동 갱신
+    // 한 턴 이동: 새로운 위치와 스텝 수로 상태 업데이트
+    public void moveTo(Position newPosition, int step) {
+        Objects.requireNonNull(newPosition);
+        this.position = newPosition;
+        if (customPath != null) {
+            this.pathIndex = findIndexForPosition(newPosition);
+            if (pathIndex >= customPath.size()) {
+                this.pathIndex = customPath.size() - 1;
+            }
+            if (pathIndex == customPath.size() - 1) { // 경로 끝 도달 시 완료 처리
+                this.finished = true;
+            }
+        } else {
+            this.pathIndex += step;
+        }
+        this.moved = true;
+        if (newPosition.isCenter()) {
+            this.passedCenter = true;
+        }
     }
 
-    public void resetPath() {
-        this.pathIndex = 0;
-        this.customPath = null;
+    // 다음 턴을 위해 상태 초기화
+    public void resetForNextTurn() {
+        this.moved = false;
+    }
+
+    public void resetToStart() {
+        this.position = startPosition;
+        this.finished = false;
+        this.moved = false;
+
+        this.passedCenter = false;
         this.pathType = PathType.OUTER;
-        this.hasPassedCenter = false;
-    }
-
-    public void setPathIndex(int index) {
-        this.pathIndex = index;
+        this.customPath = null;
+        this.pathIndex = 0;
     }
 
 }

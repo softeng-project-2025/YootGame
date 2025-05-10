@@ -1,4 +1,4 @@
-package model.manager;
+package model.util;
 
 import model.piece.Piece;
 import model.player.Player;
@@ -7,7 +7,8 @@ import java.util.List;
 
 public class VictoryManager {
     public static boolean hasPlayerWon(Player player) {
-        return player.getPieces().stream().allMatch(Piece::isFinished);
+        return player.hasAllPiecesFinished();
+
     }
 
     public static Player findWinner(List<Player> players) {
