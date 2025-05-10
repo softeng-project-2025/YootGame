@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
+// 한 턴 동안의 윷 결과를 관리합니다.
 public class TurnResult {
 
     private final List<YutResult> available = new ArrayList<>();

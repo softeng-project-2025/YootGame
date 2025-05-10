@@ -81,4 +81,9 @@ public class GameService {
         YutResult last = game.getTurnResult().getLastResult();
         return PieceUtil.getMovablePieces(current, last);
     }
+
+    // 현재 게임 인스턴스 반환
+    public Game getGame() {
+        return game;
+    }
 }

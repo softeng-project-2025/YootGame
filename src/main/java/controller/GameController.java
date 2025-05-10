@@ -16,6 +16,7 @@ import view.View;
 import java.util.ArrayList;
 import java.util.List;
 
+// GameController: 사용자 입력을 받아 GameService와 View를 연결하는 역할만 수행합니다.
 public class GameController {
 
     private final GameService gameService;
@@ -25,25 +26,37 @@ public class GameController {
     public GameController(GameService gameService, View view) {
         this.gameService = gameService;
         this.view = view;
+        this.view.setController(this);
     }
 
-    // 게임 시작 설정: 플레이어 수, 말 수, 보드 타입
-    public void initializeGame(int playerCount, int pieceCount, String boardType) {
-        PathStrategy pathStrategy = resolvePathStrategy(boardType);
-        Board board = new Board(pathStrategy);
-        List<Player> players = createPlayers(playerCount, pieceCount, board);
+    // 초기 화면 렌더링
+    public void initializeGame() {
+        view.renderGame(gameService.getGame());
+    }
 
-        this.game = new Game(board, players);
-        this.gameService = new GameService(game);
-
-        view.setController(this); // View에 컨트롤러 주입
-        view.renderGame(game);    // 초기 화면 렌더링
+    // 윷 던지기 요청 처리
+    public void throwYut() {
+        MoveResult result = gameService.throwYut();
+        view.updateYutResult(result.getYutResult());
+        if (!result.isFailure()) {
+            List<Piece> options = gameService.getSelectablePieces();
+            view.showSelectablePieces(options);
+        }
     }
 
     public void startTurn() {
         gameService.startTurn();
         view.updateYutResult(null); // 던지기 결과 초기화
         view.renderGame(game);
+    }
+
+    public void throwYut() {
+        MoveResult result = gameService.throwYut();
+        view.updateYutResult(result.getYutResult());
+        if (!result.isFailure()) {
+            List<Piece> options = gameService.getSelectablePieces();
+            view.showSelectablePieces(options);
+        }
     }
 
     public void throwYut() {

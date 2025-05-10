@@ -2,6 +2,7 @@ package model.state;
 
 import model.Game;
 import model.dto.*;
+import model.manager.GroupManager;
 import model.manager.VictoryManager;
 import model.piece.Piece;
 import model.piece.PieceUtil;
@@ -13,10 +14,14 @@ import java.util.List;
 public class SelectingPieceState implements CanSelectPiece {
 
     private final Game game;
+    private final TurnResult turnResult;
+    private final GroupManager groupManager;
 
 
     public SelectingPieceState(Game game) {
         this.game = game;
+        this.turnResult = game.getTurnResult();
+        this.groupManager = new GroupManager(game);
     }
 
     @Override
