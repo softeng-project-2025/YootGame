@@ -71,24 +71,56 @@ public class PentagonPathStrategy implements PathStrategy {
             piece.setPathIndex(9);
         }
 
-        // 모도, 모개로 와서 방에 있었을 때
-        if (
-                pathType == PathType.FROM5
-                        && pathIndex == 8
-        ) {
-            piece.setPathType(PathType.FROM5CENTER);
-            piece.setCustomPath(pathFrom5Center);
-            piece.setPathIndex(8);
+        if (pathIndex == 15) {
+            piece.setPathType(PathType.FROM15);
+            piece.setCustomPath(pathFrom15);
+            piece.setPathIndex(15);
         }
 
-        // from5이면서 방 들어갔다가 빽도로 나오면 pathFrom5로 변경
         if (
-                pathType == PathType.FROM5CENTER
-                        && pathIndex == 7
+                pathType == PathType.FROM15
+                && pathIndex == 14
         ) {
-            piece.setPathType(PathType.FROM5);
-            piece.setCustomPath(pathFrom5);
-            piece.setPathIndex(7);
+            piece.setPathType(PathType.OUTER);
+            piece.setCustomPath(outerPath);
+            piece.setPathIndex(14);
+        }
+
+        if (pathType == PathType.FROM5) {
+            if (pathIndex == 8) {
+                piece.setPathType(PathType.FROM5CENTER);
+                piece.setCustomPath(pathFrom5Center);
+                piece.setPathIndex(8);
+            }
+            else if (pathIndex == 7) {
+                piece.setPathType(PathType.FROM5);
+                piece.setCustomPath(pathFrom5);
+                piece.setPathIndex(7);
+            }
+        }
+        else if (pathType == PathType.FROM10) {
+            if (pathIndex == 13) {
+                piece.setPathType(PathType.FROM10CENTER);
+                piece.setCustomPath(pathFrom10Center);
+                piece.setPathIndex(13);
+            }
+            else if (pathIndex == 12) {
+                piece.setPathType(PathType.FROM10);
+                piece.setCustomPath(pathFrom10);
+                piece.setPathIndex(12);
+            }
+        }
+        else if (pathType == PathType.FROM15) {
+            if (pathIndex == 18) {
+                piece.setPathType(PathType.FROM15CENTER);
+                piece.setCustomPath(pathFrom15Center);
+                piece.setPathIndex(18);
+            }
+            else if (pathIndex == 17) {
+                piece.setPathType(PathType.FROM15);
+                piece.setCustomPath(pathFrom15);
+                piece.setPathIndex(17);
+            }
         }
 
         List<Position> path = piece.getCustomPath();
