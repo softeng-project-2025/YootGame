@@ -9,6 +9,7 @@ import model.piece.PieceUtil;
 import model.player.Player;
 import model.state.CanSelectPiece;
 import model.state.CanThrowYut;
+import model.state.GameOverState;
 import model.state.WaitingForThrowState;
 import model.yut.YutResult;
 import model.yut.YutThrower;
@@ -85,13 +86,16 @@ public class GameService {
         if (hint == null) return;
 
         switch (hint) {
-            case WAITING_FOR_THROW -> game.setState(new WaitingForThrowState(game));
+            case WAITING_FOR_THROW -> game.transitionTo(new WaitingForThrowState(game));
             case NEXT_TURN -> {
                 Player player = game.getTurnManager().nextTurn();
-                game.clearTurnResult();
-                game.setState(new WaitingForThrowState(game));
+                game.transitionTo(new WaitingForThrowState(game));
+
             }
-            case GAME_ENDED -> game.setFinished(true);
+            case GAME_ENDED -> {
+                game.transitionTo(new GameOverState());
+            }
+
             case STAY -> {}
         }
     }

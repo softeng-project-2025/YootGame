@@ -41,7 +41,7 @@ public class CatchPieceTest {
      */
     private void throwAndSelect(YutResult result, Piece piece) {
         gameService.handleYutThrow(result);                          // 윷 결과를 큐에 적재
-        game.setState(new SelectingPieceState(game, result)); // 상태 수동 전환
+        game.transitionTo(new SelectingPieceState(game, result)); // 상태 수동 전환
         gameService.handlePieceSelect(piece);                        // 실제 이동 수행
     }
 
