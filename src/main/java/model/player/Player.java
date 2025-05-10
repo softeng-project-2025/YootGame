@@ -24,7 +24,7 @@ public class Player {
     private final List<Piece> pieces;
 
     // 생성자: 플레이어 ID, 이름, 말 개수, 시작 보드를 받아 말 리스트 초기화
-    public Player(int id, String name, int pieceCount, Board board) {
+    public Player(int id, String name, int pieceCount) {
         this.id = id;
         this.name = Objects.requireNonNull(name);
 
@@ -75,11 +75,6 @@ public class Player {
                 .filter(p -> p.getId() == pieceId)
                 .findFirst()
                 .orElse(null);
-    }
-
-    //모든 말 리스트 반환
-    public List<Piece> getAllPieces() {
-        return getPieces();
     }
 
 
