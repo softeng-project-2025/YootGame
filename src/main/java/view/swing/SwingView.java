@@ -12,10 +12,7 @@ import model.yut.YutResult;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.Map;
-import java.util.HashMap;
 import java.util.List;
-import java.util.ArrayList;
 
 public class SwingView extends JFrame implements View {
 
