@@ -2,14 +2,15 @@ package controller;
 
 import model.Game;
 import model.board.Board;
+import model.dto.GameStateDto;
 import model.dto.MessageType;
 import model.dto.MoveResult;
 import model.service.GameService;
 import model.player.Player;
 import model.piece.Piece;
 import model.strategy.HexPathStrategy;
-import model.strategy.PathStrategy;
 import model.strategy.PentagonPathStrategy;
+import model.strategy.PathStrategy;
 import model.strategy.SquarePathStrategy;
 import model.yut.YutResult;
 import view.View;
@@ -17,9 +18,7 @@ import view.View;
 import java.util.List;
 import java.util.stream.IntStream;
 
-// GameController: 사용자 입력을 받아 GameService와 View를 연결합니다.
 public class GameController {
-
     private GameService service;
     private final View view;
 
@@ -29,22 +28,69 @@ public class GameController {
         this.view.setController(this);
     }
 
-    // showDialog에서 받은 파라미터로 실제 모델을 생성
+    // 1) 설정 다이얼로그 띄우기
+    public void initializeGameDialog() {
+        view.showGameSetupDialog();
+    }
+
+    // 2) 사용자가 입력한 설정으로 실제 게임 시작
     public void initializeGame(int playerCount, int pieceCount, String boardType) {
-        PathStrategy strat = resolvePathStrategy(boardType);
+        PathStrategy pathStrategy = resolvePathStrategy(boardType);
         List<Player> players = createPlayers(playerCount, pieceCount);
 
-        Game game = new Game(new Board(strat), players);
+        Game game = new Game(new Board(pathStrategy), players);
         this.service = new GameService(game);
         service.startTurn();
 
-        view.renderGame(service.getGame());
-        view.updateYutResult(null);
-        view.updateStatus("게임을 시작하세요.", MessageType.INFO);  // 초기 안내
-
-
+        // 초기 DTO 생성·렌더
+        GameStateDto dto = buildDto(null, "게임을 시작하세요.", MessageType.INFO);
+        view.renderGame(dto);
     }
 
+    // 3) 랜덤 윷 던지기
+    public void onRandomThrow() {
+        MoveResult result = service.throwYut();
+        view.renderGame(buildDto(result, null, null));
+    }
+
+    // 4) 지정 윷 던지기 (테스트용)
+    public void onDesignatedThrow(YutResult yut) {
+        MoveResult result = service.throwYut(yut);
+        view.renderGame(buildDto(result, null, null));
+    }
+
+    // 5) 말 선택 (뷰에서 ID를 찾는 메서드 쓰거나, Piece 객체 직접 넘겨도 됨)
+    public void onSelectPieceById(int pieceId) {
+        service.getGame().getPlayers().stream()
+                .flatMap(p -> p.getPieces().stream())
+                .filter(p -> p.getId() == pieceId)
+                .findFirst()
+                .ifPresentOrElse(
+                        piece -> onSelectPiece(piece),
+                        () -> view.showMessage("선택한 말을 찾을 수 없습니다: ID=" + pieceId)
+                );
+    }
+    private void onSelectPiece(Piece piece) {
+        MoveResult result = service.selectPiece(
+                piece,
+                service.getGame().getTurnResult().getLastResult()
+        );
+        view.renderGame(buildDto(result, null, null));
+    }
+
+    // DTO 생성 헬퍼
+    private GameStateDto buildDto(MoveResult result, String overrideMsg, MessageType overrideType) {
+        String msg = overrideMsg != null
+                ? overrideMsg
+                : (result.isFailure() ? "오류: " + result.failType() : "이동 성공");
+        MessageType type = overrideType != null
+                ? overrideType
+                : (result.isFailure() ? MessageType.ERROR : MessageType.INFO);
+        List<Piece> selectable = service.getSelectablePieces();
+        return GameStateDto.from(service.getGame(), result, selectable, msg, type);
+    }
+
+    // 보조 메서드
     private PathStrategy resolvePathStrategy(String boardType) {
         return switch (boardType.toLowerCase()) {
             case "pentagon" -> new PentagonPathStrategy();
@@ -52,61 +98,13 @@ public class GameController {
             default          -> new SquarePathStrategy();
         };
     }
-
-    private List<Player> createPlayers(int playerCount, int pieceCount) {
-        return IntStream.rangeClosed(1, playerCount)
-                .mapToObj(i -> new Player(i, "Player " + i, pieceCount))
+    private List<Player> createPlayers(int count, int pieces) {
+        return IntStream.rangeClosed(1, count)
+                .mapToObj(i -> new Player(i, "Player " + i, pieces))
                 .toList();
     }
 
-    // 랜덤 윷 던지기 처리
-    public void onRandomThrow() {
-        MoveResult result = service.throwYut();
-        handleMoveResult(result);
+    public PathStrategy getCurrentBoardStrategy() {
+        return service.getGame().getBoard().getStrategy();
     }
-
-    // 지정 윷 던지기 요청 처리
-    public void onDesignatedThrow(YutResult yut) {
-        MoveResult result = service.throwYut(yut);
-        handleMoveResult(result);
-    }
-
-    // 사용자가 선택한 말에 대해 이동 처리
-    public void onSelectPiece(Piece piece) {
-        YutResult pending = service.getGame().getTurnResult().getLastResult();
-        MoveResult result = service.selectPiece(piece, pending);
-        handleMoveResult(result);
-    }
-
-    // MoveResult에 따른 공통 View 업데이트
-    private void handleMoveResult(MoveResult result) {
-        // 1) 윷 결과 표시
-        view.updateYutResult(result.yutResult());
-
-        // 2) 게임판 갱신
-        view.renderGame(service.getGame());
-
-        // 3) 상태 메시지
-        String status = result.isFailure()
-                ? "오류: " + result.failType()
-                : "이동 성공";
-        view.updateStatus(status,
-                result.isFailure() ? MessageType.ERROR : MessageType.INFO);
-
-
-        // 4) 선택 가능한 말 표시
-        if (!result.isFailure() && result.hasPendingYutResults()) {
-            List<Piece> options = service.getSelectablePieces();
-            view.showSelectablePieces(options);
-        }
-
-
-        // 5) 게임 종료 처리
-        if (result.isGameOver()) {
-            Player winner = result.winner();
-            view.showWinner(winner);
-            view.promptRestart(this);
-        }
-    }
-
 }
