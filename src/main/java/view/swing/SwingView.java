@@ -1,6 +1,7 @@
 package view.swing;
 
 import model.dto.MessageType;
+import model.dto.MoveResult;
 import model.player.Player;
 import view.View;
 import controller.GameController;
@@ -15,7 +16,6 @@ import java.util.List;
 
 public class SwingView extends JFrame implements View {
 
-    private final JFrame frame;
     private final GameController controller;
     private JLabel resultLabel;
     private JPanel boardPanel;
@@ -27,12 +27,11 @@ public class SwingView extends JFrame implements View {
     private boolean isUiInitialized = false;
 
     public SwingView(GameController controller) {
+        super("YootGame");
         this.controller = controller;
-
-        frame = new JFrame("YootGame");
-        frame.setSize(1200, 1000);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setLayout(new BorderLayout());
+        this.setSize(1200, 1000);
+        this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        this.setLayout(new BorderLayout());
     }
 
     // 실행 시 게임 시작 전 설정하는 창
@@ -77,7 +76,7 @@ public class SwingView extends JFrame implements View {
     private void initUI() {
         resultLabel = new JLabel("결과: ");
         resultLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        frame.add(resultLabel, BorderLayout.NORTH);
+        this.add(resultLabel, BorderLayout.NORTH);
 
         randomThrowButton = new JButton("랜덤 윷 던지기");
         randomThrowButton.addActionListener(e -> {
@@ -114,14 +113,14 @@ public class SwingView extends JFrame implements View {
         bottomPanel.add(buttonPanel, BorderLayout.CENTER);
         bottomPanel.add(statusLabel, BorderLayout.SOUTH);
 
-        frame.add(bottomPanel, BorderLayout.SOUTH);
+        this.add(bottomPanel, BorderLayout.SOUTH);
     }
 
     public void setController(GameController controller) {
-        this.controller = controller;
+
         if (!isUiInitialized) {
             initUI();           // 이제 controller가 null이 아님
-            frame.setVisible(true); // UI가 완성된 뒤에 화면 표시
+            this.setVisible(true); // UI가 완성된 뒤에 화면 표시
             isUiInitialized = true;
         }
     }
@@ -132,8 +131,8 @@ public class SwingView extends JFrame implements View {
             boardPanel.setLayout(null);
             boardPanel.setBackground(Color.WHITE);
             JScrollPane scrollPane = new JScrollPane(boardPanel);
-            frame.add(scrollPane, BorderLayout.CENTER);
-            frame.validate();
+            this.add(scrollPane, BorderLayout.CENTER);
+            this.validate();
         }
 
         boardPanel.removeAll();
@@ -155,6 +154,11 @@ public class SwingView extends JFrame implements View {
 
         boardPanel.revalidate();
         boardPanel.repaint();
+    }
+
+    @Override
+    public void render(MoveResult moveResult) {
+
     }
 
     private CylinderButton getPieceButton(Piece piece) {

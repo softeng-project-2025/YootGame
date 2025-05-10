@@ -39,8 +39,8 @@ public class CylinderButton extends JButton {
 
     /* pos 정보를 기준으로 컴포넌트 위치 재계산 */
     private void updateBounds() {
-        int x = pos.getX() - WIDTH / 2;
-        int y = pos.getY() - HEIGHT / 2 - CAP_H / 2;
+        int x = pos.x() - WIDTH / 2;
+        int y = pos.y() - HEIGHT / 2 - CAP_H / 2;
         setBounds(x, y, WIDTH, HEIGHT + CAP_H);
     }
 

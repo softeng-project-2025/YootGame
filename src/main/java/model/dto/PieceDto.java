@@ -14,8 +14,8 @@ public record PieceDto(
         var pos = piece.getPosition();
         return new PieceDto(
                 piece.getId(),
-                pos.getX(),
-                pos.getY(),
+                pos.x(),
+                pos.y(),
                 selectable
         );
     }
