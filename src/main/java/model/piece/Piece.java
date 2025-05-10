@@ -7,10 +7,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Piece {
-    private Player owner;
-    private int id;
+    private final Player owner;
+    private final int id;
     private Position position;          // 현재 말이 있는 위치
-    private Position startPosition;     // 말이 잡히면 돌아갈 위치
+    private final Position startPosition;     // 말이 잡히면 돌아갈 위치
     private boolean isGrouped;
     private boolean isFinished;
     private boolean hasMoved = false;
