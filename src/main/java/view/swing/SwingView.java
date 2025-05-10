@@ -23,6 +23,12 @@ public class SwingView extends JFrame implements View {
     private JButton randomThrowButton;
     private JButton selectThrowButton;
     private JButton restartButton;
+    private JButton DoButton;
+    private JButton GaeButton;
+    private JButton GeolButton;
+    private JButton YutButton;
+    private JButton MoButton;
+    private JButton BackDoButton;
     private JComboBox<String> yutChoiceBox;
     private JLabel statusLabel;
     private boolean isUiInitialized = false;
@@ -89,6 +95,8 @@ public class SwingView extends JFrame implements View {
             controller.initializeGame(2, 3, "square")
         );
 
+        yutChoiceBox = new JComboBox<>(new String[]{"도", "개", "걸", "윷", "모", "빽도"});
+
         selectThrowButton = new JButton("지정 윷 던지기");
         selectThrowButton.addActionListener(e -> {
             String choice = (String) yutChoiceBox.getSelectedItem();
@@ -96,13 +104,30 @@ public class SwingView extends JFrame implements View {
             controller.throwYut();
         });
 
-        yutChoiceBox = new JComboBox<>(new String[]{"도", "개", "걸", "윷", "모", "빽도"});
+        DoButton = new JButton("도 x {do_cnt}");
+        GaeButton = new JButton("개");
+        GeolButton = new JButton("걸");
+        YutButton = new JButton("윷");
+        MoButton = new JButton("모");
+        BackDoButton = new JButton("빽도");
 
-        JPanel buttonPanel = new JPanel(new FlowLayout());
-        buttonPanel.add(randomThrowButton);
-        buttonPanel.add(restartButton);
-        buttonPanel.add(selectThrowButton);
-        buttonPanel.add(yutChoiceBox);
+        JPanel leftButtons = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        leftButtons.add(randomThrowButton);
+        leftButtons.add(restartButton);
+        leftButtons.add(selectThrowButton);
+        leftButtons.add(yutChoiceBox);
+
+        JPanel rightButtons = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        rightButtons.add(DoButton);
+        rightButtons.add(GaeButton);
+        rightButtons.add(GeolButton);
+        rightButtons.add(YutButton);
+        rightButtons.add(MoButton);
+        rightButtons.add(BackDoButton);
+
+        JPanel buttonPanel = new JPanel(new BorderLayout());
+        buttonPanel.add(leftButtons, BorderLayout.WEST);
+        buttonPanel.add(rightButtons, BorderLayout.EAST);
 
         statusLabel = new JLabel("게임을 시작하세요.");
         statusLabel.setFont(new Font("맑은 고딕", Font.BOLD, 16));
