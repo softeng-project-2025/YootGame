@@ -35,7 +35,7 @@ public class Board {
         }
         // 다음 위치 계산
         Position next = result.getStep() < 0
-                ? strategy.getPreviousPosition(piece.getPosition())
+                ? strategy.getPreviousPosition(piece, result)
                 : strategy.getNextPosition(piece, result);
         // 위치 업데이트
         piece.moveTo(next, result.getStep());

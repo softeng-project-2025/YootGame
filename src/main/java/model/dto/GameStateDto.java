@@ -4,19 +4,23 @@ import model.Game;
 import model.piece.Piece;
 import model.player.Player;
 import model.yut.YutResult;
-
 import java.util.List;
+import java.util.Map;
+import java.util.EnumMap;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-// 통합 DTO: 게임 상태와 렌더링에 필요한 모든 정보를 한 곳에 모읍니다.
-
+/**
+ * 통합 DTO: 게임 상태와 렌더링에 필요한 모든 정보를 제공합니다.
+ */
 public record GameStateDto(
-        YutResult yutResult,
+        YutResult lastYut,
         List<PieceInfo> pieces,
         List<PlayerInfo> players,
         String messageText,
         MessageType messageType,
-        boolean gameOver
+        boolean gameOver,
+        List<YutResult> pendingYuts
 ) {
 
     /**
@@ -34,14 +38,7 @@ public record GameStateDto(
     ) {}
 
     /**
-     * 도메인 모델과 View 렌더링에 필요한 데이터로부터 통합 DTO 생성
-     *
-     * @param game 게임 도메인 객체
-     * @param result 마지막 MoveResult (null 가능)
-     * @param selectablePieces 이번 선택 가능 말 리스트
-     * @param messageText 뷰에 표시할 상태 메시지
-     * @param messageType 메시지 타입
-     * @return GameStateDto 인스턴스
+     * 도메인 모델과 MoveResult로부터 DTO를 생성합니다.
      */
     public static GameStateDto from(
             Game game,
@@ -50,11 +47,9 @@ public record GameStateDto(
             String messageText,
             MessageType messageType
     ) {
-        // 윷 결과
-        YutResult yut = result != null ? result.yutResult() : null;
+        YutResult last = result != null ? result.yutResult() : null;
 
-        // 도메인에서 모든 말 수집 (Player 기준)
-        List<PieceInfo> pieces = game.getPlayers().stream()
+        List<PieceInfo> pieceInfos = game.getPlayers().stream()
                 .flatMap(p -> p.getPieces().stream())
                 .map(p -> {
                     var pos = p.getPosition();
@@ -63,21 +58,22 @@ public record GameStateDto(
                 })
                 .collect(Collectors.toList());
 
-        // 플레이어 정보
         Player current = game.getTurnManager().currentPlayer();
-        List<PlayerInfo> players = game.getPlayers().stream()
-                .map(pl -> new PlayerInfo(
-                        pl.getId(), pl.getName(), pl.equals(current)
-                ))
+        List<PlayerInfo> playerInfos = game.getPlayers().stream()
+                .map(p -> new PlayerInfo(p.getId(), p.getName(), p.equals(current)))
                 .collect(Collectors.toList());
 
+        boolean over = game.isFinished();
+        List<YutResult> pending = game.getTurnResult().getPending();
+
         return new GameStateDto(
-                yut,
-                pieces,
-                players,
+                last,
+                pieceInfos,
+                playerInfos,
                 messageText != null ? messageText : "",
                 messageType != null ? messageType : MessageType.INFO,
-                game.isFinished()
+                over,
+                List.copyOf(pending)
         );
     }
 }
