@@ -416,9 +416,9 @@ public class PentagonPathStrategy implements PathStrategy {
                 {-15, 230},     // 15
                 {90, 264},   // 30
                 {195, 298},   // 31
+                {300, 332},      // 36, center
                 {365, 421},   // 34
                 {430, 511},   // 35
-                {300, 332},      // 36, center
                 {495, 600},     // 25
                 {5000, 5000}
         };
