@@ -82,10 +82,10 @@ public class GameService {
     }
 
     // 상태 전이 및 턴 전환 로직
-
     private void applyNextState(MoveResult result) {
         if (result == null || result.isFailure()) return;
         NextStateHint hint = result.nextStateHint();
+        if (hint == null) return;
         switch (hint) {
             case WAITING_FOR_THROW ->
                     game.transitionTo(new WaitingForThrowState(game));

@@ -62,6 +62,7 @@ class GameServiceIntegrationTest {
         // Arrange: initial path remains OUTER after landing on corner via board.movePiece
         Board board = game.getBoard();
         Piece piece = p1.getPieces().get(0);
+        piece.setCustomPath(board.getStrategy().getPath());
         // first move: 'MO' to reach index 5 (corner)
         board.movePiece(piece, YutResult.MO);
         // pathType should still be OUTER at arrival
@@ -75,26 +76,30 @@ class GameServiceIntegrationTest {
     }
 
     // 목표 지점 직전에서 “도”를 사용해 finish시키면 Piece.isFinished()가 true가 되고, GameService.selectPiece 호출 후 턴이 다음 플레이어로 넘어가는지 검사합니다.
+
     @Test
     void goalInAdvancesTurn() {
         // Arrange: move p1 piece to one step before goal
         Board board = game.getBoard();
         Piece piece = p1.getPieces().get(0);
+        // 경로 초기화
         piece.setCustomPath(board.getStrategy().getPath());
         var path = board.getStrategy().getPath();
         int finalIdx = path.size() - 1;
         int beforeFinal = finalIdx - 1;
+        // 마지막 전 칸으로 이동
         piece.moveTo(path.get(beforeFinal), path.get(beforeFinal).index() - piece.getPosition().index());
         assertFalse(piece.isFinished());
 
-        // Simulate pending DO
+        // pending 결과로 '도' 추가
         TurnResult tr = game.getTurnResult();
         tr.add(YutResult.DO);
 
-        // Act: finish move via selectPiece
-        service.selectPiece(piece, YutResult.DO);
+        // 윷 던지기 -> 말 선택(selectPiece)으로 완전한 턴 로직 수행
+        service.throwYut(YutResult.DO);      // state: CanSelectPiece 로 전환
+        service.selectPiece(piece, YutResult.DO); // 실제 이동 & applyNextState()
 
-        // Assert: piece finished and turn advanced
+        // 골인 되어야 finished=true 이고, 그 후 다음 턴으로 넘어갑니다
         assertTrue(piece.isFinished());
         assertSame(p2, game.getTurnManager().currentPlayer());
     }
