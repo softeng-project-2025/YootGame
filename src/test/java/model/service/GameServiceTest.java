@@ -249,4 +249,73 @@ class GameServiceTest {
         assertSame(expected, actual);
     }
 
+    @Test
+    void selectPiece_whenNextTurn_thenAdvancesTurnAndTransitions() {
+        // 준비
+        when(mockGame.isFinished()).thenReturn(false);
+        CanSelectPiece selState = mock(CanSelectPiece.class);
+        when(mockGame.getState()).thenReturn(selState);
+
+        TurnManager tm = mock(TurnManager.class);
+        when(mockGame.getTurnManager()).thenReturn(tm);
+
+        MoveResult r = mock(MoveResult.class);
+        when(selState.handlePieceSelect(any(Piece.class), eq(YutResult.MO)))
+                .thenReturn(r);
+        when(r.isFailure()).thenReturn(false);
+        when(r.nextStateHint()).thenReturn(NextStateHint.NEXT_TURN);
+
+        // 실행
+        sut.selectPiece(mock(Piece.class), YutResult.MO);
+
+        // 검증
+        verify(mockGame).startTurn();
+        verify(tm).nextTurn();
+        verify(mockGame).transitionTo(isA(WaitingForThrowState.class));
+    }
+
+    @Test
+    void selectPiece_whenGameEnded_thenTransitionToGameOver() {
+        when(mockGame.isFinished()).thenReturn(false);
+        CanSelectPiece selState = mock(CanSelectPiece.class);
+        when(mockGame.getState()).thenReturn(selState);
+
+        MoveResult r = mock(MoveResult.class);
+        when(selState.handlePieceSelect(any(), any())).thenReturn(r);
+        when(r.isFailure()).thenReturn(false);
+        when(r.nextStateHint()).thenReturn(NextStateHint.GAME_ENDED);
+
+        sut.selectPiece(mock(Piece.class), YutResult.DO);
+
+        verify(mockGame).transitionTo(isA(GameOverState.class));
+    }
+
+    @Test
+    void selectPiece_whenStay_thenDoesNotTransition() {
+        when(mockGame.isFinished()).thenReturn(false);
+        CanSelectPiece selState = mock(CanSelectPiece.class);
+        when(mockGame.getState()).thenReturn(selState);
+
+        MoveResult r = mock(MoveResult.class);
+        when(selState.handlePieceSelect(any(), any())).thenReturn(r);
+        when(r.isFailure()).thenReturn(false);
+        when(r.nextStateHint()).thenReturn(NextStateHint.STAY);
+
+        sut.selectPiece(mock(Piece.class), YutResult.YUT);
+
+        verify(mockGame, never()).transitionTo(any());
+        verify(mockGame, never()).startTurn();
+    }
+
+    @Test
+    void startTurn_callsGameStartTurn() {
+        sut.startTurn();
+        verify(mockGame).startTurn();
+    }
+
+    @Test
+    void getGame_returnsOriginalGame() {
+        assertSame(mockGame, sut.getGame());
+    }
+
 }
