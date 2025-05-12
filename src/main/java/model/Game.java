@@ -2,6 +2,7 @@ package model;
 
 import java.util.*;
 
+import exception.GameInitializationException;
 import model.board.Board;
 import model.manager.TurnManager;
 import model.player.Player;
@@ -20,12 +21,35 @@ public class Game {
     private final TurnManager turnManager;
     private TurnResult turnResult;
 
+    // 허용 범위 상수
+    private static final int MIN_PLAYERS = 2;
+    private static final int MAX_PLAYERS = 4;
+    private static final int MIN_PIECES = 2;
+    private static final int MAX_PIECES = 5;
+
     public Game(Board board, List<Player> players) {
+        validatePlayers(players);
         this.board = board;
         this.players = new ArrayList<>(players);
         this.turnManager = new TurnManager(this.players);
-        this.currentState = new WaitingForThrowState(this); // 초기 상태
+        this.currentState = new WaitingForThrowState(this);
         startTurn();
+    }
+
+    private void validatePlayers(List<Player> players) {
+        if (players == null || players.size() < MIN_PLAYERS || players.size() > MAX_PLAYERS) {
+            throw new GameInitializationException(
+                    "플레이어 수는 " + MIN_PLAYERS + "명 이상, " + MAX_PLAYERS + "명 이하만 가능합니다."
+            );
+        }
+        for (Player p : players) {
+            int count = p.getPieces().size();
+            if (count < MIN_PIECES || count > MAX_PIECES) {
+                throw new GameInitializationException(
+                        "각 플레이어는 말 개수를 " + MIN_PIECES + "개 이상, " + MAX_PIECES + "개 이하로 설정해야 합니다."
+                );
+            }
+        }
     }
 
     public Board getBoard() {

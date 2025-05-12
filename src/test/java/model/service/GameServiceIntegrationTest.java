@@ -19,7 +19,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
-import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -32,8 +31,8 @@ class GameServiceIntegrationTest {
     @BeforeEach
     void setUp() {
         squareBoard = new Board(new SquarePathStrategy());
-        p1 = new Player(0, "P1", 1);
-        p2 = new Player(1, "P2", 1);
+        p1 = new Player(0, "P1", 2);
+        p2 = new Player(1, "P2", 2);
         game = new Game(squareBoard, List.of(p1, p2));
         service = new GameService(game);
     }
@@ -73,8 +72,8 @@ class GameServiceIntegrationTest {
     void goalInAdvancesTurn() {
         // 1) 로컬 게임/서비스 생성
         Board board = new Board(new SquarePathStrategy());
-        Player local1 = new Player(0, "P1", 1);
-        Player local2 = new Player(1, "P2", 1);
+        Player local1 = new Player(0, "P1", 2);
+        Player local2 = new Player(1, "P2", 2);
         Game localGame = new Game(board, List.of(local1, local2));
         GameService localService = new GameService(localGame);
 
@@ -136,7 +135,7 @@ class GameServiceIntegrationTest {
         assertEquals(a.getPosition().index(), b.getPosition().index());
 
         // Attacker 설정
-        Player attacker = new Player(1, "P2", 1);
+        Player attacker = new Player(1, "P2", 2);
         Piece captor = attacker.getPieces().get(0);
         captor.setCustomPath(path);
         captor.moveTo(a.getPosition(), 0);
@@ -164,6 +163,16 @@ class GameServiceIntegrationTest {
         p1Piece.moveTo(path.get(path.size() - 1), /*step*/ path.size() - 1);
 
         // 바로 게임 오버
+        assertTrue(!game.isFinished());
+        assertFalse(game.getState() instanceof GameOverState);
+
+        // p1 하나만 골인시킨다
+        Piece p1OtherPiece = p1.getPieces().get(1);
+        List<Position> otherPath = game.getBoard().getStrategy().getPath();
+        p1OtherPiece.setCustomPath(otherPath);
+        p1OtherPiece.moveTo(path.get(otherPath.size() - 1), /*step*/ otherPath.size() - 1);
+
+        // 바로 게임 오버
         assertTrue(game.isFinished());
         assertTrue(game.getState() instanceof GameOverState);
     }
@@ -173,8 +182,9 @@ class GameServiceIntegrationTest {
     void pentagonAndHexagon_strategiesSwitchAtCorner() {
         // Pentagon
         Board pentBoard = new Board(new PentagonPathStrategy());
-        Player pentPlayer = new Player(0, "P1", 1);
-        Game pentGame = new Game(pentBoard, List.of(pentPlayer));
+        Player pentPlayer = new Player(0, "P1", 2);
+        Player dummy = new Player(99, "Dummy", 2);
+        game = new Game(new model.board.Board(new model.strategy.PentagonPathStrategy()), List.of(p1, dummy));
         Piece pp = pentPlayer.getPieces().get(0);
         pp.setCustomPath(pentBoard.getStrategy().getPath());
         pentBoard.movePiece(pp, YutResult.MO);
@@ -184,8 +194,8 @@ class GameServiceIntegrationTest {
 
         // Hexagon
         Board hexBoard = new Board(new HexPathStrategy());
-        Player hexPlayer = new Player(0, "P1", 1);
-        Game hexGame = new Game(hexBoard, List.of(hexPlayer));
+        Player hexPlayer = new Player(0, "P1", 2);
+        game = new Game(new model.board.Board(new model.strategy.HexPathStrategy()), List.of(p1, dummy));
         Piece hh = hexPlayer.getPieces().get(0);
         hh.setCustomPath(hexBoard.getStrategy().getPath());
         hexBoard.movePiece(hh, YutResult.MO);
@@ -197,10 +207,12 @@ class GameServiceIntegrationTest {
 
     @Test
     void selectPiece_recordsGroupingInMoveResult() {
-        // 1) 플레이어 한 명에 말 2개 세팅
+        // 1) 플레이어 두 명에 첫번째 플레이어만 말 2개 세팅 (두번째는 더미)
         Player multi = new Player(0, "M", 2);
+        Player dummy = new Player(99, "Dummy", 2);
         Board b = new Board(new SquarePathStrategy());
-        Game g = new Game(b, List.of(multi));
+        Game g = new Game(b, List.of(multi, dummy));
+
         GameService svc = new GameService(g);
 
         // 2) 커스텀 경로 설정 (movePiece 가 이 경로를 쓸 수 있게)

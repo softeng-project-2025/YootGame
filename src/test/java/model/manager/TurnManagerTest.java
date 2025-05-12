@@ -18,16 +18,16 @@ class TurnManagerTest {
 
     @Test
     void currentPlayer_initiallyFirst() {
-        Player p1 = new Player(0, "A", 0);
-        Player p2 = new Player(1, "B", 0);
+        Player p1 = new Player(0, "A", 2);
+        Player p2 = new Player(1, "B", 2);
         TurnManager tm = new TurnManager(List.of(p1, p2));
         assertSame(p1, tm.currentPlayer());
     }
 
     @Test
     void nextTurn_cyclesThroughPlayers() {
-        Player p1 = new Player(0, "A", 0);
-        Player p2 = new Player(1, "B", 0);
+        Player p1 = new Player(0, "A", 2);
+        Player p2 = new Player(1, "B", 2);
         TurnManager tm = new TurnManager(List.of(p1, p2));
 
         assertSame(p1, tm.currentPlayer());
@@ -37,8 +37,8 @@ class TurnManagerTest {
 
     @Test
     void reset_setsIndexBackToZero() {
-        Player p1 = new Player(0, "A", 0);
-        Player p2 = new Player(1, "B", 0);
+        Player p1 = new Player(0, "A", 2);
+        Player p2 = new Player(1, "B", 2);
         TurnManager tm = new TurnManager(List.of(p1, p2));
         tm.nextTurn(); // at p2
         tm.reset();
@@ -47,7 +47,7 @@ class TurnManagerTest {
 
     @Test
     void getPlayers_returnsImmutableList() {
-        Player p = new Player(0, "X", 0);
+        Player p = new Player(0, "X", 2);
         TurnManager tm = new TurnManager(List.of(p));
         var players = tm.getPlayers();
         assertThrows(UnsupportedOperationException.class, () -> players.add(p));

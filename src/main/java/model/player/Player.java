@@ -25,6 +25,9 @@ public class Player {
 
     // 생성자: 플레이어 ID, 이름, 말 개수, 시작 보드를 받아 말 리스트 초기화
     public Player(int id, String name, int pieceCount) {
+        if (pieceCount < 2 || pieceCount > 5) {
+            throw new IllegalArgumentException("말 개수는 2개 이상, 5개 이하만 가능합니다.");
+        }
         this.id = id;
         this.name = Objects.requireNonNull(name);
 
