@@ -6,7 +6,7 @@ import javax.swing.*;
 import java.awt.*;
 
 public class DrawBoard extends JPanel {
-    private final PathStrategy pathStrategy;    // final이 될 수 있다고 해서 일단 붙였는데 문제 생기면 여기 보기
+    private final PathStrategy pathStrategy;
 
     DrawBoard(PathStrategy pathStrategy) {
         this.pathStrategy = pathStrategy;

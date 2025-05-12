@@ -26,6 +26,7 @@ public class GameController {
     public GameController(View view) {
         this.view = view;
         this.view.setController(this);
+        initializeGameDialog();
     }
 
     // 1) 설정 다이얼로그 띄우기
@@ -43,7 +44,7 @@ public class GameController {
         service.startTurn();
 
         // 초기 DTO 생성·렌더
-        GameStateDto dto = buildDto(null, "게임을 시작하세요.", MessageType.INFO);
+        GameStateDto dto = GameStateDto.empty();
         view.renderGame(dto);
     }
 
@@ -107,4 +108,15 @@ public class GameController {
     public PathStrategy getCurrentBoardStrategy() {
         return service.getGame().getBoard().getStrategy();
     }
+
+    public void onRestartGame() {
+        service.restartGame();
+        view.resetUI();
+    }
+
+    public GameStateDto getInitialGameStateDto() {
+        // 예시: 빈 보드, 버튼만 세팅한 DTO
+        return GameStateDto.empty();
+    }
+
 }

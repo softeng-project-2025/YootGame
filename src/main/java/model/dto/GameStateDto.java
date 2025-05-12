@@ -23,6 +23,19 @@ public record GameStateDto(
         List<YutResult> pendingYuts
 ) {
 
+    /** 아무 것도 없는 초기 화면용 DTO */
+    public static GameStateDto empty() {
+        return new GameStateDto(
+                null,            // 마지막 윷 결과 없음
+                List.of(),       // 보드에는 말이 없음
+                List.of(),       // pending 윷 결과 없음
+                "게임을 설정해주세요", // 초기 안내 문구
+                MessageType.INFO, // INFO 스타일
+                false,
+                List.of()
+                );
+    }
+
     /**
      * 화면에 표시할 말 정보
      */
