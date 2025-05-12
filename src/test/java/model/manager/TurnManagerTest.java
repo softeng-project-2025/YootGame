@@ -1,24 +1,55 @@
 package model.manager;
 
-import model.manager.TurnManager;
+import exception.GameInitializationException;
 import model.player.Player;
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 class TurnManagerTest {
+
     @Test
-    void nextTurnCyclesThroughPlayers() {
-        List<Player> players = List.of(
-                new Player(1, "A", 1),
-                new Player(2, "B", 1)
-        );
-        TurnManager tm = new TurnManager(players);
-        assertEquals("A", tm.currentPlayer().getName());
-        tm.nextTurn();
-        assertEquals("B", tm.currentPlayer().getName());
-        tm.nextTurn();
-        assertEquals("A", tm.currentPlayer().getName());
+    void constructor_nullOrEmpty_throws() {
+        assertThrows(GameInitializationException.class, () -> new TurnManager(null));
+        assertThrows(GameInitializationException.class, () -> new TurnManager(List.of()));
+    }
+
+    @Test
+    void currentPlayer_initiallyFirst() {
+        Player p1 = new Player(0, "A", 0);
+        Player p2 = new Player(1, "B", 0);
+        TurnManager tm = new TurnManager(List.of(p1, p2));
+        assertSame(p1, tm.currentPlayer());
+    }
+
+    @Test
+    void nextTurn_cyclesThroughPlayers() {
+        Player p1 = new Player(0, "A", 0);
+        Player p2 = new Player(1, "B", 0);
+        TurnManager tm = new TurnManager(List.of(p1, p2));
+
+        assertSame(p1, tm.currentPlayer());
+        assertSame(p2, tm.nextTurn());
+        assertSame(p1, tm.nextTurn());
+    }
+
+    @Test
+    void reset_setsIndexBackToZero() {
+        Player p1 = new Player(0, "A", 0);
+        Player p2 = new Player(1, "B", 0);
+        TurnManager tm = new TurnManager(List.of(p1, p2));
+        tm.nextTurn(); // at p2
+        tm.reset();
+        assertSame(p1, tm.currentPlayer());
+    }
+
+    @Test
+    void getPlayers_returnsImmutableList() {
+        Player p = new Player(0, "X", 0);
+        TurnManager tm = new TurnManager(List.of(p));
+        var players = tm.getPlayers();
+        assertThrows(UnsupportedOperationException.class, () -> players.add(p));
     }
 }
