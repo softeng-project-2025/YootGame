@@ -27,7 +27,7 @@ public record GameStateDto(
      * 화면에 표시할 말 정보
      */
     public static record PieceInfo(
-            int id, int x, int y, boolean selectable
+            int ownerId, int id, int x, int y, boolean selectable
     ) {}
 
     /**
@@ -54,7 +54,7 @@ public record GameStateDto(
                 .map(p -> {
                     var pos = p.getPosition();
                     boolean sel = selectablePieces != null && selectablePieces.contains(p);
-                    return new PieceInfo(p.getId(), pos.x(), pos.y(), sel);
+                    return new PieceInfo(p.getOwner().getId(),p.getId(), pos.x(), pos.y(), sel);
                 })
                 .collect(Collectors.toList());
 

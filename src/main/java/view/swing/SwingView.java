@@ -66,9 +66,9 @@ public class SwingView extends JFrame implements View {
         // PieceInfo 리스트로 버튼 생성
         for (PieceInfo info : dto.pieces()) {
             CylinderButton btn = new CylinderButton(
-                    getPlayerColor(info.id()),
+                    getPlayerColor(info.ownerId()),
                     new Position(info.id(),info.x(), info.y()),
-                    "P" + info.id()
+                    "P" + info.ownerId()
             );
             btn.setEnabled(info.selectable());
             btn.addActionListener(e -> controller.onSelectPieceById(info.id()));
