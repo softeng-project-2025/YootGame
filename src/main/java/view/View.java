@@ -24,4 +24,6 @@ public interface View {
     void showGameSetupDialog();
 
     void showMessage(String s);
+
+    void resetUI();
 }

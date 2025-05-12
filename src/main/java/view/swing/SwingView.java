@@ -77,12 +77,14 @@ public class SwingView extends JFrame implements View {
 
         boolean gameOver = dto.gameOver();
         randomThrowButton.setEnabled(!gameOver);
-        selectThrowButton.setEnabled(!gameOver && dto.pieces().stream().anyMatch(PieceInfo::selectable));
+        selectThrowButton.setEnabled(!gameOver && !dto.pendingYuts().isEmpty());
         restartButton.setEnabled(gameOver);
 
         // 결과 및 상태 표시
         resultLabel.setText("결과: " + (dto.lastYut() != null ? dto.lastYut().getName() : ""));
         updateStatus(dto.messageText(), dto.messageType());
+
+        updateMoveButtons(dto.pendingYuts());
 
         boardPanel.revalidate();
         boardPanel.repaint();
@@ -99,9 +101,7 @@ public class SwingView extends JFrame implements View {
 
         restartButton = new JButton("다시 시작");
         restartButton.setEnabled(false);
-        restartButton.addActionListener(e -> controller.initializeGameDialog());
-
-        yutChoiceBox = new JComboBox<>(new String[]{"도", "개", "걸", "윷", "모", "빽도"});
+        restartButton.addActionListener(e -> controller.onRestartGame());
 
         selectThrowButton = new JButton("지정 윷 던지기");
         selectThrowButton.addActionListener(e -> controller.onDesignatedThrow(
@@ -232,7 +232,7 @@ public class SwingView extends JFrame implements View {
         int sel = JOptionPane.showConfirmDialog(
                 this, "게임을 다시 시작할까요?", "게임 종료",
                 JOptionPane.YES_NO_OPTION);
-        if (sel == JOptionPane.YES_OPTION) controller.initializeGameDialog();
+        if (sel == JOptionPane.YES_OPTION) controller.onRestartGame();
         else System.exit(0);
     }
 
@@ -241,12 +241,14 @@ public class SwingView extends JFrame implements View {
         return colors[(pieceId - 1) % colors.length];
     }
 
+    @Override
     public void resetUI() {
-        updateStatus("게임을 시작하세요.", MessageType.INFO);
         resultLabel.setText("결과: ");
-        restartButton.setEnabled(false);
+        statusLabel.setText("게임을 시작하세요.");
         randomThrowButton.setEnabled(true);
         selectThrowButton.setEnabled(true);
+        restartButton.setEnabled(false);
+        updateMoveButtons(List.of());
     }
 
     public void updateMoveButtons(List<YutResult> pending) {
