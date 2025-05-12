@@ -5,11 +5,28 @@ import model.position.Position;
 import model.yut.YutResult;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import model.piece.PathType;
 
+/**
+ * All indexes of SquarePathStrategy follow under figure.
+ *⠀⠀⠀⠀10⡶⠲⠲⠲ 9⠲⠲⠲ 8⠲⠲⠲⠲ 7 ⠲⠲ 6⠲⠲⠲ 5
+ *⠀⠀⠀⠀⢸⡇⠙⢦⡄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣤⠟⠁⣿
+ *⠀⠀⠀⠀⢸⡇⠀⠀ 23⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀  21⠀⠀⠀⣿
+ *⠀⠀⠀⠀ 11⠀⠀⠀⠀⠙⢦⣀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⡤⠟⠁⠀⠀⠀⠀4
+ *⠀⠀⠀⠀⢸⡇⠀⠀⠀⠀⠀⠀⠙⢦⣀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣰⠏⠁⠀⠀⠀⠀⠀⠀⣿
+ *⠀⠀⠀⠀⢸⡇⠀⠀⠀⠀⠀⠀⠀⠀ 24 ⠀⠀⠀⠀⠀⠀⠀22⠀⠀⠀⠀⠀⠀⠀⠀⠀⣿
+ *⠀⠀⠀⠀ 12⠀⠀⠀⠀⠀⠀⠀⠀⠀⠙⢧⡀⠀⠀⠀⣴⠟⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀3
+ *⠀⠀⠀⠀⢸⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠛⢧⣴⠟⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣿⠀
+ *⠀⠀⠀⠀⢸⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣤ 29 ⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣿
+ *⠀⠀⠀⠀ 13 ⠀⠀⠀⠀⠀⠀⠀⠀⢀⣠⠞⠁⠀⠀⠀⠛⣦⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀2
+ *⠀⠀⠀⠀⢸⡇⠀⠀⠀⠀⠀⠀⠀  25⠀⠀⠀⠀⠀⠀⠀ 27 ⠀⠀⠀⠀⠀⠀⠀⠀⣿
+ *⠀⠀⠀⠀⢸⡇⠀⠀⠀⠀⠀⠀⣰⠞⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠹⢦⡀⠀⠀⠀⠀⠀⠀⣿
+ *⠀⠀⠀⠀ 14⠀⠀⠀⠀⣠⠟⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠙⣦⡀⠀⠀⠀⠀1
+ *⠀⠀⠀⠀⢸⡇⠀⠀ 26⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀ 28 ⠀⠀⣿
+ *⠀⠀⠀⠀⢸⡇⣰⠞⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠙⢦⡀⣿
+ *⠀⠀⠀⠀15⢥⣤⢤ 16 ⣤ 17 ⢤⣤ 18 ⢤⣤ 19 ⣤⢤ 20
+ */
 public class SquarePathStrategy implements PathStrategy {
 
     private final List<Position> allPositions;
@@ -44,7 +61,7 @@ public class SquarePathStrategy implements PathStrategy {
         // 모에 있었다가 백도 받아서 윷에 있었을 때
         if (
                 pathType == PathType.FROM5
-                && pathIndex == 4
+                        && pathIndex == 4
         ) {
             piece.setPathType(PathType.OUTER);
             piece.setCustomPath(outerPath);
@@ -61,17 +78,17 @@ public class SquarePathStrategy implements PathStrategy {
         // 뒷모에 있었다가 백도를 받아서 뒷윷에 있었을 때
         if (
                 pathType == PathType.FROM10
-                && pathIndex == 9
+                        && pathIndex == 9
         ) {
             piece.setPathType(PathType.OUTER);
             piece.setCustomPath(outerPath);
             piece.setPathIndex(9);
         }
 
-        // 모도, 모개로 와서 방에 있었을 때
+        // (모도, 모개 || 속윷에 있다가 빽도)로 와서 방에 있었을 때
         if (
                 pathType == PathType.FROM5
-                && pathIndex == 8
+                        && pathIndex == 8
         ) {
             piece.setPathType(PathType.FROM5CENTER);
             piece.setCustomPath(pathFrom5Center);
@@ -81,7 +98,7 @@ public class SquarePathStrategy implements PathStrategy {
         // from5이면서 방 들어갔다가 빽도로 나오면 pathFrom5로 변경
         if (
                 pathType == PathType.FROM5CENTER
-                && pathIndex == 7
+                        && pathIndex == 7
         ) {
             piece.setPathType(PathType.FROM5);
             piece.setCustomPath(pathFrom5);
@@ -152,7 +169,7 @@ public class SquarePathStrategy implements PathStrategy {
                 {120, 600},
                 {240, 600},
                 {360, 600},
-                {480, 600}, // 19
+                {480, 600},
                 {600, 600}, // 20
                 {500, 100},
                 {400, 200},
@@ -173,151 +190,48 @@ public class SquarePathStrategy implements PathStrategy {
             boolean isCenter = (i == allCoords.length - 2);
             positions.add(new Position(i, x, y, isCenter, isVertex));
         }
-
         return positions;
     }
 
     // for drawing board's background line
     private List<Position> createAllVertexPositions() {
-        List<Position> positions = new ArrayList<>();
-        int[][] allCoords = {
-                {600, 600},
-                {600, 0},
-
-                {600, 0},
-                {0, 0},
-
-                {0, 0},
-                {0, 600},
-
-                {0, 600},
-                {600, 600},
-
-                {300, 300},
-                {600, 600},
-
-                {300, 300},
-                {600, 0},
-
-                {300, 300},
-                {0, 0},
-
-                {300, 300},
-                {0, 600},
+        int[] coords = {
+                // outer lines
+                5, 10,
+                10, 15,
+                15, 20,
+                20, 5,
+                // inner lines
+                5, 15,
+                10, 20
         };
-
-        for (int i = 0; i < allCoords.length; i++) {
-            int x = allCoords[i][0];
-            int y = allCoords[i][1];
-            positions.add(new Position(i, x, y));
-        }
-
-        return positions;
+        return createPath(coords);
     }
 
     private List<Position> createOuterPath() {
-        int[][] coords = {
-                {5000, 5000},   // 출발 전, Piece의 startPos 따로 참고
-                {600, 480},
-                {600, 360},
-                {600, 240},
-                {600, 120},
-                {600, 0},   // 모
-                {480, 0},
-                {360, 0},
-                {240, 0},
-                {120, 0},
-                {0, 0},     // 뒷모
-                {0, 120},
-                {0, 240},
-                {0, 360},
-                {0, 480},
-                {0, 600},   // 찌모
-                {120, 600},
-                {240, 600},
-                {360, 600},
-                {480, 600},
-                {600, 600}, // 참먹이
-                {5000, 5000}    // 탈출
-        };
-
+        int[] coords = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 30};
         return createPath(coords);
     }
 
     private List<Position> createPathFrom5() {
-        int[][] coords = {
-                {5000, 5000},   // 출발 전, Piece의 startPos 따로 참고
-                {600, 480},
-                {600, 360},
-                {600, 240},
-                {600, 120},
-                {600, 0},
-                {500, 100},
-                {400, 200},
-                {300, 300}, // 28, center
-                {400, 400},
-                {500, 500},
-                {0, 600},
-                {120, 600},
-                {240, 600},
-                {360, 600},
-                {480, 600}, // 19
-                {600, 600}, // 참먹이
-                {5000, 5000}    // 탈출
-        };
-
+        int[] coords = {0, 1, 2, 3, 4, 5, 21, 22, 29, 25, 26, 15, 16, 17, 18, 19, 20, 30};
         return createPath(coords);
     }
 
     private List<Position> createPathFrom10() {
-        int[][] coords = {
-                {5000, 5000},   // 출발 전, Piece의 startPos 따로 참고
-                {600, 480},
-                {600, 360},
-                {600, 240},
-                {600, 120},
-                {600, 0},
-                {480, 0},
-                {360, 0},
-                {240, 0},
-                {120, 0},
-                {0, 0},     // 뒷모
-                {100, 100},
-                {200, 200},
-                {300, 300},
-                {400, 400},
-                {500, 500},
-                {600, 600}, // 참먹이
-                {5000, 5000}    // 탈출
-        };
-
+        int[] coords = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 23, 24, 29, 27, 28, 20, 30};
         return createPath(coords);
     }
 
     private List<Position> createPathFrom5Center() {
-        int[][] coords = {
-                {5000, 5000},   // 출발 전, Piece의 startPos 따로 참고
-                {600, 480},
-                {600, 360},
-                {600, 240},
-                {600, 120},
-                {600, 0},
-                {500, 100},
-                {400, 200},
-                {300, 300},
-                {400, 400},
-                {500, 500},
-                {600, 600}, // 참먹이
-                {5000, 5000}    // 탈출
-        };
-
+        int[] coords = {0, 1, 2, 3, 4, 5, 21, 22, 29, 27, 28, 20, 30};
         return createPath(coords);
     }
 
-    private List<Position> createPath(int[][] coords) {
+    private List<Position> createPath(int[] coords) {
         List<Position> path = new ArrayList<>();
-        for (int i = 0; i < coords.length; i++) {
-            path.add(new Position(i, coords[i][0], coords[i][1]));
+        for (int i : coords) {
+            path.add(allPositions.get(i));
         }
         return path;
     }
