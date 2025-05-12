@@ -11,7 +11,6 @@ import model.piece.Piece;
 import model.strategy.HexPathStrategy;
 import model.strategy.PentagonPathStrategy;
 import model.strategy.PathStrategy;
-import model.strategy.PentagonPathStrategy;
 import model.strategy.SquarePathStrategy;
 import model.yut.YutResult;
 import view.View;

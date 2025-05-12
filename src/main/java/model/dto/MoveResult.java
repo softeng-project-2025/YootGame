@@ -1,9 +1,13 @@
 package model.dto;
 
 import model.Game;
+import model.manager.GroupManager;
 import model.piece.Piece;
 import model.player.Player;
 import model.yut.YutResult;
+
+import java.util.List;
+import java.util.Map;
 
 // 이동 결과를 나타내는 레코드입니다.
 // YutResult, 캡처 여부, 게임 종료 여부, 승자, 보너스 턴 여부, 이동된 말, 실패 사유, 대기 중인 윷 결과 여부, 다음 상태 힌트를 포함합니다.
@@ -17,7 +21,9 @@ public record MoveResult(
         Piece movedPiece,
         MoveFailType failType,
         boolean hasPendingYutResults,
-        NextStateHint nextStateHint
+        NextStateHint nextStateHint,
+        Map<Piece, List<Piece>> captureMap,
+        Map<GroupManager.GroupKey, List<Piece>> groupMap
 ) {
     // 실패 케이스
     public static MoveResult fail(YutResult yut, MoveFailType reason) {
@@ -31,7 +37,9 @@ public record MoveResult(
                 null,
                 reason,
                 false,
-                NextStateHint.STAY
+                NextStateHint.STAY,
+                Map.of(),
+                Map.of()
         );
     }
 
@@ -47,7 +55,9 @@ public record MoveResult(
                 null,
                 null,
                 false,
-                NextStateHint.GAME_ENDED
+                NextStateHint.GAME_ENDED,
+                Map.of(),
+                Map.of()
         );
     }
 
@@ -62,7 +72,9 @@ public record MoveResult(
                 movedPiece,
                 null,
                 false,
-                NextStateHint.GAME_ENDED
+                NextStateHint.GAME_ENDED,
+                Map.of(),
+                Map.of()
         );
     }
 
@@ -78,7 +90,9 @@ public record MoveResult(
                 null,
                 null,
                 false,
-                hintFor(bonusTurn, false, game.isFinished())
+                hintFor(bonusTurn, false, game.isFinished()),
+                Map.of(),
+                Map.of()
         );
     }
 
@@ -94,12 +108,16 @@ public record MoveResult(
                 movedPiece,
                 null,
                 false,
-                hintFor(bonusTurn, false, game.isFinished())
+                hintFor(bonusTurn, false, game.isFinished()),
+                Map.of(),
+                Map.of()
+
         );
     }
 
     // 정상 이동 - movedPiece + hasPendingYutResults 포함
-    public static MoveResult success(YutResult yut, boolean captured, boolean bonusTurn, Player winner, Game game, Piece movedPiece, boolean hasPendingYutResults) {
+    public static MoveResult success(YutResult yut, boolean captured, boolean bonusTurn, Player winner, Game game, Piece movedPiece, boolean hasPendingYutResults, Map<Piece, List<Piece>> captureMap,
+                                     Map<GroupManager.GroupKey, List<Piece>> groupMap) {
         return new MoveResult(
                 yut,
                 captured,
@@ -110,7 +128,9 @@ public record MoveResult(
                 movedPiece,
                 null,
                 hasPendingYutResults,
-                hintFor(bonusTurn, hasPendingYutResults, game.isFinished())
+                hintFor(bonusTurn, hasPendingYutResults, game.isFinished()),
+                captureMap,
+                groupMap
         );
     }
 
@@ -126,7 +146,9 @@ public record MoveResult(
                 null,
                 null,
                 false,
-                NextStateHint.NEXT_TURN
+                NextStateHint.NEXT_TURN,
+                Map.of(),
+                Map.of()
         );
     }
 
@@ -142,7 +164,9 @@ public record MoveResult(
                 null,
                 null,
                 false,
-                NextStateHint.GAME_ENDED
+                NextStateHint.GAME_ENDED,
+                Map.of(),
+                Map.of()
         );
     }
 
@@ -167,7 +191,8 @@ public record MoveResult(
     }
 
     public MoveResult withNextStateHint(NextStateHint hint) {
-        return new MoveResult(yutResult, captured, gameEnded, winner, bonusTurn, turnSkipped, movedPiece, failType, hasPendingYutResults, hint);
+        return new MoveResult(yutResult, captured, gameEnded, winner, bonusTurn, turnSkipped, movedPiece, failType, hasPendingYutResults, hint, captureMap,
+                groupMap);
     }
 
     private static NextStateHint hintFor(boolean bonusTurn, boolean hasPendingYuts, boolean isFinished) {
@@ -175,5 +200,40 @@ public record MoveResult(
         if (bonusTurn) return NextStateHint.WAITING_FOR_THROW;
         if (hasPendingYuts) return NextStateHint.STAY;
         return NextStateHint.NEXT_TURN;
+    }
+    /** captureMap만 교체한 새 인스턴스를 반환 */
+    public MoveResult withCaptureMap(Map<Piece, List<Piece>> newCaptureMap) {
+        return new MoveResult(
+                yutResult,
+                captured,
+                gameEnded,
+                winner,
+                bonusTurn,
+                turnSkipped,
+                movedPiece,
+                failType,
+                hasPendingYutResults,
+                nextStateHint,
+                newCaptureMap,
+                this.groupMap
+        );
+    }
+
+    /** groupMap만 교체한 새 인스턴스를 반환 */
+    public MoveResult withGroupMap(Map<GroupManager.GroupKey, List<Piece>> newGroupMap) {
+        return new MoveResult(
+                yutResult,
+                captured,
+                gameEnded,
+                winner,
+                bonusTurn,
+                turnSkipped,
+                movedPiece,
+                failType,
+                hasPendingYutResults,
+                nextStateHint,
+                this.captureMap,
+                newGroupMap
+        );
     }
 }

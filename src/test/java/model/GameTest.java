@@ -51,6 +51,9 @@ class GameTest {
     @Test
     void isFinished_falseInitially_trueAfterTransition() {
         Game game = new Game(mockBoard(), List.of(dummyPlayer()));
+
+        System.out.println("Initial state: " + game.getState().getClass().getSimpleName());
+        System.out.println("isFinished = " + game.isFinished());
         assertFalse(game.isFinished());
 
         game.transitionTo(new GameOverState());

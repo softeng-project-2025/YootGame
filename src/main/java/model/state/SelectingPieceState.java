@@ -40,8 +40,6 @@ public class SelectingPieceState implements CanSelectPiece {
 
         // 2) 기록 & 이동
         turnResult.apply(yut, piece);
-        // 통합된 movePiece 사용: 실제 이동 및 내부 처리
-        // 반환된 Position이 이동 후 위치
         var newPos = game.getBoard().movePiece(piece, yut);
 
         // 3) 캡처 처리
@@ -53,8 +51,9 @@ public class SelectingPieceState implements CanSelectPiece {
         List<Piece> allPieces = game.getPlayers().stream()
                 .flatMap(p -> p.getPieces().stream())
                 .collect(Collectors.toList());
-        boolean didGroup = groupManager.computeGroups(allPieces)
-                .containsKey(new GroupManager.GroupKey(piece.getOwner(), newPos));
+        Map<GroupManager.GroupKey, List<Piece>> groupMap = groupManager.computeGroups(allPieces);
+        boolean didGroup = groupMap.containsKey(new GroupManager.GroupKey(piece.getOwner(), newPos));
+
 
         // 5) 승리 검사
         boolean isGameOver = VictoryManager.hasPlayerWon(piece.getOwner());
@@ -86,7 +85,9 @@ public class SelectingPieceState implements CanSelectPiece {
                 game.getTurnManager().currentPlayer(),
                 game,
                 piece,
-                hasMore
+                hasMore,
+                captures,
+                groupMap
         ).withNextStateHint(hint);
     }
 

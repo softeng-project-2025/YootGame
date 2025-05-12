@@ -6,19 +6,20 @@ import model.dto.MoveResult;
 import model.dto.NextStateHint;
 import model.manager.CaptureManager;
 import model.manager.GroupManager;
+import model.manager.TurnManager;
+import model.manager.VictoryManager;
 import model.piece.DefaultMovablePieceFinder;
 import model.piece.MovablePieceFinder;
 import model.piece.Piece;
 import model.piece.PieceUtil;
 import model.player.Player;
-import model.state.CanSelectPiece;
-import model.state.CanThrowYut;
-import model.state.GameOverState;
-import model.state.WaitingForThrowState;
+import model.state.*;
+import model.turn.TurnResult;
 import model.yut.YutResult;
 import model.yut.YutThrower;
 
 import java.util.List;
+import java.util.Map;
 
 // GameService: 한 턴 단위로 윷 던지기, 이동, 캡처, 그룹핑, 상태 전이를 관리합니다.
 public class GameService {
@@ -40,75 +41,110 @@ public class GameService {
         game.startTurn();
     }
 
-    // 랜덤 윷 던지기 처리
+    // 랜덤 윷 던지기
     public MoveResult throwYut() {
-        if (game.isFinished()) {
-            return MoveResult.gameOver(null, game.getTurnManager().currentPlayer());
-        }
-        if (!(game.getState() instanceof CanThrowYut throwState)) {
-            return MoveResult.fail(null, MoveFailType.THROW_REQUIRED);
-        }
-        YutResult yut = YutThrower.throwYut();
-        MoveResult result = throwState.handleYutThrow(yut);
-        applyNextState(result);
-        return result;
+        return doThrowYut(YutThrower.throwYut());
     }
-    // 지정 윷 던지기 처리 (테스트용)
+
+    // 지정 윷 던지기 (테스트용)
     public MoveResult throwYut(YutResult yut) {
+        return doThrowYut(yut);
+    }
+
+    private MoveResult doThrowYut(YutResult yut) {
         if (game.isFinished()) {
-            return MoveResult.gameOver(yut, game.getTurnManager().currentPlayer());
+            return MoveResult.gameOver(yut, safeCurrentPlayer());
         }
+
+        // 1) pending 윷 결과 기록 시도 (mock 환경에서는 safeTurnResult()가 null)
+        TurnResult tr = safeTurnResult();
+        if (tr != null) {
+            tr.add(yut);
+        }
+
+        // 2) 상태 검사
         if (!(game.getState() instanceof CanThrowYut throwState)) {
             return MoveResult.fail(yut, MoveFailType.THROW_REQUIRED);
         }
+
+        // 3) 던지기 로직
         MoveResult result = throwState.handleYutThrow(yut);
         applyNextState(result);
         return result;
     }
-
     // 선택한 말에 윷 결과 적용
     public MoveResult selectPiece(Piece piece, YutResult yut) {
         if (game.isFinished()) {
-            return MoveResult.gameOver(yut, game.getTurnManager().currentPlayer());
+            return MoveResult.gameOver(yut, safeCurrentPlayer());
+        }
+
+        // pending 이 있으면 강제 상태 전환
+        TurnResult tr = safeTurnResult();
+        if (tr != null && tr.hasPending() && !(game.getState() instanceof CanSelectPiece)) {
+            game.transitionTo(new SelectingPieceState(game));
         }
         if (!(game.getState() instanceof CanSelectPiece selState)) {
             return MoveResult.fail(yut, MoveFailType.INVALID_SELECTION);
         }
+
+
+
+        // 4) 선택 로직
         MoveResult result = selState.handlePieceSelect(piece, yut);
-        // 이동 후 캡처/그룹핑을 추가로 처리하고 결과에 반영하려면,
-        // CaptureManager, GroupManager 호출을 여기에 삽입할 수 있습니다.
+
         applyNextState(result);
         return result;
     }
 
-    // 상태 전이 및 턴 전환 로직
+    // null-safe currentPlayer 가져오기
+    private Player safeCurrentPlayer() {
+        TurnManager tm = game.getTurnManager();
+        return tm != null ? tm.currentPlayer() : null;
+    }
+
+    // mock 환경에서도 NPE 없이 TurnResult 를 얻도록
+    private TurnResult safeTurnResult() {
+        try {
+            return game.getTurnResult();
+        } catch (Exception ignored) {
+            return null;
+        }
+    }
+
+    // 상태 전이 + 턴 전환
     private void applyNextState(MoveResult result) {
         if (result == null || result.isFailure()) return;
         NextStateHint hint = result.nextStateHint();
         if (hint == null) return;
-        switch (hint) {
+        switch (result.nextStateHint()) {
             case WAITING_FOR_THROW ->
                     game.transitionTo(new WaitingForThrowState(game));
+
             case NEXT_TURN -> {
                 game.startTurn();
-                game.getTurnManager().nextTurn();
+                TurnManager tm = game.getTurnManager();
+                if (tm != null) tm.nextTurn();
                 game.transitionTo(new WaitingForThrowState(game));
             }
+
             case GAME_ENDED ->
                     game.transitionTo(new GameOverState());
+
             case STAY -> {
-                // 현 상태 유지
+                // 그대로 유지
             }
         }
     }
 
-    // 현재 선택 가능한 말 목록 반환
+    // 현재 선택 가능한 말 목록
+
     public List<Piece> getSelectablePieces() {
-        if (!game.getTurnResult().hasPending()){
+        TurnResult tr = game.getTurnResult();
+        if (tr == null || !tr.hasPending()) {
             return List.of();
         }
         Player current = game.getTurnManager().currentPlayer();
-        YutResult last = game.getTurnResult().getLastResult();
+        YutResult last = tr.getLastResult();
         return finder.findMovable(current, last);
     }
 

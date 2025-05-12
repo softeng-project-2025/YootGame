@@ -64,8 +64,22 @@ public class Game {
 
     // 게임이 종료 상태인지 확인합니다.
     public boolean isFinished() {
-        return currentState instanceof GameOverState;
+        // 1) 이미 GameOverState 인 경우
+        if (currentState instanceof GameOverState) {
+            return true;
+        }
+        // 2) 조각이 하나 이상 있고, 모든 말을 골인시킨 플레이어가 있다면
+        boolean someoneWon = players.stream()
+                .filter(p -> !p.getPieces().isEmpty())       // << 이 줄을 추가!
+                .anyMatch(Player::hasAllPiecesFinished);
+        if (someoneWon) {
+            transitionTo(new GameOverState());
+            return true;
+        }
+        // 3) 그 외에는 진행 중
+        return false;
     }
+
 
     // 상태 전이를 캡슐화합니다.
     public void transitionTo(GameState next) {
