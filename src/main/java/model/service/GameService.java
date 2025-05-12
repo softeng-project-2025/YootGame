@@ -6,6 +6,8 @@ import model.dto.MoveResult;
 import model.dto.NextStateHint;
 import model.manager.CaptureManager;
 import model.manager.GroupManager;
+import model.piece.DefaultMovablePieceFinder;
+import model.piece.MovablePieceFinder;
 import model.piece.Piece;
 import model.piece.PieceUtil;
 import model.player.Player;
@@ -21,13 +23,16 @@ import java.util.List;
 // GameService: 한 턴 단위로 윷 던지기, 이동, 캡처, 그룹핑, 상태 전이를 관리합니다.
 public class GameService {
     private final Game game;
-    private final CaptureManager captureManager;
-    private final GroupManager groupManager;
+    private final MovablePieceFinder finder;
+
 
     public GameService(Game game) {
+        this(game, new DefaultMovablePieceFinder());
+    }
+
+    GameService(Game game, MovablePieceFinder finder) {
         this.game = game;
-        this.captureManager = new CaptureManager();
-        this.groupManager = new GroupManager();
+        this.finder = finder;
     }
 
     // 새로운 턴을 시작할 때 호출합니다.
@@ -99,9 +104,12 @@ public class GameService {
 
     // 현재 선택 가능한 말 목록 반환
     public List<Piece> getSelectablePieces() {
+        if (!game.getTurnResult().hasPending()){
+            return List.of();
+        }
         Player current = game.getTurnManager().currentPlayer();
         YutResult last = game.getTurnResult().getLastResult();
-        return PieceUtil.getMovablePieces(current, last);
+        return finder.findMovable(current, last);
     }
 
     // 현재 게임 인스턴스 반환

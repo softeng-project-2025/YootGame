@@ -20,18 +20,6 @@ public final class PieceUtil {
 
     private PieceUtil() { /* 유틸 클래스 방지 */ }
 
-
-//    /**
-//     * 말의 초기 경로와 상태를 설정합니다.
-//     */
-//    public static void initializePath(Piece piece, PathStrategy strategy) {
-//        Objects.requireNonNull(piece);
-//        Objects.requireNonNull(strategy);
-//        piece.setPathType(PathType.OUTER);
-//        piece.setCustomPath(new ArrayList<>(strategy.getPath()));
-//        piece.setPathIndex(0);
-//    }
-
     /**
      * 플레이어의 말 중 주어진 윷 결과로 움직일 수 있는 말만 반환합니다.
      */
