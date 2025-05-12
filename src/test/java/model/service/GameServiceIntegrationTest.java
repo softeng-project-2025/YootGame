@@ -98,4 +98,119 @@ class GameServiceIntegrationTest {
         assertTrue(piece.isFinished());
         assertSame(p2, game.getTurnManager().currentPlayer());
     }
+
+    /**
+     * 1) '빽도' 로직: 지나온 길로 한 칸 뒤로 이동하고,
+     *    모서리에서 외곽 경로로 돌아오는지 검증합니다.
+     */
+    @Test
+    void backDo_returnsAlongPreviousPath_andCornerResetsToOuter() {
+        Board board = game.getBoard();
+        Piece piece = p1.getPieces().get(0);
+
+        // customPath 초기화 (outerPath)
+        piece.setCustomPath(board.getStrategy().getPath());
+
+        // 1) 두 칸 전진해 경로상 index=2 지점으로 이동
+        board.movePiece(piece, YutResult.GAE);   // step=2
+        int idxAfter = piece.getPathIndex();
+        assertEquals(2, idxAfter);
+
+        // 2) 또 GAE 하면 index=4, 그 후 모서리(5) 직전 상태
+        board.movePiece(piece, YutResult.GAE);
+        assertEquals(4, piece.getPathIndex());
+
+        // 3) '빽도'(BACK_DO) 실행: 한 칸 뒤로, index=3
+        board.movePiece(piece, YutResult.BACK_DO);
+        assertEquals(3, piece.getPathIndex());
+        // 여전히 outerPath
+        assertEquals(PathType.OUTER, piece.getPathType());
+
+        // 4) corner(모)까지 가서 pathType 전환 테스트
+        board.movePiece(piece, YutResult.DO); // +1 -> index=4
+        board.movePiece(piece, YutResult.DO); // +1 -> index=5 (corner)
+        // 아직 corner 도착만 했기에 OUTER 유지
+        assertEquals(PathType.OUTER, piece.getPathType());
+        // 다음 이동(개)에서만 FROM5로 변경
+        board.movePiece(piece, YutResult.GAE);
+        assertEquals(PathType.FROM5, piece.getPathType());
+    }
+
+    /**
+     * 2) 업기(Stack) & 업힌 말 캡처:
+     *    두 말을 같은 칸에 모아서 stack, 잡히면 둘 다 reset 되는지 확인합니다.
+     */
+    @Test
+    void stackingAndCapture_resetsAllStacked() {
+        Player targetOwner = new Player(0, "P1", 2);
+        List<Piece> targetPieces = targetOwner.getPieces();
+        Piece a = targetPieces.get(0);
+        Piece b = targetPieces.get(1);
+        assertEquals(0, a.getPosition().index());
+        assertEquals(0, b.getPosition().index());
+
+        Player attacker = new Player(1, "P2", 1);
+        Piece captor = attacker.getPieces().get(0);
+        assertEquals(0, captor.getPosition().index());
+
+        var caps = new CaptureManager().handleCaptures(
+                List.of(captor),
+                List.of(targetOwner, attacker)
+        );
+
+        assertTrue(caps.containsKey(captor));
+        assertTrue(caps.get(captor).containsAll(List.of(a, b)));
+        assertEquals(a.getStartPosition(), a.getPosition());
+        assertEquals(b.getStartPosition(), b.getPosition());
+    }
+
+    /**
+     * 3) 골인(Goal-in) 시 턴 전환 & 게임 종료:
+     *    마지막 말까지 골인 시 다음 플레이어가 없어 game.isFinished()==true 가 되는지 확인합니다.
+     */
+    @Test
+    void finishingAllPieces_setsGameFinished() {
+        // Arrange: finish both players' pieces by moving to goal index
+        Piece p1Piece = p1.getPieces().get(0);
+        Piece p2Piece = p2.getPieces().get(0);
+        List<model.position.Position> path = game.getBoard().getStrategy().getPath();
+        p1Piece.setCustomPath(path);
+        p1Piece.moveTo(path.get(path.size() - 1), path.size() - 1);
+        game.startTurn();
+        game.getTurnManager().nextTurn(); // switch to p2
+        p2Piece.setCustomPath(path);
+        p2Piece.moveTo(path.get(path.size() - 1), path.size() - 1);
+
+        // Assert: both players' pieces are finished
+        assertTrue(p1.hasAllPiecesFinished());
+        assertTrue(p2.hasAllPiecesFinished());
+    }
+
+    /**
+     * 4) PentagonPathStrategy / HexPathStrategy 동작 검증:
+     *    오각형·육각형 판에서도 corner 진입→다음 이동에서 커스텀 경로 전환이 잘 되는지.
+     */
+    @Test
+    void pentagonAndHexagon_strategiesSwitchAtCorner() {
+        game = new Game(new model.board.Board(new model.strategy.PentagonPathStrategy()), List.of(p1));
+        Board pent = game.getBoard();
+        Piece pp = p1.getPieces().get(0);
+        pp.setCustomPath(pent.getStrategy().getPath());
+        pent.movePiece(pp, YutResult.MO);
+        assertEquals(PathType.OUTER, pp.getPathType());
+        pent.movePiece(pp, YutResult.GAE);
+        assertEquals(PathType.FROM5, pp.getPathType());
+
+        game = new Game(new model.board.Board(new model.strategy.HexPathStrategy()), List.of(p1));
+        Board hex = game.getBoard();
+        Piece hh = p1.getPieces().get(0);
+        hh.setCustomPath(hex.getStrategy().getPath());
+        hex.movePiece(hh, YutResult.MO);
+        assertEquals(PathType.OUTER, hh.getPathType());
+        hex.movePiece(hh, YutResult.GAE);
+        assertEquals(PathType.FROM5, hh.getPathType());
+    }
+
+
+
 }
