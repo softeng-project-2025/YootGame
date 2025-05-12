@@ -30,7 +30,7 @@ public class DrawBoard extends JPanel {
             model.position.Position p2 = allVertexPositions.get(i+1);
 
             int x1 = p1.x() + marginX;
-            int y1 = p1.x() + marginY;
+            int y1 = p1.y() + marginY;
             int x2 = p2.x() + marginX;
             int y2 = p2.y() + marginY;
 
