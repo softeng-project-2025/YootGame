@@ -198,10 +198,12 @@ public class SquarePathStrategy implements PathStrategy {
     // for drawing board's background line
     private List<Position> createAllVertexPositions() {
         int[] coords = {
+                // outer lines
                 5, 10,
                 10, 15,
                 15, 20,
                 20, 5,
+                // inner lines
                 5, 15,
                 10, 20
         };
