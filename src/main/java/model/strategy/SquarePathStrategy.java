@@ -10,6 +10,25 @@ import java.util.List;
 import java.util.Map;
 import model.piece.PathType;
 
+/**
+ * All indexes of SquarePathStrategy follow under figure.
+ *⠀⠀⠀⠀10⡶⠲⠲⠲ 9⠲⠲⠲ 8⠲⠲⠲⠲ 7 ⠲⠲ 6⠲⠲⠲ 5
+ *⠀⠀⠀⠀⢸⡇⠙⢦⡄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣤⠟⠁⣿
+ *⠀⠀⠀⠀⢸⡇⠀⠀ 23⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀  21⠀⠀⠀⣿
+ *⠀⠀⠀⠀ 11⠀⠀⠀⠀⠙⢦⣀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⡤⠟⠁⠀⠀⠀⠀4
+ *⠀⠀⠀⠀⢸⡇⠀⠀⠀⠀⠀⠀⠙⢦⣀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣰⠏⠁⠀⠀⠀⠀⠀⠀⣿
+ *⠀⠀⠀⠀⢸⡇⠀⠀⠀⠀⠀⠀⠀⠀ 24 ⠀⠀⠀⠀⠀⠀⠀22⠀⠀⠀⠀⠀⠀⠀⠀⠀⣿
+ *⠀⠀⠀⠀ 12⠀⠀⠀⠀⠀⠀⠀⠀⠀⠙⢧⡀⠀⠀⠀⣴⠟⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀3
+ *⠀⠀⠀⠀⢸⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠛⢧⣴⠟⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣿⠀
+ *⠀⠀⠀⠀⢸⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣤ 29 ⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣿
+ *⠀⠀⠀⠀ 13 ⠀⠀⠀⠀⠀⠀⠀⠀⢀⣠⠞⠁⠀⠀⠀⠛⣦⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀2
+ *⠀⠀⠀⠀⢸⡇⠀⠀⠀⠀⠀⠀⠀  25⠀⠀⠀⠀⠀⠀⠀ 27 ⠀⠀⠀⠀⠀⠀⠀⠀⣿
+ *⠀⠀⠀⠀⢸⡇⠀⠀⠀⠀⠀⠀⣰⠞⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠹⢦⡀⠀⠀⠀⠀⠀⠀⣿
+ *⠀⠀⠀⠀ 14⠀⠀⠀⠀⣠⠟⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠙⣦⡀⠀⠀⠀⠀1
+ *⠀⠀⠀⠀⢸⡇⠀⠀ 26⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀ 28 ⠀⠀⣿
+ *⠀⠀⠀⠀⢸⡇⣰⠞⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠙⢦⡀⣿
+ *⠀⠀⠀⠀15⢥⣤⢤ 16 ⣤ 17 ⢤⣤ 18 ⢤⣤ 19 ⣤⢤ 20
+ */
 public class SquarePathStrategy implements PathStrategy {
 
     private final List<Position> allPositions;
@@ -44,7 +63,7 @@ public class SquarePathStrategy implements PathStrategy {
         // 모에 있었다가 백도 받아서 윷에 있었을 때
         if (
                 pathType == PathType.FROM5
-                && pathIndex == 4
+                        && pathIndex == 4
         ) {
             piece.setPathType(PathType.OUTER);
             piece.setCustomPath(outerPath);
@@ -61,7 +80,7 @@ public class SquarePathStrategy implements PathStrategy {
         // 뒷모에 있었다가 백도를 받아서 뒷윷에 있었을 때
         if (
                 pathType == PathType.FROM10
-                && pathIndex == 9
+                        && pathIndex == 9
         ) {
             piece.setPathType(PathType.OUTER);
             piece.setCustomPath(outerPath);
@@ -71,7 +90,7 @@ public class SquarePathStrategy implements PathStrategy {
         // 모도, 모개로 와서 방에 있었을 때
         if (
                 pathType == PathType.FROM5
-                && pathIndex == 8
+                        && pathIndex == 8
         ) {
             piece.setPathType(PathType.FROM5CENTER);
             piece.setCustomPath(pathFrom5Center);
@@ -81,7 +100,7 @@ public class SquarePathStrategy implements PathStrategy {
         // from5이면서 방 들어갔다가 빽도로 나오면 pathFrom5로 변경
         if (
                 pathType == PathType.FROM5CENTER
-                && pathIndex == 7
+                        && pathIndex == 7
         ) {
             piece.setPathType(PathType.FROM5);
             piece.setCustomPath(pathFrom5);
