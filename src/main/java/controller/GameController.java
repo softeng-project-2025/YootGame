@@ -44,7 +44,7 @@ public class GameController {
         service.startTurn();
 
         // 초기 DTO 생성·렌더
-        GameStateDto dto = GameStateDto.empty();
+        GameStateDto dto = buildDto(null, "게임을 시작하세요.", MessageType.INFO);
         view.renderGame(dto);
     }
 

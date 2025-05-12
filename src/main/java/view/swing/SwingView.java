@@ -60,6 +60,8 @@ public class SwingView extends JFrame implements View {
             boardPanel.setBackground(Color.WHITE);
             JScrollPane scrollPane = new JScrollPane(boardPanel);
             add(scrollPane, BorderLayout.CENTER);
+            this.revalidate();
+            this.repaint();
         }
         boardPanel.removeAll();
 
