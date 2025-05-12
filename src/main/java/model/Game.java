@@ -5,7 +5,9 @@ import java.util.*;
 import exception.GameInitializationException;
 import model.board.Board;
 import model.manager.TurnManager;
+import model.piece.Piece;
 import model.player.Player;
+import model.position.Position;
 import model.state.GameOverState;
 import model.state.WaitingForThrowState;
 import model.state.GameState;
@@ -32,9 +34,19 @@ public class Game {
         this.board = board;
         this.players = new ArrayList<>(players);
         this.turnManager = new TurnManager(this.players);
+
+        if (board.getStrategy() != null) {
+            List<Position> basePath = board.getStrategy().getPath();
+            for (Player p : this.players) {
+                for (Piece piece : p.getPieces()) {
+                    piece.setCustomPath(basePath);
+                }
+            }
+        }
         this.currentState = new WaitingForThrowState(this);
         startTurn();
     }
+
 
     private void validatePlayers(List<Player> players) {
         if (players == null || players.size() < MIN_PLAYERS || players.size() > MAX_PLAYERS) {
@@ -110,6 +122,18 @@ public class Game {
         currentState.onExit(this);
         this.currentState = next;
         currentState.onEnter(this);
+    }
+
+    public void reset() {
+        for (Player p : players) {
+            for (Piece piece : p.getPieces()) {
+                piece.resetToStart();
+                piece.setCustomPath(board.getStrategy().getPath());
+            }
+        }
+        turnManager.reset();
+        this.currentState = new WaitingForThrowState(this);
+        startTurn();
     }
 
 }

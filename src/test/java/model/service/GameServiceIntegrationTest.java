@@ -7,6 +7,7 @@ import model.manager.CaptureManager;
 import model.manager.GroupManager;
 import model.position.Position;
 import model.state.GameOverState;
+import model.state.WaitingForThrowState;
 import model.strategy.SquarePathStrategy;
 import model.strategy.PentagonPathStrategy;
 import model.strategy.HexPathStrategy;
@@ -21,6 +22,8 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 
 class GameServiceIntegrationTest {
     private Board squareBoard;
@@ -33,7 +36,7 @@ class GameServiceIntegrationTest {
         squareBoard = new Board(new SquarePathStrategy());
         p1 = new Player(0, "P1", 2);
         p2 = new Player(1, "P2", 2);
-        game = new Game(squareBoard, List.of(p1, p2));
+        game = spy(new Game(squareBoard, List.of(p1, p2)));
         service = new GameService(game);
     }
 
@@ -242,4 +245,39 @@ class GameServiceIntegrationTest {
         assertTrue(grouped.containsAll(multi.getPieces()),
                 "groupMap 에 두 말 모두 포함되어야 한다");
     }
+
+
+
+    @Test
+    void restartGame_resetsAllState() {
+        // 1) 기존 게임에서 일부 말 이동·캡처·골인
+        service.throwYut(YutResult.DO);
+        service.selectPiece(p1.getPieces().get(0), YutResult.DO);
+        assertTrue(game.getTurnResult().hasPending()); // 상태 변화 확인
+
+        // 2) 재시작 API 호출
+        service.restartGame();
+
+        // 3) 초기화 확인
+        assertTrue(game.getState() instanceof WaitingForThrowState);
+        assertFalse(game.getTurnResult().hasPending());
+        // 말들도 모두 시작 위치로 돌아갔는지
+        for (Player pl : game.getPlayers()) {
+            for (Piece pc : pl.getPieces()) {
+                assertEquals(pc.getStartPosition(), pc.getPosition());
+            }
+        }
+    }
+
+    @Test
+    void restartGame_resetsGameAndTurnAndPieces() {
+        // given
+        service.throwYut(YutResult.DO);
+        service.selectPiece(p1.getPieces().get(0), YutResult.DO);
+        // when
+        service.restartGame();
+        // then
+        verify(game).reset();
+    }
+
 }

@@ -1,5 +1,6 @@
 package model.service;
 
+import model.Game;
 import model.dto.MoveFailType;
 import model.dto.MoveResult;
 import model.dto.NextStateHint;
@@ -10,10 +11,14 @@ import model.player.Player;
 import model.state.*;
 import model.turn.TurnResult;
 import model.yut.YutResult;
+import model.yut.YutThrower;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.MockedStatic;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -317,6 +322,53 @@ class GameServiceTest {
     void getGame_returnsOriginalGame() {
         assertSame(mockGame, sut.getGame());
     }
+
+    @Test
+    void randomThrowYut_delegatesToYutThrowerAndReturnsValidResult() {
+        // 1) mockGame.getTurnResult() 가 null 을 리턴하지 않도록 미리 준비
+        TurnResult fakeTr = new TurnResult();
+        when(mockGame.getTurnResult()).thenReturn(fakeTr);
+
+        // 2) GameState 와 TurnManager 도 stub (CanThrowYut 이어야 내부 분기 통과)
+        CanThrowYut throwState = mock(CanThrowYut.class);
+        when(mockGame.getState()).thenReturn(throwState);
+        when(mockGame.isFinished()).thenReturn(false);
+
+        // 3) YutThrower.throwYut() 이 MO 를 반환하도록 mocking
+        try (MockedStatic<YutThrower> mockYut = mockStatic(YutThrower.class)) {
+            mockYut.when(YutThrower::throwYut).thenReturn(YutResult.MO);
+
+            // 4) handleYutThrow 에도 MoveResult 를 리턴하도록 stub
+            MoveResult expected = MoveResult.success(
+                    YutResult.MO,
+                    /*captured*/ false,
+                    /*bonusTurn*/ false,
+                    /*winner*/ null,
+                    /*game*/ mockGame
+            );
+            when(throwState.handleYutThrow(YutResult.MO)).thenReturn(expected);
+
+            // 5) 실제 호출
+            MoveResult actual = sut.throwYut();
+
+            assertSame(expected, actual);
+            // pending 에도 잘 기록됐는지
+            assertTrue(fakeTr.hasPending());
+        }
+    }
+    @Test
+    void randomThrowYut_generatesOnlyValidYutResults() {
+        Set<YutResult> seen = new HashSet<>();
+        for (int i = 0; i < 100; i++) {
+            MoveResult r = sut.throwYut();
+            assertNotNull(r.yutResult());
+            seen.add(r.yutResult());
+        }
+        // 6가지 중 최소 대부분이 나오는지 간단히 체크
+        assertTrue(seen.containsAll(List.of(YutResult.DO, YutResult.GAE, YutResult.GEOL, YutResult.YUT, YutResult.MO, YutResult.BACK_DO)));
+    }
+
+
 
 
 

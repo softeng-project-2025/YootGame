@@ -152,4 +152,8 @@ public class GameService {
     public Game getGame() {
         return game;
     }
+
+    public void restartGame() {
+        game.reset();
+    }
 }
