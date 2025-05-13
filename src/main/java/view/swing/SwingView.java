@@ -186,37 +186,35 @@ public class SwingView extends JFrame implements View {
 
     @Override
     public void showGameSetupDialog() {
-        JPanel panel = new JPanel(new GridLayout(3, 2));
 
-        JTextField playerCountField = new JTextField("2");
-        JTextField pieceCountField = new JTextField("3");
+        SpinnerNumberModel playerModel = new SpinnerNumberModel(2, 2, 4, 1);
+        SpinnerNumberModel pieceModel  = new SpinnerNumberModel(2, 2, 5, 1);
+
+        JSpinner playerCountSpinner = new JSpinner(playerModel);
+        JSpinner pieceCountSpinner  = new JSpinner(pieceModel);
         JComboBox<String> boardTypeBox = new JComboBox<>(new String[]{"square", "pentagon", "hexagon"});
 
+        JPanel panel = new JPanel(new GridLayout(3, 2));
         panel.add(new JLabel("플레이어 수:"));
-        panel.add(playerCountField);
+        panel.add(playerCountSpinner);
         panel.add(new JLabel("말 개수:"));
-        panel.add(pieceCountField);
+        panel.add(pieceCountSpinner);
         panel.add(new JLabel("보드 타입:"));
         panel.add(boardTypeBox);
 
         int result = JOptionPane.showConfirmDialog(
-                this, panel, "게임 설정", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+                this, panel, "게임 설정",
+                JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE
+        );
 
         if (result == JOptionPane.OK_OPTION) {
-            try {
-                int playerCount = Integer.parseInt(playerCountField.getText());
-                int pieceCount = Integer.parseInt(pieceCountField.getText());
-                String boardType = (String) boardTypeBox.getSelectedItem();
-
-                controller.initializeGame(playerCount, pieceCount, boardType);
-
-
-            } catch (NumberFormatException e) {
-                showMessage("숫자를 올바르게 입력해주세요.");
-                showGameSetupDialog(); // 재귀 호출로 다시 띄움
-            }
+            // 범위를 벗어날 일이 없으므로 바로 컨트롤러 호출
+            int playerCount = (Integer) playerCountSpinner.getValue();
+            int pieceCount  = (Integer) pieceCountSpinner.getValue();
+            String boardType = (String) boardTypeBox.getSelectedItem();
+            controller.initializeGame(playerCount, pieceCount, boardType);
         } else {
-            System.exit(0); // 취소 누르면 종료
+            System.exit(0);
         }
     }
 
