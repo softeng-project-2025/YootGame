@@ -322,7 +322,7 @@ public class HexPathStrategy implements PathStrategy {
     }
 
     private List<Position> createPathFrom5Center() {
-        int[] coords = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 33, 34, 43, 41, 42, 30, 44};
+        int[] coords = {0, 1, 2, 3, 4, 5, 31, 32, 43, 41, 42, 30, 44};
         return createPath(coords);
     }
 
