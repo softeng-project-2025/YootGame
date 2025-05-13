@@ -73,7 +73,7 @@ public class SwingView extends JFrame implements View {
                 ));
 
         // 2) 그룹별로 버튼 생성, 같은 좌표 업힌 말들은 위로 오프셋
-        final int OFFSET = 12;
+        final int OFFSET = PIECE_OFFSET;
         for (var entry : groups.entrySet()) {
             List<PieceInfo> grp = entry.getValue();
             int size = grp.size();
