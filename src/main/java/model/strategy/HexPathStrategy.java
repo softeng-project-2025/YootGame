@@ -62,141 +62,165 @@ public class HexPathStrategy implements PathStrategy {
     @Override
     public Position getNextPosition(Piece piece, YutResult result) {
         PathType pathType = piece.getPathType();
-        int pathIndex = piece.getPathIndex();
+        List<Position> path = piece.getCustomPath();
+        int nextIndex = Math.min(piece.getPathIndex() + result.getStep(), path.size() - 1);
 
         // 모에 있었을 때 + 모든 5까지의 경로는 OUTER경로를 따르기에 조건 충분
-        if (pathIndex == 5) {
+        if (nextIndex == 5) {
             piece.setPathType(PathType.FROM5);
             piece.setCustomPath(pathFrom5);
             piece.setPathIndex(5);
         }
 
-        // 모에 있었다가 백도 받아서 윷에 있었을 때
-        if (
-                pathType == PathType.FROM5
-                        && pathIndex == 4
-        ) {
-            piece.setPathType(PathType.OUTER);
-            piece.setCustomPath(outerPath);
-            piece.setPathIndex(4);
-        }
-
         // 뒷모에 있었을 때
-        if (pathIndex == 10 && pathType == PathType.OUTER) {
+        if (
+                pathType == PathType.OUTER
+                        && nextIndex == 10
+        ) {
             piece.setPathType(PathType.FROM10);
             piece.setCustomPath(pathFrom10);
             piece.setPathIndex(10);
         }
 
-        // 뒷모에 있었다가 백도를 받아서 뒷윷에 있었을 때
         if (
-                pathType == PathType.FROM10
-                        && pathIndex == 9
+                pathType == PathType.OUTER
+                        && nextIndex == 15
         ) {
-            piece.setPathType(PathType.OUTER);
-            piece.setCustomPath(outerPath);
-            piece.setPathIndex(9);
-        }
-
-        if (pathIndex == 15 && pathType == PathType.OUTER) {
             piece.setPathType(PathType.FROM15);
             piece.setCustomPath(pathFrom15);
             piece.setPathIndex(15);
         }
 
         if (
+                pathType == PathType.OUTER
+                        && nextIndex == 20
+        ) {
+            piece.setPathType(PathType.FROM20);
+            piece.setCustomPath(pathFrom20);
+            piece.setPathIndex(20);
+        }
+
+        if (pathType == PathType.FROM5) {
+            if (nextIndex == 8) {
+                piece.setPathType(PathType.FROM5CENTER);
+                piece.setCustomPath(pathFrom5Center);
+                piece.setPathIndex(8);
+            }
+        }
+
+        if (pathType == PathType.FROM10) {
+            if (nextIndex == 13) {
+                piece.setPathType(PathType.FROM10CENTER);
+                piece.setCustomPath(pathFrom10Center);
+                piece.setPathIndex(13);
+            }
+        }
+
+        if (
                 pathType == PathType.FROM15
-                        && pathIndex == 14
+                        && nextIndex == 18
+        ) {
+            piece.setPathType(PathType.FROM15CENTER);
+            piece.setCustomPath(pathFrom15Center);
+            piece.setPathIndex(18);
+        }
+
+        if (
+                pathType == PathType.FROM20
+                        && nextIndex == 23
+        ) {
+            piece.setPathType(PathType.FROM20CENTER);
+            piece.setCustomPath(pathFrom20Center);
+            piece.setPathIndex(23);
+        }
+
+        return path.get(nextIndex);
+    }
+
+    @Override
+    public Position getPreviousPosition(Piece piece, YutResult result) {
+        PathType pathType = piece.getPathType();
+        int prevIndex = piece.getPathIndex() - 1;
+
+        if (prevIndex == 0) {
+            piece.setPathType(PathType.OUTER);
+            piece.setCustomPath(outerPath);
+            piece.setPathIndex(30);
+            prevIndex = 30;
+        }
+
+        // 모에 있었다가 백도 받아서 윷에 있었을 때
+        if (
+                pathType == PathType.FROM5
+                        && prevIndex == 4
+        ) {
+            piece.setPathType(PathType.OUTER);
+            piece.setCustomPath(outerPath);
+            piece.setPathIndex(4);
+        }
+
+        // 뒷모에 있었다가 백도를 받아서 뒷윷에 있었을 때
+        if (
+                pathType == PathType.FROM10
+                        && prevIndex == 9
+        ) {
+            piece.setPathType(PathType.OUTER);
+            piece.setCustomPath(outerPath);
+            piece.setPathIndex(9);
+        }
+
+        if (
+                pathType == PathType.FROM15
+                        && prevIndex == 14
         ) {
             piece.setPathType(PathType.OUTER);
             piece.setCustomPath(outerPath);
             piece.setPathIndex(14);
         }
 
-        if (pathIndex == 20 && pathType == PathType.OUTER) {
-            piece.setPathType(PathType.FROM20);
-            piece.setCustomPath(pathFrom20);
-            piece.setPathIndex(20);
-        }
-
         if (
                 pathType == PathType.FROM20
-                        && pathIndex == 19
+                        && prevIndex == 19
         ) {
             piece.setPathType(PathType.OUTER);
             piece.setCustomPath(outerPath);
             piece.setPathIndex(19);
         }
 
-        if (pathType == PathType.FROM5) {
-            if (pathIndex == 8) {
-                piece.setPathType(PathType.FROM5CENTER);
-                piece.setCustomPath(pathFrom5Center);
-                piece.setPathIndex(8);
-            }
-            else if (pathIndex == 7) {
-                piece.setPathType(PathType.FROM5);
-                piece.setCustomPath(pathFrom5);
-                piece.setPathIndex(7);
-            }
-        }
-        else if (pathType == PathType.FROM10) {
-            if (pathIndex == 13) {
-                piece.setPathType(PathType.FROM10CENTER);
-                piece.setCustomPath(pathFrom10Center);
-                piece.setPathIndex(13);
-            }
-            else if (pathIndex == 12) {
-                piece.setPathType(PathType.FROM10);
-                piece.setCustomPath(pathFrom10);
-                piece.setPathIndex(12);
-            }
-        }
-        else if (pathType == PathType.FROM15) {
-            if (pathIndex == 18) {
-                piece.setPathType(PathType.FROM15CENTER);
-                piece.setCustomPath(pathFrom15Center);
-                piece.setPathIndex(18);
-            }
-            else if (pathIndex == 17) {
-                piece.setPathType(PathType.FROM15);
-                piece.setCustomPath(pathFrom15);
-                piece.setPathIndex(17);
-            }
-        }
-        else if (pathType == PathType.FROM20) {
-            if (pathIndex == 23) {
-                piece.setPathType(PathType.FROM20CENTER);
-                piece.setCustomPath(pathFrom20Center);
-                piece.setPathIndex(23);
-            }
-            else if (pathIndex == 22) {
-                piece.setPathType(PathType.FROM20);
-                piece.setCustomPath(pathFrom20);
-                piece.setPathIndex(22);
-            }
+        if (
+                pathType == PathType.FROM5
+                        && prevIndex == 7
+        ) {
+            piece.setPathType(PathType.FROM5);
+            piece.setCustomPath(pathFrom5);
+            piece.setPathIndex(7);
         }
 
-        List<Position> path = piece.getCustomPath();
-        pathIndex = piece.getPathIndex();
-        int nextIdx = pathIndex + result.getStep();
-        if (nextIdx >= path.size()) {
-            nextIdx = path.size() - 1;
+        if (
+                pathType == PathType.FROM10
+                        && prevIndex == 12
+        ) {
+            piece.setPathType(PathType.FROM10);
+            piece.setCustomPath(pathFrom10);
+            piece.setPathIndex(12);
         }
 
-        return path.get(nextIdx);
-    }
+        if (
+                pathType == PathType.FROM15
+                        && prevIndex == 17
+        ) {
+            piece.setPathType(PathType.FROM15);
+            piece.setCustomPath(pathFrom15);
+            piece.setPathIndex(17);
+        }
 
-    @Override
-    public Position getPreviousPosition(Piece piece, YutResult result) {
-        int pathIndex = piece.getPathIndex();
-        int prevIndex = pathIndex - 1;
-
-        if (pathIndex == 1) {
-            piece.setPathType(PathType.OUTER);
-            piece.setCustomPath(outerPath);
-            piece.setPathIndex(30);
-            prevIndex = 30;
+        if (
+                pathType == PathType.FROM20
+                        && prevIndex == 22
+        ) {
+            piece.setPathType(PathType.FROM20);
+            piece.setCustomPath(pathFrom20);
+            piece.setPathIndex(22);
         }
 
         List<Position> path = piece.getCustomPath();
@@ -322,7 +346,7 @@ public class HexPathStrategy implements PathStrategy {
     }
 
     private List<Position> createPathFrom5Center() {
-        int[] coords = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 33, 34, 43, 41, 42, 30, 44};
+        int[] coords = {0, 1, 2, 3, 4, 5, 31, 32, 43, 41, 42, 30, 44};
         return createPath(coords);
     }
 
