@@ -50,14 +50,10 @@ public class SquarePathStrategy implements PathStrategy {
     public Position getNextPosition(Piece piece, YutResult result) {
         PathType pathType = piece.getPathType();
         List<Position> path = piece.getCustomPath();
-        int pathIndex = piece.getPathIndex();
-        int nextIdx = pathIndex + result.getStep();
-        if (nextIdx >= path.size()) {
-            nextIdx = path.size() - 1;
-        }
+        int nextIndex = Math.min(piece.getPathIndex() + result.getStep(), path.size() - 1);
 
         // 모에 있었을 때 + 5번째까지는 모든 경로가 OUTER를 따르기에 조건 충분
-        if (nextIdx == 5) {
+        if (nextIndex == 5) {
             piece.setPathType(PathType.FROM5);
             piece.setCustomPath(pathFrom5);
             piece.setPathIndex(5);
@@ -66,7 +62,7 @@ public class SquarePathStrategy implements PathStrategy {
         // 뒷모에 있었을 때 + 외곽 경로에서 왔을 때만 인정
         if (
                 pathType == PathType.OUTER
-                        && nextIdx == 10
+                        && nextIndex == 10
         ) {
             piece.setPathType(PathType.FROM10);
             piece.setCustomPath(pathFrom10);
@@ -76,21 +72,27 @@ public class SquarePathStrategy implements PathStrategy {
         // (모도, 모개 || 속윷에 있다가 빽도)로 와서 방에 있었을 때
         if (
                 pathType == PathType.FROM5
-                        && nextIdx == 8
+                        && nextIndex == 8
         ) {
             piece.setPathType(PathType.FROM5CENTER);
             piece.setCustomPath(pathFrom5Center);
             piece.setPathIndex(8);
         }
 
-        return path.get(nextIdx);
+        return path.get(nextIndex);
     }
 
     @Override
     public Position getPreviousPosition(Piece piece, YutResult result) {
-        int pathIndex = piece.getPathIndex();
-        int prevIndex = pathIndex - 1;
+        int prevIndex = piece.getPathIndex() - 1;
         PathType pathType = piece.getPathType();
+
+        if (prevIndex == 0) {
+            piece.setPathType(PathType.OUTER);
+            piece.setCustomPath(outerPath);
+            piece.setPathIndex(20);
+            prevIndex = 20;
+        }
 
         // 모에 있었다가 백도 받아서 윷에 있었을 때
         if (
@@ -130,13 +132,6 @@ public class SquarePathStrategy implements PathStrategy {
             piece.setPathType(PathType.FROM5);
             piece.setCustomPath(pathFrom5);
             piece.setPathIndex(7);
-        }
-
-        if (pathIndex == 1) {
-            piece.setPathType(PathType.OUTER);
-            piece.setCustomPath(outerPath);
-            piece.setPathIndex(20);
-            prevIndex = 20;
         }
 
         List<Position> path = piece.getCustomPath();

@@ -63,11 +63,7 @@ public class HexPathStrategy implements PathStrategy {
     public Position getNextPosition(Piece piece, YutResult result) {
         PathType pathType = piece.getPathType();
         List<Position> path = piece.getCustomPath();
-        int pathIndex = piece.getPathIndex();
-        int nextIndex = pathIndex + result.getStep();
-        if (nextIndex >= path.size()) {
-            nextIndex = path.size() - 1;
-        }
+        int nextIndex = Math.min(piece.getPathIndex() + result.getStep(), path.size() - 1);
 
         // 모에 있었을 때 + 모든 5까지의 경로는 OUTER경로를 따르기에 조건 충분
         if (nextIndex == 5) {
@@ -144,10 +140,9 @@ public class HexPathStrategy implements PathStrategy {
     @Override
     public Position getPreviousPosition(Piece piece, YutResult result) {
         PathType pathType = piece.getPathType();
-        int pathIndex = piece.getPathIndex();
-        int prevIndex = pathIndex - 1;
+        int prevIndex = piece.getPathIndex() - 1;
 
-        if (pathIndex == 1) {
+        if (prevIndex == 0) {
             piece.setPathType(PathType.OUTER);
             piece.setCustomPath(outerPath);
             piece.setPathIndex(30);
