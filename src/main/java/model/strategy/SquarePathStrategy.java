@@ -49,67 +49,38 @@ public class SquarePathStrategy implements PathStrategy {
     @Override
     public Position getNextPosition(Piece piece, YutResult result) {
         PathType pathType = piece.getPathType();
+        List<Position> path = piece.getCustomPath();
         int pathIndex = piece.getPathIndex();
+        int nextIdx = pathIndex + result.getStep();
+        if (nextIdx >= path.size()) {
+            nextIdx = path.size() - 1;
+        }
 
         // 모에 있었을 때 + 5번째까지는 모든 경로가 OUTER를 따르기에 조건 충분
-        if (pathIndex == 5) {
+        if (nextIdx == 5) {
             piece.setPathType(PathType.FROM5);
             piece.setCustomPath(pathFrom5);
             piece.setPathIndex(5);
         }
 
-        // 모에 있었다가 백도 받아서 윷에 있었을 때
-        if (
-                pathType == PathType.FROM5
-                        && pathIndex == 4
-        ) {
-            piece.setPathType(PathType.OUTER);
-            piece.setCustomPath(outerPath);
-            piece.setPathIndex(4);
-        }
-
         // 뒷모에 있었을 때 + 외곽 경로에서 왔을 때만 인정
-        if (pathIndex == 10 && pathType == PathType.OUTER) {
+        if (
+                pathType == PathType.OUTER
+                        && nextIdx == 10
+        ) {
             piece.setPathType(PathType.FROM10);
             piece.setCustomPath(pathFrom10);
             piece.setPathIndex(10);
         }
 
-        // 뒷모에 있었다가 백도를 받아서 뒷윷에 있었을 때
-        if (
-                pathType == PathType.FROM10
-                        && pathIndex == 9
-        ) {
-            piece.setPathType(PathType.OUTER);
-            piece.setCustomPath(outerPath);
-            piece.setPathIndex(9);
-        }
-
         // (모도, 모개 || 속윷에 있다가 빽도)로 와서 방에 있었을 때
         if (
                 pathType == PathType.FROM5
-                        && pathIndex == 8
+                        && nextIdx == 8
         ) {
             piece.setPathType(PathType.FROM5CENTER);
             piece.setCustomPath(pathFrom5Center);
             piece.setPathIndex(8);
-        }
-
-        // from5이면서 방 들어갔다가 빽도로 나오면 pathFrom5로 변경
-        if (
-                pathType == PathType.FROM5CENTER
-                        && pathIndex == 7
-        ) {
-            piece.setPathType(PathType.FROM5);
-            piece.setCustomPath(pathFrom5);
-            piece.setPathIndex(7);
-        }
-
-        List<Position> path = piece.getCustomPath();
-        pathIndex = piece.getPathIndex();
-        int nextIdx = pathIndex + result.getStep();
-        if (nextIdx >= path.size()) {
-            nextIdx = path.size() - 1;
         }
 
         return path.get(nextIdx);
@@ -119,6 +90,47 @@ public class SquarePathStrategy implements PathStrategy {
     public Position getPreviousPosition(Piece piece, YutResult result) {
         int pathIndex = piece.getPathIndex();
         int prevIndex = pathIndex - 1;
+        PathType pathType = piece.getPathType();
+
+        // 모에 있었다가 백도 받아서 윷에 있었을 때
+        if (
+                pathType == PathType.FROM5
+                        && prevIndex == 4
+        ) {
+            piece.setPathType(PathType.OUTER);
+            piece.setCustomPath(outerPath);
+            piece.setPathIndex(4);
+        }
+
+        // 뒷모에 있었다가 백도를 받아서 뒷윷에 있었을 때
+        if (
+                pathType == PathType.FROM10
+                        && prevIndex == 9
+        ) {
+            piece.setPathType(PathType.OUTER);
+            piece.setCustomPath(outerPath);
+            piece.setPathIndex(9);
+        }
+
+        // (모도, 모개 || 속윷에 있다가 빽도)로 와서 방에 있었을 때
+        if (
+                pathType == PathType.FROM5
+                        && prevIndex == 8
+        ) {
+            piece.setPathType(PathType.FROM5CENTER);
+            piece.setCustomPath(pathFrom5Center);
+            piece.setPathIndex(8);
+        }
+
+        // from5이면서 방 들어갔다가 빽도로 나오면 pathFrom5로 변경
+        if (
+                pathType == PathType.FROM5CENTER
+                        && prevIndex == 7
+        ) {
+            piece.setPathType(PathType.FROM5);
+            piece.setCustomPath(pathFrom5);
+            piece.setPathIndex(7);
+        }
 
         if (pathIndex == 1) {
             piece.setPathType(PathType.OUTER);

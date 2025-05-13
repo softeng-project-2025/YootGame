@@ -59,8 +59,15 @@ public class PentagonPathStrategy implements PathStrategy {
         PathType pathType = piece.getPathType();
         int pathIndex = piece.getPathIndex();
 
+        List<Position> path = piece.getCustomPath();
+        pathIndex = piece.getPathIndex();
+        int nextIndex = pathIndex + result.getStep();
+        if (nextIndex >= path.size()) {
+            nextIndex = path.size() - 1;
+        }
+
         // 모에 있었을 때 + 5까지는 모두 OUTER를 따르기에 조건 충분
-        if (pathIndex == 5) {
+        if (nextIndex == 5) {
             piece.setPathType(PathType.FROM5);
             piece.setCustomPath(pathFrom5);
             piece.setPathIndex(5);
@@ -69,7 +76,7 @@ public class PentagonPathStrategy implements PathStrategy {
         // 모에 있었다가 백도 받아서 윷에 있었을 때
         if (
                 pathType == PathType.FROM5
-                        && pathIndex == 4
+                        && nextIndex == 4
         ) {
             piece.setPathType(PathType.OUTER);
             piece.setCustomPath(outerPath);
@@ -77,7 +84,10 @@ public class PentagonPathStrategy implements PathStrategy {
         }
 
         // 뒷모에 있었을 때 + 외곽 경로를 따라와서 모서리로 도착했을 때에만
-        if (pathIndex == 10 && pathType == PathType.OUTER) {
+        if (
+                pathType == PathType.OUTER
+                        && nextIndex == 10
+        ) {
             piece.setPathType(PathType.FROM10);
             piece.setCustomPath(pathFrom10);
             piece.setPathIndex(10);
@@ -86,7 +96,7 @@ public class PentagonPathStrategy implements PathStrategy {
         // 뒷모에 있었다가 백도를 받아서 뒷윷에 있었을 때
         if (
                 pathType == PathType.FROM10
-                        && pathIndex == 9
+                        && nextIndex == 9
         ) {
             piece.setPathType(PathType.OUTER);
             piece.setCustomPath(outerPath);
@@ -94,7 +104,10 @@ public class PentagonPathStrategy implements PathStrategy {
         }
 
         // "외곽 경로를 따라와서 모서리에 도착했을 때에만" 조건 추간
-        if (pathIndex == 15 && pathType == PathType.OUTER) {
+        if (
+                pathType == PathType.OUTER
+                        && nextIndex == 15
+        ) {
             piece.setPathType(PathType.FROM15);
             piece.setCustomPath(pathFrom15);
             piece.setPathIndex(15);
@@ -102,7 +115,7 @@ public class PentagonPathStrategy implements PathStrategy {
 
         if (
                 pathType == PathType.FROM15
-                && pathIndex == 14
+                        && nextIndex == 14
         ) {
             piece.setPathType(PathType.OUTER);
             piece.setCustomPath(outerPath);
@@ -110,54 +123,48 @@ public class PentagonPathStrategy implements PathStrategy {
         }
 
         if (pathType == PathType.FROM5) {
-            if (pathIndex == 8) {
+            if (nextIndex == 8) {
                 piece.setPathType(PathType.FROM5CENTER);
                 piece.setCustomPath(pathFrom5Center);
                 piece.setPathIndex(8);
             }
-            else if (pathIndex == 7) {
+            else if (nextIndex == 7) {
                 piece.setPathType(PathType.FROM5);
                 piece.setCustomPath(pathFrom5);
                 piece.setPathIndex(7);
             }
         }
         else if (pathType == PathType.FROM10) {
-            if (pathIndex == 13) {
+            if (nextIndex == 13) {
                 piece.setPathType(PathType.FROM10CENTER);
                 piece.setCustomPath(pathFrom10Center);
                 piece.setPathIndex(13);
             }
-            else if (pathIndex == 12) {
+            else if (nextIndex == 12) {
                 piece.setPathType(PathType.FROM10);
                 piece.setCustomPath(pathFrom10);
                 piece.setPathIndex(12);
             }
         }
         else if (pathType == PathType.FROM15) {
-            if (pathIndex == 18) {
+            if (nextIndex == 18) {
                 piece.setPathType(PathType.FROM15CENTER);
                 piece.setCustomPath(pathFrom15Center);
                 piece.setPathIndex(18);
             }
-            else if (pathIndex == 17) {
+            else if (nextIndex == 17) {
                 piece.setPathType(PathType.FROM15);
                 piece.setCustomPath(pathFrom15);
                 piece.setPathIndex(17);
             }
         }
 
-        List<Position> path = piece.getCustomPath();
-        pathIndex = piece.getPathIndex();
-        int nextIdx = pathIndex + result.getStep();
-        if (nextIdx >= path.size()) {
-            nextIdx = path.size() - 1;
-        }
-
-        return path.get(nextIdx);
+        return path.get(nextIndex);
     }
 
     @Override
     public Position getPreviousPosition(Piece piece, YutResult result) {
+        PathType pathType = piece.getPathType();
         int pathIndex = piece.getPathIndex();
         int prevIndex = pathIndex - 1;
 
@@ -166,6 +173,99 @@ public class PentagonPathStrategy implements PathStrategy {
             piece.setCustomPath(outerPath);
             piece.setPathIndex(25);
             prevIndex = 25;
+        }
+
+        // 모에 있었을 때 + 5까지는 모두 OUTER를 따르기에 조건 충분
+        if (prevIndex == 5) {
+            piece.setPathType(PathType.FROM5);
+            piece.setCustomPath(pathFrom5);
+            piece.setPathIndex(5);
+        }
+
+        // 모에 있었다가 백도 받아서 윷에 있었을 때
+        if (
+                pathType == PathType.FROM5
+                        && prevIndex == 4
+        ) {
+            piece.setPathType(PathType.OUTER);
+            piece.setCustomPath(outerPath);
+            piece.setPathIndex(4);
+        }
+
+        // 뒷모에 있었을 때 + 외곽 경로를 따라와서 모서리로 도착했을 때에만
+        if (
+                pathType == PathType.OUTER
+                        && prevIndex == 10
+        ) {
+            piece.setPathType(PathType.FROM10);
+            piece.setCustomPath(pathFrom10);
+            piece.setPathIndex(10);
+        }
+
+        // 뒷모에 있었다가 백도를 받아서 뒷윷에 있었을 때
+        if (
+                pathType == PathType.FROM10
+                        && prevIndex == 9
+        ) {
+            piece.setPathType(PathType.OUTER);
+            piece.setCustomPath(outerPath);
+            piece.setPathIndex(9);
+        }
+
+        // "외곽 경로를 따라와서 모서리에 도착했을 때에만" 조건 추간
+        if (
+                pathType == PathType.OUTER
+                        && prevIndex == 15
+        ) {
+            piece.setPathType(PathType.FROM15);
+            piece.setCustomPath(pathFrom15);
+            piece.setPathIndex(15);
+        }
+
+        if (
+                pathType == PathType.FROM15
+                        && prevIndex == 14
+        ) {
+            piece.setPathType(PathType.OUTER);
+            piece.setCustomPath(outerPath);
+            piece.setPathIndex(14);
+        }
+
+        if (pathType == PathType.FROM5) {
+            if (prevIndex == 8) {
+                piece.setPathType(PathType.FROM5CENTER);
+                piece.setCustomPath(pathFrom5Center);
+                piece.setPathIndex(8);
+            }
+            else if (prevIndex == 7) {
+                piece.setPathType(PathType.FROM5);
+                piece.setCustomPath(pathFrom5);
+                piece.setPathIndex(7);
+            }
+        }
+        else if (pathType == PathType.FROM10) {
+            if (prevIndex == 13) {
+                piece.setPathType(PathType.FROM10CENTER);
+                piece.setCustomPath(pathFrom10Center);
+                piece.setPathIndex(13);
+            }
+            else if (prevIndex == 12) {
+                piece.setPathType(PathType.FROM10);
+                piece.setCustomPath(pathFrom10);
+                piece.setPathIndex(12);
+            }
+        }
+        else if (pathType == PathType.FROM15) {
+            if (prevIndex == 18) {
+                piece.setPathType(PathType.FROM15CENTER);
+                piece.setCustomPath(pathFrom15Center);
+                piece.setPathIndex(18);
+            }
+            else if (prevIndex == 17) {
+                piece.setPathType(PathType.FROM15);
+                piece.setCustomPath(pathFrom15);
+                piece.setPathIndex(17);
+            }
         }
 
         List<Position> path = piece.getCustomPath();
