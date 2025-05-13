@@ -96,14 +96,12 @@ public class SwingView extends JFrame implements View {
         resultLabel = new JLabel("결과: ", SwingConstants.CENTER);
         add(resultLabel, BorderLayout.NORTH);
 
-        randomThrowButton = new JButton("랜덤 윷 던지기");
-        randomThrowButton.addActionListener(e -> controller.onRandomThrow());
-
-
-
         restartButton = new JButton("다시 시작");
         restartButton.setEnabled(false);
         restartButton.addActionListener(e -> controller.onRestartGame());
+
+        randomThrowButton = new JButton("랜덤 윷 던지기");
+        randomThrowButton.addActionListener(e -> controller.onRandomThrow());
 
         // 콤보박스 생성 및 기본값 설정
         yutChoiceBox = new JComboBox<>(YutResult.getNames());
@@ -121,8 +119,8 @@ public class SwingView extends JFrame implements View {
         BackDoButton = new JButton("빽도 x 0");
 
         JPanel leftButtons = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        leftButtons.add(randomThrowButton);
         leftButtons.add(restartButton);
+        leftButtons.add(randomThrowButton);
         leftButtons.add(selectThrowButton);
         leftButtons.add(yutChoiceBox);
 
@@ -222,10 +220,26 @@ public class SwingView extends JFrame implements View {
 
     @Override
     public void showWinner(Player winner) {
-        JOptionPane.showMessageDialog(this,
-                winner.getName() + "님이 모두 도착해 승리했습니다!",
+        String message = winner.getName() + "님이 모두 도착해 승리했습니다!";
+        String[] options = {"다시 시작", "종료"};
+        int choice = JOptionPane.showOptionDialog(
+                this,
+                message,
                 "게임 종료",
-                JOptionPane.INFORMATION_MESSAGE);
+                JOptionPane.DEFAULT_OPTION,
+                JOptionPane.INFORMATION_MESSAGE,
+                null,
+                options,
+                options[0]   // 기본 선택은 “다시 시작”
+        );
+
+        if (choice == 0) {
+            // 다시 시작
+            controller.initializeGameDialog();
+        } else {
+            // 종료
+            System.exit(0);
+        }
     }
 
     @Override
