@@ -191,7 +191,7 @@ public class PentagonPathStrategy implements PathStrategy {
         List<Position> positions = new ArrayList<>();
         int[][] allCoords = {
                 {5000, 5000},   // 0
-                {529, 526},
+                {519, 526},
                 {543, 452},
                 {567, 378},
                 {591, 304},
