@@ -21,7 +21,7 @@ public class DrawBoard extends JPanel {
         java.util.List<model.position.Position> allPositions = pathStrategy.getAllPositions();
         java.util.List<model.position.Position> allVertexPositions = pathStrategy.getAllVertexPositions();
 
-        int marginX = 70;
+        int marginX = 50;
         int marginY = (getHeight() - 600) / 2;
 
         // draw line
@@ -47,7 +47,7 @@ public class DrawBoard extends JPanel {
     }
 
     private void drawNoon(model.position.Position position, Graphics2D g2, int r) {
-        int marginX = 70;
+        int marginX = 50;
         int marginY = (getHeight() - 600) / 2;
 
         int x = position.x() + marginX - r;
