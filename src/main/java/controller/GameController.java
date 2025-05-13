@@ -51,13 +51,13 @@ public class GameController {
     // 3) 랜덤 윷 던지기
     public void onRandomThrow() {
         MoveResult result = service.throwYut();
-        view.renderGame(buildDto(result, null, null));
+        view.renderGame(buildDto(result, result.yutResult().toString() + "이(가) 나왔습니다.", null));
     }
 
     // 4) 지정 윷 던지기 (테스트용)
     public void onDesignatedThrow(YutResult yut) {
         MoveResult result = service.throwYut(yut);
-        view.renderGame(buildDto(result, null, null));
+        view.renderGame(buildDto(result, result.yutResult().toString() + "이(가) 나왔습니다.", null));
     }
 
     // 5) 말 선택 (뷰에서 ID를 찾는 메서드 쓰거나, Piece 객체 직접 넘겨도 됨)
@@ -67,7 +67,7 @@ public class GameController {
                 .filter(p -> p.getId() == pieceId)
                 .findFirst()
                 .ifPresentOrElse(
-                        piece -> onSelectPiece(piece),
+                        this::onSelectPiece,
                         () -> view.showMessage("선택한 말을 찾을 수 없습니다: ID=" + pieceId)
                 );
     }
@@ -76,7 +76,7 @@ public class GameController {
                 piece,
                 service.getGame().getTurnResult().getLastResult()
         );
-        view.renderGame(buildDto(result, null, null));
+        view.renderGame(buildDto(result, result.movedPiece().getId() + "번 말을 옮겼습니다.", null));
     }
 
     // DTO 생성 헬퍼
@@ -115,6 +115,7 @@ public class GameController {
         view.renderGame(buildDto(null, "게임을 시작하세요.", MessageType.INFO));
     }
 
+    @Deprecated
     public GameStateDto getInitialGameStateDto() {
         // 예시: 빈 보드, 버튼만 세팅한 DTO
         return GameStateDto.empty();
