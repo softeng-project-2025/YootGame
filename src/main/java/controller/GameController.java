@@ -99,8 +99,7 @@ public class GameController {
                 break;
             case GAME_ENDED:
                 Player winner = result.winner();
-                view.showWinner(winner);
-                view.promptRestart(this);
+                view.showWinner(winner); // Ensure this method includes restart logic.
                 break;
         }
     }
