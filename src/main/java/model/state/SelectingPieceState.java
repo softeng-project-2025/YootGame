@@ -45,9 +45,10 @@ public class SelectingPieceState implements CanSelectPiece {
                 .collect(Collectors.toList());
         GroupManager.GroupKey oldKey =
                 new GroupManager.GroupKey(piece.getOwner(), piece.getPosition());
+        Map<GroupManager.GroupKey, List<Piece>> groupMap =
+                groupManager.computeGroups(allPieces);
         List<Piece> riding =
-                groupManager.computeGroups(allPieces)
-                        .getOrDefault(oldKey, List.of());
+                groupMap.getOrDefault(oldKey, List.of());
 
         // 3) 대표 말 이동
         turnResult.apply(yut, piece);                           // 기록만
