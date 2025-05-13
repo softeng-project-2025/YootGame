@@ -14,7 +14,7 @@ public class CylinderButton extends JButton {
 
     /* DrawBoard 와 동일한 여백 상수 */
     private static final int BOARD_W  = 600;  // 보드 세로 영역(픽셀)
-    private static final int MARGIN_X = 70;
+    private static final int MARGIN_X = 50;
 
     private Position pos;                     // 게임 상의 논리적 위치
 
