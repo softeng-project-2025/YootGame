@@ -26,7 +26,6 @@ public class SwingView extends JFrame implements View {
     private JPanel boardPanel;
     private JButton randomThrowButton;
     private JButton selectThrowButton;
-    private JButton restartButton;
     private JButton DoButton;
     private JButton GaeButton;
     private JButton GeolButton;
@@ -80,7 +79,6 @@ public class SwingView extends JFrame implements View {
         boolean gameOver = dto.gameOver();
         randomThrowButton.setEnabled(!gameOver);
         selectThrowButton.setEnabled(!gameOver && !dto.pendingYuts().isEmpty());
-        restartButton.setEnabled(gameOver);
 
         // 결과 및 상태 표시
         resultLabel.setText("결과: " + (dto.lastYut() != null ? dto.lastYut().getName() : ""));
@@ -95,10 +93,6 @@ public class SwingView extends JFrame implements View {
     private void initUI() {
         resultLabel = new JLabel("결과: ", SwingConstants.CENTER);
         add(resultLabel, BorderLayout.NORTH);
-
-        restartButton = new JButton("다시 시작");
-        restartButton.setEnabled(false);
-        restartButton.addActionListener(e -> controller.onRestartGame());
 
         randomThrowButton = new JButton("랜덤 윷 던지기");
         randomThrowButton.addActionListener(e -> controller.onRandomThrow());
@@ -119,7 +113,6 @@ public class SwingView extends JFrame implements View {
         BackDoButton = new JButton("빽도 x 0");
 
         JPanel leftButtons = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        leftButtons.add(restartButton);
         leftButtons.add(randomThrowButton);
         leftButtons.add(selectThrowButton);
         leftButtons.add(yutChoiceBox);
@@ -171,7 +164,6 @@ public class SwingView extends JFrame implements View {
 
         randomThrowButton.setEnabled(!finished);
         selectThrowButton.setEnabled(!finished);
-        restartButton.setEnabled(finished);
 
         boardPanel.revalidate();
         boardPanel.repaint();
@@ -262,7 +254,6 @@ public class SwingView extends JFrame implements View {
         statusLabel.setText("게임을 시작하세요.");
         randomThrowButton.setEnabled(true);
         selectThrowButton.setEnabled(true);
-        restartButton.setEnabled(false);
         updateMoveButtons(List.of());
     }
 
