@@ -56,7 +56,6 @@ public class SelectingPieceState implements CanSelectPiece {
         // 4) 그룹원도 함께 이동
         for (Piece p : riding) {
             if (p != piece) {
-                turnResult.apply(yut, p);                        // (선택) 기록
                 game.getBoard().movePiece(p, yut);               // 실제 위치 변경
             }
         }
