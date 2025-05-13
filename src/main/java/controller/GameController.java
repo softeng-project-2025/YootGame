@@ -112,6 +112,7 @@ public class GameController {
     public void onRestartGame() {
         service.restartGame();
         view.resetUI();
+        view.renderGame(buildDto(null, "게임을 시작하세요.", MessageType.INFO));
     }
 
     public GameStateDto getInitialGameStateDto() {
