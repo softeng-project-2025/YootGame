@@ -49,36 +49,65 @@ public class SquarePathStrategy implements PathStrategy {
     @Override
     public Position getNextPosition(Piece piece, YutResult result) {
         PathType pathType = piece.getPathType();
-        int pathIndex = piece.getPathIndex();
+        List<Position> path = piece.getCustomPath();
+        int nextIndex = Math.min(piece.getPathIndex() + result.getStep(), path.size() - 1);
 
         // 모에 있었을 때 + 5번째까지는 모든 경로가 OUTER를 따르기에 조건 충분
-        if (pathIndex == 5) {
+        if (nextIndex == 5) {
             piece.setPathType(PathType.FROM5);
             piece.setCustomPath(pathFrom5);
             piece.setPathIndex(5);
         }
 
+        // 뒷모에 있었을 때 + 외곽 경로에서 왔을 때만 인정
+        if (
+                pathType == PathType.OUTER
+                        && nextIndex == 10
+        ) {
+            piece.setPathType(PathType.FROM10);
+            piece.setCustomPath(pathFrom10);
+            piece.setPathIndex(10);
+        }
+
+        // (모도, 모개 || 속윷에 있다가 빽도)로 와서 방에 있었을 때
+        if (
+                pathType == PathType.FROM5
+                        && nextIndex == 8
+        ) {
+            piece.setPathType(PathType.FROM5CENTER);
+            piece.setCustomPath(pathFrom5Center);
+            piece.setPathIndex(8);
+        }
+
+        return path.get(nextIndex);
+    }
+
+    @Override
+    public Position getPreviousPosition(Piece piece, YutResult result) {
+        int prevIndex = piece.getPathIndex() - 1;
+        PathType pathType = piece.getPathType();
+
+        if (prevIndex == 0) {
+            piece.setPathType(PathType.OUTER);
+            piece.setCustomPath(outerPath);
+            piece.setPathIndex(20);
+            prevIndex = 20;
+        }
+
         // 모에 있었다가 백도 받아서 윷에 있었을 때
         if (
                 pathType == PathType.FROM5
-                        && pathIndex == 4
+                        && prevIndex == 4
         ) {
             piece.setPathType(PathType.OUTER);
             piece.setCustomPath(outerPath);
             piece.setPathIndex(4);
         }
 
-        // 뒷모에 있었을 때 + 외곽 경로에서 왔을 때만 인정
-        if (pathIndex == 10 && pathType == PathType.OUTER) {
-            piece.setPathType(PathType.FROM10);
-            piece.setCustomPath(pathFrom10);
-            piece.setPathIndex(10);
-        }
-
         // 뒷모에 있었다가 백도를 받아서 뒷윷에 있었을 때
         if (
                 pathType == PathType.FROM10
-                        && pathIndex == 9
+                        && prevIndex == 9
         ) {
             piece.setPathType(PathType.OUTER);
             piece.setCustomPath(outerPath);
@@ -88,7 +117,7 @@ public class SquarePathStrategy implements PathStrategy {
         // (모도, 모개 || 속윷에 있다가 빽도)로 와서 방에 있었을 때
         if (
                 pathType == PathType.FROM5
-                        && pathIndex == 8
+                        && prevIndex == 8
         ) {
             piece.setPathType(PathType.FROM5CENTER);
             piece.setCustomPath(pathFrom5Center);
@@ -98,33 +127,11 @@ public class SquarePathStrategy implements PathStrategy {
         // from5이면서 방 들어갔다가 빽도로 나오면 pathFrom5로 변경
         if (
                 pathType == PathType.FROM5CENTER
-                        && pathIndex == 7
+                        && prevIndex == 7
         ) {
             piece.setPathType(PathType.FROM5);
             piece.setCustomPath(pathFrom5);
             piece.setPathIndex(7);
-        }
-
-        List<Position> path = piece.getCustomPath();
-        pathIndex = piece.getPathIndex();
-        int nextIdx = pathIndex + result.getStep();
-        if (nextIdx >= path.size()) {
-            nextIdx = path.size() - 1;
-        }
-
-        return path.get(nextIdx);
-    }
-
-    @Override
-    public Position getPreviousPosition(Piece piece, YutResult result) {
-        int pathIndex = piece.getPathIndex();
-        int prevIndex = pathIndex - 1;
-
-        if (pathIndex == 1) {
-            piece.setPathType(PathType.OUTER);
-            piece.setCustomPath(outerPath);
-            piece.setPathIndex(20);
-            prevIndex = 20;
         }
 
         List<Position> path = piece.getCustomPath();
