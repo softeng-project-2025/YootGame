@@ -34,29 +34,31 @@ import java.util.List;
 public class HexPathStrategy implements PathStrategy {
 
     private final List<Position> allPositions;
-    private final List<Position> allVertexPositions;
-    private final List<Position> outerPath;
-    private final List<Position> pathFrom5;
-    private final List<Position> pathFrom10;
-    private final List<Position> pathFrom15;
-    private final List<Position> pathFrom20;
-    private final List<Position> pathFrom5Center;
-    private final List<Position> pathFrom10Center;
-    private final List<Position> pathFrom15Center;
-    private final List<Position> pathFrom20Center;
+    private final int[] allVertexPositions = {
+            // outer lines
+            5, 10,
+            10, 15,
+            15, 20,
+            20, 25,
+            25, 30,
+            30, 5,
+            // inner lines
+            5, 20,
+            10, 25,
+            15, 30
+    };
+    private final int[] outerPath = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 44};
+    private final int[] pathFrom5 = {0, 1, 2, 3, 4, 5, 31, 32, 43, 39, 40, 25, 26, 27, 28, 29, 30, 30, 44};
+    private final int[] pathFrom10 = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 33, 34, 43, 39, 40, 25, 26, 27, 28, 29, 30, 44};
+    private final int[] pathFrom15 = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 35, 36, 43, 39, 40, 25, 26, 27, 28, 29, 30, 44};
+    private final int[] pathFrom20 = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 37, 38, 43, 39, 40, 25, 26, 27, 28, 29, 30, 44};
+    private final int[] pathFrom5Center = {0, 1, 2, 3, 4, 5, 31, 32, 43, 41, 42, 30, 44};
+    private final int[] pathFrom10Center = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 33, 34, 43, 41, 42, 30, 44};
+    private final int[] pathFrom15Center = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 35, 36, 43, 41, 42, 30, 44};
+    private final int[] pathFrom20Center = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 37, 38, 43, 41, 42, 30, 44};
 
     public HexPathStrategy() {
         allPositions = createAllPositions();
-        allVertexPositions = createAllVertexPositions();
-        outerPath = createOuterPath();
-        pathFrom5 = createPathFrom5();
-        pathFrom10 = createPathFrom10();
-        pathFrom15 = createPathFrom15();
-        pathFrom20 = createPathFrom20();
-        pathFrom5Center = createPathFrom5Center();
-        pathFrom10Center = createPathFrom10Center();
-        pathFrom15Center = createPathFrom15Center();
-        pathFrom20Center = createPathFrom20Center();
     }
 
     @Override
@@ -68,7 +70,7 @@ public class HexPathStrategy implements PathStrategy {
         // 모에 있었을 때 + 모든 5까지의 경로는 OUTER경로를 따르기에 조건 충분
         if (nextIndex == 5) {
             piece.setPathType(PathType.FROM5);
-            piece.setCustomPath(pathFrom5);
+            piece.setCustomPath(createPath(pathFrom5));
             piece.setPathIndex(5);
         }
 
@@ -78,7 +80,7 @@ public class HexPathStrategy implements PathStrategy {
                         && nextIndex == 10
         ) {
             piece.setPathType(PathType.FROM10);
-            piece.setCustomPath(pathFrom10);
+            piece.setCustomPath(createPath(pathFrom10));
             piece.setPathIndex(10);
         }
 
@@ -87,7 +89,7 @@ public class HexPathStrategy implements PathStrategy {
                         && nextIndex == 15
         ) {
             piece.setPathType(PathType.FROM15);
-            piece.setCustomPath(pathFrom15);
+            piece.setCustomPath(createPath(pathFrom15));
             piece.setPathIndex(15);
         }
 
@@ -96,14 +98,14 @@ public class HexPathStrategy implements PathStrategy {
                         && nextIndex == 20
         ) {
             piece.setPathType(PathType.FROM20);
-            piece.setCustomPath(pathFrom20);
+            piece.setCustomPath(createPath(pathFrom20));
             piece.setPathIndex(20);
         }
 
         if (pathType == PathType.FROM5) {
             if (nextIndex == 8) {
                 piece.setPathType(PathType.FROM5CENTER);
-                piece.setCustomPath(pathFrom5Center);
+                piece.setCustomPath(createPath(pathFrom5Center));
                 piece.setPathIndex(8);
             }
         }
@@ -111,7 +113,7 @@ public class HexPathStrategy implements PathStrategy {
         if (pathType == PathType.FROM10) {
             if (nextIndex == 13) {
                 piece.setPathType(PathType.FROM10CENTER);
-                piece.setCustomPath(pathFrom10Center);
+                piece.setCustomPath(createPath(pathFrom10Center));
                 piece.setPathIndex(13);
             }
         }
@@ -121,7 +123,7 @@ public class HexPathStrategy implements PathStrategy {
                         && nextIndex == 18
         ) {
             piece.setPathType(PathType.FROM15CENTER);
-            piece.setCustomPath(pathFrom15Center);
+            piece.setCustomPath(createPath(pathFrom15Center));
             piece.setPathIndex(18);
         }
 
@@ -130,7 +132,7 @@ public class HexPathStrategy implements PathStrategy {
                         && nextIndex == 23
         ) {
             piece.setPathType(PathType.FROM20CENTER);
-            piece.setCustomPath(pathFrom20Center);
+            piece.setCustomPath(createPath(pathFrom20Center));
             piece.setPathIndex(23);
         }
 
@@ -144,7 +146,7 @@ public class HexPathStrategy implements PathStrategy {
 
         if (prevIndex == 0) {
             piece.setPathType(PathType.OUTER);
-            piece.setCustomPath(outerPath);
+            piece.setCustomPath(createPath(outerPath));
             piece.setPathIndex(30);
             prevIndex = 30;
         }
@@ -155,7 +157,7 @@ public class HexPathStrategy implements PathStrategy {
                         && prevIndex == 4
         ) {
             piece.setPathType(PathType.OUTER);
-            piece.setCustomPath(outerPath);
+            piece.setCustomPath(createPath(outerPath));
             piece.setPathIndex(4);
         }
 
@@ -165,7 +167,7 @@ public class HexPathStrategy implements PathStrategy {
                         && prevIndex == 9
         ) {
             piece.setPathType(PathType.OUTER);
-            piece.setCustomPath(outerPath);
+            piece.setCustomPath(createPath(outerPath));
             piece.setPathIndex(9);
         }
 
@@ -174,7 +176,7 @@ public class HexPathStrategy implements PathStrategy {
                         && prevIndex == 14
         ) {
             piece.setPathType(PathType.OUTER);
-            piece.setCustomPath(outerPath);
+            piece.setCustomPath(createPath(outerPath));
             piece.setPathIndex(14);
         }
 
@@ -183,7 +185,7 @@ public class HexPathStrategy implements PathStrategy {
                         && prevIndex == 19
         ) {
             piece.setPathType(PathType.OUTER);
-            piece.setCustomPath(outerPath);
+            piece.setCustomPath(createPath(outerPath));
             piece.setPathIndex(19);
         }
 
@@ -192,7 +194,7 @@ public class HexPathStrategy implements PathStrategy {
                         && prevIndex == 7
         ) {
             piece.setPathType(PathType.FROM5);
-            piece.setCustomPath(pathFrom5);
+            piece.setCustomPath(createPath(pathFrom5));
             piece.setPathIndex(7);
         }
 
@@ -201,7 +203,7 @@ public class HexPathStrategy implements PathStrategy {
                         && prevIndex == 12
         ) {
             piece.setPathType(PathType.FROM10);
-            piece.setCustomPath(pathFrom10);
+            piece.setCustomPath(createPath(pathFrom10));
             piece.setPathIndex(12);
         }
 
@@ -210,7 +212,7 @@ public class HexPathStrategy implements PathStrategy {
                         && prevIndex == 17
         ) {
             piece.setPathType(PathType.FROM15);
-            piece.setCustomPath(pathFrom15);
+            piece.setCustomPath(createPath(pathFrom15));
             piece.setPathIndex(17);
         }
 
@@ -219,7 +221,7 @@ public class HexPathStrategy implements PathStrategy {
                         && prevIndex == 22
         ) {
             piece.setPathType(PathType.FROM20);
-            piece.setCustomPath(pathFrom20);
+            piece.setCustomPath(createPath(pathFrom20));
             piece.setPathIndex(22);
         }
 
@@ -229,7 +231,7 @@ public class HexPathStrategy implements PathStrategy {
 
     @Override
     public java.util.List<Position> getPath() {
-        return outerPath;
+        return createPath(outerPath);
     }
 
     public List<Position> getAllPositions() {
@@ -238,7 +240,7 @@ public class HexPathStrategy implements PathStrategy {
 
     @Override
     public List<Position> getAllVertexPositions() {
-        return allVertexPositions;
+        return createPath(allVertexPositions);
     }
 
     private List<Position> createAllPositions() {
@@ -300,69 +302,6 @@ public class HexPathStrategy implements PathStrategy {
         }
 
         return positions;
-    }
-
-    // for drawing board's background line
-    private List<Position> createAllVertexPositions() {
-        int [] coords = {
-                // outer lines
-                5, 10,
-                10, 15,
-                15, 20,
-                20, 25,
-                25, 30,
-                30, 5,
-                // inner lines
-                5, 20,
-                10, 25,
-                15, 30
-        };
-        return createPath(coords);
-    }
-
-    private List<Position> createOuterPath() {
-        int[] coords = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 44};
-        return createPath(coords);
-    }
-
-    private List<Position> createPathFrom5() {
-        int[] coords = {0, 1, 2, 3, 4, 5, 31, 32, 43, 39, 40, 25, 26, 27, 28, 29, 30, 30, 44};
-        return createPath(coords);
-    }
-
-    private List<Position> createPathFrom10() {
-        int[] coords = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 33, 34, 43, 39, 40, 25, 26, 27, 28, 29, 30, 44};
-        return createPath(coords);
-    }
-
-    private List<Position> createPathFrom15() {
-        int[] coords = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 35, 36, 43, 39, 40, 25, 26, 27, 28, 29, 30, 44};
-        return createPath(coords);
-    }
-
-    private List<Position> createPathFrom20() {
-        int[] coords = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 37, 38, 43, 39, 40, 25, 26, 27, 28, 29, 30, 44};
-        return createPath(coords);
-    }
-
-    private List<Position> createPathFrom5Center() {
-        int[] coords = {0, 1, 2, 3, 4, 5, 31, 32, 43, 41, 42, 30, 44};
-        return createPath(coords);
-    }
-
-    private List<Position> createPathFrom10Center() {
-        int[] coords = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 33, 34, 43, 41, 42, 30, 44};
-        return createPath(coords);
-    }
-
-    private List<Position> createPathFrom15Center() {
-        int[] coords = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 35, 36, 43, 41, 42, 30, 44};
-        return createPath(coords);
-    }
-
-    private List<Position> createPathFrom20Center() {
-        int[] coords = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 37, 38, 43, 41, 42, 30, 44};
-        return createPath(coords);
     }
 
     private List<Position> createPath(int[] coords) {
