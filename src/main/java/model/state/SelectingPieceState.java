@@ -6,6 +6,7 @@ import model.manager.CaptureManager;
 import model.manager.GroupManager;
 import model.manager.VictoryManager;
 import model.piece.Piece;
+import model.position.Position;
 import model.turn.TurnResult;
 import model.yut.YutResult;
 
@@ -38,24 +39,38 @@ public class SelectingPieceState implements CanSelectPiece {
             return MoveResult.fail(yut, MoveFailType.NO_RESULT);
         }
 
-        // 2) 기록 & 이동
-        turnResult.apply(yut, piece);
-        var newPos = game.getBoard().movePiece(piece, yut);
+        // 2) 이동 전: 같은 칸에서 업힐 말 그룹 미리 계산
+        List<Piece> allPieces = game.getPlayers().stream()
+                .flatMap(p -> p.getPieces().stream())
+                .collect(Collectors.toList());
+        GroupManager.GroupKey oldKey =
+                new GroupManager.GroupKey(piece.getOwner(), piece.getPosition());
+        List<Piece> riding =
+                groupManager.computeGroups(allPieces)
+                        .getOrDefault(oldKey, List.of());
 
-        // 3) 캡처 처리
+        // 3) 대표 말 이동
+        turnResult.apply(yut, piece);                           // 기록만
+        Position newPos = game.getBoard().movePiece(piece, yut); // 실제 위치 변경
+
+        // 4) 그룹원도 함께 이동
+        for (Piece p : riding) {
+            if (p != piece) {
+                turnResult.apply(yut, p);                        // (선택) 기록
+                game.getBoard().movePiece(p, yut);               // 실제 위치 변경
+            }
+        }
+
+        // 5) 캡처 처리
         Map<Piece, List<Piece>> captures = captureManager.handleCaptures(
                 List.of(piece), game.getPlayers());
         boolean didCapture = captures.containsKey(piece);
 
-        // 4) 그룹핑 처리
-        List<Piece> allPieces = game.getPlayers().stream()
-                .flatMap(p -> p.getPieces().stream())
-                .collect(Collectors.toList());
-        Map<GroupManager.GroupKey, List<Piece>> groupMap = groupManager.computeGroups(allPieces);
-        boolean didGroup = groupMap.containsKey(new GroupManager.GroupKey(piece.getOwner(), newPos));
+        // 6) 그룹
+        Map<GroupManager.GroupKey, List<Piece>> groupMap =
+                groupManager.computeGroups(allPieces);
 
-
-        // 5) 승리 검사
+        // 7) 승리 검사
         boolean isGameOver = VictoryManager.hasPlayerWon(piece.getOwner());
         if (isGameOver) {
             game.transitionTo(new GameOverState());
@@ -63,14 +78,14 @@ public class SelectingPieceState implements CanSelectPiece {
                     .withNextStateHint(NextStateHint.GAME_ENDED);
         }
 
-        // 6) 다음 상태 힌트 계산
+        // 8) 다음 상태 힌트 계산
         boolean bonusTurn = (yut == YutResult.YUT || yut == YutResult.MO) ^ didCapture;
         boolean hasMore = turnResult.hasPending();
         NextStateHint hint = bonusTurn ? NextStateHint.WAITING_FOR_THROW
                 : hasMore  ? NextStateHint.STAY
                 : NextStateHint.NEXT_TURN;
 
-        // 7) 상태 전이 및 턴 전환
+        // 9) 상태 전이 및 턴 전환
         if (hint == NextStateHint.NEXT_TURN) {
             game.startTurn();
             game.getTurnManager().nextTurn();
