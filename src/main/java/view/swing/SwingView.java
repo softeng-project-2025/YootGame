@@ -105,11 +105,13 @@ public class SwingView extends JFrame implements View {
         restartButton.setEnabled(false);
         restartButton.addActionListener(e -> controller.onRestartGame());
 
+        // 콤보박스 생성 및 기본값 설정
+        yutChoiceBox = new JComboBox<>(YutResult.getNames());
+        yutChoiceBox.setSelectedIndex(1);
         selectThrowButton = new JButton("지정 윷 던지기");
         selectThrowButton.addActionListener(e -> controller.onDesignatedThrow(
                 YutResult.fromName((String) yutChoiceBox.getSelectedItem())
         ));
-        yutChoiceBox = new JComboBox<>(YutResult.getNames());
 
         DoButton = new JButton("도 x 0");
         GaeButton = new JButton("개 x 0");
