@@ -51,7 +51,7 @@ public class SquarePathStrategy implements PathStrategy {
         PathType pathType = piece.getPathType();
         int pathIndex = piece.getPathIndex();
 
-        // 모에 있었을 때
+        // 모에 있었을 때 + 5번째까지는 모든 경로가 OUTER를 따르기에 조건 충분
         if (pathIndex == 5) {
             piece.setPathType(PathType.FROM5);
             piece.setCustomPath(pathFrom5);
@@ -68,8 +68,8 @@ public class SquarePathStrategy implements PathStrategy {
             piece.setPathIndex(4);
         }
 
-        // 뒷모에 있었을 때
-        if (pathIndex == 10) {
+        // 뒷모에 있었을 때 + 외곽 경로에서 왔을 때만 인정
+        if (pathIndex == 10 && pathType == PathType.OUTER) {
             piece.setPathType(PathType.FROM10);
             piece.setCustomPath(pathFrom10);
             piece.setPathIndex(10);
