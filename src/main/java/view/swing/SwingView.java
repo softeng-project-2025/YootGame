@@ -22,6 +22,7 @@ import java.util.stream.Collectors;
  */
 public class SwingView extends JFrame implements View {
 
+    private static final int PIECE_OFFSET = 13;
     private GameStateDto currentDto;
     private GameController controller;
     private JLabel resultLabel;

@@ -66,11 +66,7 @@ public class SelectingPieceState implements CanSelectPiece {
                 List.of(piece), game.getPlayers());
         boolean didCapture = captures.containsKey(piece);
 
-        // 6) 그룹
-        Map<GroupManager.GroupKey, List<Piece>> groupMap =
-                groupManager.computeGroups(allPieces);
-
-        // 7) 승리 검사
+        // 6) 승리 검사
         boolean isGameOver = VictoryManager.hasPlayerWon(piece.getOwner());
         if (isGameOver) {
             game.transitionTo(new GameOverState());
@@ -78,21 +74,21 @@ public class SelectingPieceState implements CanSelectPiece {
                     .withNextStateHint(NextStateHint.GAME_ENDED);
         }
 
-        // 8) 다음 상태 힌트 계산
+        // 7) 다음 상태 힌트 계산
         boolean bonusTurn = (yut == YutResult.YUT || yut == YutResult.MO) ^ didCapture;
         boolean hasMore = turnResult.hasPending();
         NextStateHint hint = bonusTurn ? NextStateHint.WAITING_FOR_THROW
                 : hasMore  ? NextStateHint.STAY
                 : NextStateHint.NEXT_TURN;
 
-        // 9) 상태 전이 및 턴 전환
+        // 8) 상태 전이 및 턴 전환
         if (hint == NextStateHint.NEXT_TURN) {
             game.startTurn();
             game.getTurnManager().nextTurn();
         }
         game.transitionTo(new WaitingForThrowState(game));
 
-        // 8) MoveResult 반환
+        // 9) MoveResult 반환
         return MoveResult.success(
                 yut,
                 didCapture,
