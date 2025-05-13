@@ -52,12 +52,14 @@ public class GameController {
     public void onRandomThrow() {
         MoveResult result = service.throwYut();
         view.renderGame(buildDto(result, result.yutResult().toString() + "이(가) 나왔습니다.", null));
+        handleNextStateHint(result);
     }
 
     // 4) 지정 윷 던지기 (테스트용)
     public void onDesignatedThrow(YutResult yut) {
         MoveResult result = service.throwYut(yut);
         view.renderGame(buildDto(result, result.yutResult().toString() + "이(가) 나왔습니다.", null));
+        handleNextStateHint(result);
     }
 
     // 5) 말 선택 (뷰에서 ID를 찾는 메서드 쓰거나, Piece 객체 직접 넘겨도 됨)
@@ -71,12 +73,36 @@ public class GameController {
                         () -> view.showMessage("선택한 말을 찾을 수 없습니다: ID=" + pieceId)
                 );
     }
+
     private void onSelectPiece(Piece piece) {
         MoveResult result = service.selectPiece(
                 piece,
                 service.getGame().getTurnResult().getLastResult()
         );
         view.renderGame(buildDto(result, result.movedPiece().getId() + "번 말을 옮겼습니다.", null));
+        handleNextStateHint(result);
+    }
+
+    private void handleNextStateHint(MoveResult result) {
+        switch (result.nextStateHint()) {
+            case WAITING_FOR_THROW:
+                // 다음 단계 대기이니 따로 할 일 없음
+                break;
+            case NEXT_TURN:
+                view.updateStatus(
+                        "다음 차례: " + service.getGame().getTurnManager().currentPlayer().getName(),
+                        MessageType.INFO
+                );
+                break;
+            case STAY:
+                view.updateStatus("같은 플레이어가 한 번 더 던집니다.", MessageType.INFO);
+                break;
+            case GAME_ENDED:
+                Player winner = result.winner();
+                view.showWinner(winner);
+                view.promptRestart(this);
+                break;
+        }
     }
 
     // DTO 생성 헬퍼
@@ -120,5 +146,7 @@ public class GameController {
         // 예시: 빈 보드, 버튼만 세팅한 DTO
         return GameStateDto.empty();
     }
+
+
 
 }
