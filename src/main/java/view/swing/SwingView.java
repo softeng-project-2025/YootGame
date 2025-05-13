@@ -166,8 +166,7 @@ public class SwingView extends JFrame implements View {
             default -> color = Color.BLACK;
         }
 
-        // DTO에 담긴 pendingYuts, gameOver 정보로 버튼 상태/텍스트 업데이트
-        updateMoveButtons(currentDto.pendingYuts());
+
         boolean finished = currentDto.gameOver();
 
         randomThrowButton.setEnabled(!finished);

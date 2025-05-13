@@ -324,36 +324,39 @@ class GameServiceTest {
     }
 
     @Test
-    void randomThrowYut_delegatesToYutThrowerAndReturnsValidResult() {
-        // 1) mockGame.getTurnResult() 가 null 을 리턴하지 않도록 미리 준비
+    void randomThrowYut_addsToPendingAndReturnsStubbedResult() {
+        // 1) fakeTr 준비
         TurnResult fakeTr = new TurnResult();
         when(mockGame.getTurnResult()).thenReturn(fakeTr);
 
-        // 2) GameState 와 TurnManager 도 stub (CanThrowYut 이어야 내부 분기 통과)
-        CanThrowYut throwState = mock(CanThrowYut.class);
-        when(mockGame.getState()).thenReturn(throwState);
+        // 2) real WaitingForThrowState를 스파이로
+        WaitingForThrowState realState = new WaitingForThrowState(mockGame);
+        CanThrowYut spyState = spy(realState);
+        when(mockGame.getState()).thenReturn(spyState);
         when(mockGame.isFinished()).thenReturn(false);
 
-        // 3) YutThrower.throwYut() 이 MO 를 반환하도록 mocking
+        // 3) YutThrower.throwYut() stub
         try (MockedStatic<YutThrower> mockYut = mockStatic(YutThrower.class)) {
             mockYut.when(YutThrower::throwYut).thenReturn(YutResult.MO);
 
-            // 4) handleYutThrow 에도 MoveResult 를 리턴하도록 stub
+            // 4) handleYutThrow 호출 시 실제 add()는 실행하되,
+            //    리턴값은 우리가 만든 expected 로 덮어쓰기
             MoveResult expected = MoveResult.success(
-                    YutResult.MO,
-                    /*captured*/ false,
-                    /*bonusTurn*/ false,
-                    /*winner*/ null,
-                    /*game*/ mockGame
+                    YutResult.MO, false, false, null, mockGame
             );
-            when(throwState.handleYutThrow(YutResult.MO)).thenReturn(expected);
+            doAnswer(invocation -> {
+                // 실제 add(...) 실행
+                realState.handleYutThrow(invocation.getArgument(0));
+                // stubbed 리턴
+                return expected;
+            }).when(spyState).handleYutThrow(YutResult.MO);
 
-            // 5) 실제 호출
+            // 5) 실행
             MoveResult actual = sut.throwYut();
 
-            assertSame(expected, actual);
-            // pending 에도 잘 기록됐는지
-            assertTrue(fakeTr.hasPending());
+            // 6) 검증
+            assertSame(expected, actual, "stubbed MoveResult를 그대로 반환해야 합니다");
+            assertTrue(fakeTr.hasPending(), "실제 WaitingForThrowState.add(...)가 호출되어야 합니다");
         }
     }
     @Test

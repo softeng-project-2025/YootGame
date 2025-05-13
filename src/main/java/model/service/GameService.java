@@ -56,11 +56,6 @@ public class GameService {
             return MoveResult.gameOver(yut, safeCurrentPlayer());
         }
 
-        // 1) pending 윷 결과 기록 시도 (mock 환경에서는 safeTurnResult()가 null)
-        TurnResult tr = safeTurnResult();
-        if (tr != null) {
-            tr.add(yut);
-        }
 
         // 2) 상태 검사
         if (!(game.getState() instanceof CanThrowYut throwState)) {

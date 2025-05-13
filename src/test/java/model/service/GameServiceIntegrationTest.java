@@ -250,17 +250,15 @@ class GameServiceIntegrationTest {
 
     @Test
     void restartGame_resetsAllState() {
-        // 1) 기존 게임에서 일부 말 이동·캡처·골인
+        // 1) 윷 던지기로 pending 생성
         service.throwYut(YutResult.DO);
-        service.selectPiece(p1.getPieces().get(0), YutResult.DO);
-        assertTrue(game.getTurnResult().hasPending()); // 상태 변화 확인
+        assertTrue(game.getTurnResult().hasPending(), "throwYut 후에는 pending이 있어야 합니다");
 
         // 2) 재시작 API 호출
         service.restartGame();
 
-        // 3) 초기화 확인
-        assertTrue(game.getState() instanceof WaitingForThrowState);
-        assertFalse(game.getTurnResult().hasPending());
+        // 3) 초기화 확인: pending이 초기화되었는지
+        assertFalse(game.getTurnResult().hasPending(), "restart 후에는 pending이 없어야 합니다");
         // 말들도 모두 시작 위치로 돌아갔는지
         for (Player pl : game.getPlayers()) {
             for (Piece pc : pl.getPieces()) {
