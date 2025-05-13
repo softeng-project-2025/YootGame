@@ -64,7 +64,7 @@ public class HexPathStrategy implements PathStrategy {
         PathType pathType = piece.getPathType();
         int pathIndex = piece.getPathIndex();
 
-        // 모에 있었을 때
+        // 모에 있었을 때 + 모든 5까지의 경로는 OUTER경로를 따르기에 조건 충분
         if (pathIndex == 5) {
             piece.setPathType(PathType.FROM5);
             piece.setCustomPath(pathFrom5);
@@ -82,7 +82,7 @@ public class HexPathStrategy implements PathStrategy {
         }
 
         // 뒷모에 있었을 때
-        if (pathIndex == 10) {
+        if (pathIndex == 10 && pathType == PathType.OUTER) {
             piece.setPathType(PathType.FROM10);
             piece.setCustomPath(pathFrom10);
             piece.setPathIndex(10);
@@ -98,7 +98,7 @@ public class HexPathStrategy implements PathStrategy {
             piece.setPathIndex(9);
         }
 
-        if (pathIndex == 15) {
+        if (pathIndex == 15 && pathType == PathType.OUTER) {
             piece.setPathType(PathType.FROM15);
             piece.setCustomPath(pathFrom15);
             piece.setPathIndex(15);
@@ -113,7 +113,7 @@ public class HexPathStrategy implements PathStrategy {
             piece.setPathIndex(14);
         }
 
-        if (pathIndex == 20) {
+        if (pathIndex == 20 && pathType == PathType.OUTER) {
             piece.setPathType(PathType.FROM20);
             piece.setCustomPath(pathFrom20);
             piece.setPathIndex(20);
