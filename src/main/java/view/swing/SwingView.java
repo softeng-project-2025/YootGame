@@ -2,7 +2,6 @@ package view.swing;
 
 import model.dto.GameStateDto;
 import model.dto.MessageType;
-import model.piece.Piece;
 import model.player.Player;
 import model.position.Position;
 import model.yut.YutResult;
@@ -15,6 +14,8 @@ import java.util.List;
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * Swing 기반 View: GameStateDto를 받아 화면을 렌더링합니다.
@@ -38,7 +39,7 @@ public class SwingView extends JFrame implements View {
 
     private JButton randomThrowButton;
     private JButton selectThrowButton;
-    private JButton DoButton, GaeButton, GeolButton, YutButton, MoButton, BackDoButton;
+    private final EnumMap<YutResult, JButton> pendingButtons = new EnumMap<>(YutResult.class);
     private JComboBox<String> yutChoiceBox;
     private JLabel statusLabel;
 
@@ -80,42 +81,35 @@ public class SwingView extends JFrame implements View {
                 YutResult.fromName((String) yutChoiceBox.getSelectedItem())
         ));
 
-        // Pending Yut 선택 버튼
-        DoButton = new JButton("도 x 0");
-        DoButton.addActionListener(e -> controller.onSelectPendingYut(YutResult.DO));
+        // pending 선택 버튼
+        JButton doBtn, gaeBtn, geolBtn, yutBtn, moBtn, backDoBtn;
+        doBtn   = makePendingButton("도",   YutResult.DO);
+        gaeBtn  = makePendingButton("개",  YutResult.GAE);
+        geolBtn = makePendingButton("걸", YutResult.GEOL);
+        yutBtn  = makePendingButton("윷",  YutResult.YUT);
+        moBtn   = makePendingButton("모",   YutResult.MO);
+        backDoBtn = makePendingButton("빽도", YutResult.BACK_DO);
 
-        GaeButton = new JButton("개 x 0");
-        GaeButton.addActionListener(e -> controller.onSelectPendingYut(YutResult.GAE));
-
-        GeolButton = new JButton("걸 x 0");
-        GeolButton.addActionListener(e -> controller.onSelectPendingYut(YutResult.GEOL));
-
-        YutButton = new JButton("윷 x 0");
-        YutButton.addActionListener(e -> controller.onSelectPendingYut(YutResult.YUT));
-
-        MoButton = new JButton("모 x 0");
-        MoButton.addActionListener(e -> controller.onSelectPendingYut(YutResult.MO));
-
-        BackDoButton = new JButton("빽도 x 0");
-        BackDoButton.addActionListener(e -> controller.onSelectPendingYut(YutResult.BACK_DO));
+        pendingButtons.put(YutResult.DO,        doBtn);
+        pendingButtons.put(YutResult.GAE,       gaeBtn);
+        pendingButtons.put(YutResult.GEOL,      geolBtn);
+        pendingButtons.put(YutResult.YUT,       yutBtn);
+        pendingButtons.put(YutResult.MO,        moBtn);
+        pendingButtons.put(YutResult.BACK_DO,   backDoBtn);
 
         // 레이아웃 구성
-        JPanel leftButtons = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        leftButtons.add(randomThrowButton);
-        leftButtons.add(selectThrowButton);
-        leftButtons.add(yutChoiceBox);
+        JPanel left = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        left.add(randomThrowButton);
+        left.add(selectThrowButton);
+        left.add(yutChoiceBox);
 
-        JPanel rightButtons = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        rightButtons.add(DoButton);
-        rightButtons.add(GaeButton);
-        rightButtons.add(GeolButton);
-        rightButtons.add(YutButton);
-        rightButtons.add(MoButton);
-        rightButtons.add(BackDoButton);
+        JPanel right = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        for (JButton b : List.of(doBtn, gaeBtn, geolBtn, yutBtn, moBtn, backDoBtn))
+            right.add(b);
 
-        JPanel buttonPanel = new JPanel(new BorderLayout());
-        buttonPanel.add(leftButtons, BorderLayout.WEST);
-        buttonPanel.add(rightButtons, BorderLayout.EAST);
+        JPanel controlPanel = new JPanel(new BorderLayout());
+        controlPanel.add(left, BorderLayout.WEST);
+        controlPanel.add(right, BorderLayout.EAST);
 
         // 상태바
         statusLabel = new JLabel("게임을 시작하세요.", SwingConstants.CENTER);
@@ -123,10 +117,16 @@ public class SwingView extends JFrame implements View {
         statusLabel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
         JPanel bottomPanel = new JPanel(new BorderLayout());
-        bottomPanel.add(buttonPanel, BorderLayout.CENTER);
+        bottomPanel.add(controlPanel, BorderLayout.CENTER);
         bottomPanel.add(statusLabel, BorderLayout.SOUTH);
 
         add(bottomPanel, BorderLayout.SOUTH);
+    }
+
+    private JButton makePendingButton(String label, YutResult r) {
+        JButton b = new JButton(label + " x 0");
+        b.addActionListener(e -> controller.onSelectPendingYut(r));
+        return b;
     }
 
     @Override
@@ -219,10 +219,6 @@ public class SwingView extends JFrame implements View {
         statusLabel.setText(message);
     }
 
-    @Override
-    public void showSelectablePieces(List<Piece> pieces) {
-        // DTO 렌더링으로 대체됨
-    }
 
     @Override
     public void showGameSetupDialog() {
@@ -260,29 +256,14 @@ public class SwingView extends JFrame implements View {
 
     @Override
     public void showWinner(Player winner) {
-        String message = winner.getName() + "님이 모두 도착해 승리했습니다!";
-        String[] options = {"다시 시작", "종료"};
         int choice = JOptionPane.showOptionDialog(
-                this,
-                message,
-                "게임 종료",
-                JOptionPane.DEFAULT_OPTION,
-                JOptionPane.INFORMATION_MESSAGE,
-                null,
-                options,
-                options[0]
+                this, winner.getName()+"님 승리!", "게임 종료",
+                JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE,
+                null, new String[]{"다시 시작","종료"}, "다시 시작"
         );
 
-        if (choice == 0) {
-            controller.onRestartGame();
-        } else {
-            System.exit(0);
-        }
-    }
-
-    // 새 게임 설정 다이얼로그 전용으로 뷰를 깨끗이 초기화
-    private void prepareForNewGameSetup() {
-
+        if (choice==0) controller.onRestartGame();
+        else System.exit(0);
     }
 
     @Override
@@ -334,19 +315,18 @@ public class SwingView extends JFrame implements View {
     }
 
     public void updateMoveButtons(List<YutResult> pending) {
-        // 윷 결과별 개수를 세기 위한 EnumMap
-        EnumMap<YutResult, Integer> counter = new EnumMap<>(YutResult.class);
-        for (YutResult r : YutResult.values()) counter.put(r, 0);   // 0 으로 초기화
-        for (YutResult r : pending) {
-            counter.merge(r, 1, Integer::sum);
-        }
+        // 카운터 계산
+        Map<YutResult, Long> counts = pending.stream()
+                .collect(Collectors.groupingBy(Function.identity(),
+                        () -> new EnumMap<>(YutResult.class),
+                        Collectors.counting()));
 
-        // 버튼 텍스트 갱신
-        DoButton.setText(   "도 x "  + counter.get(YutResult.DO));
-        GaeButton.setText(  "개 x "  + counter.get(YutResult.GAE));
-        GeolButton.setText( "걸 x "  + counter.get(YutResult.GEOL));
-        YutButton.setText(  "윷 x "  + counter.get(YutResult.YUT));
-        MoButton.setText(   "모 x "  + counter.get(YutResult.MO));
-        BackDoButton.setText("빽도 x " + counter.get(YutResult.BACK_DO));
+        // 한 번의 루프로 버튼 업데이트
+        for (YutResult r : YutResult.values()) {
+            int cnt = counts.getOrDefault(r, 0L).intValue();
+            JButton btn = pendingButtons.get(r);
+            btn.setText(r.getName() + " x " + cnt);
+            btn.setEnabled(cnt > 0 && !currentDto.gameOver());
+        }
     }
 }

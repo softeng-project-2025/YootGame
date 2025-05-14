@@ -19,7 +19,6 @@ public interface View {
     void showWinner(Player currentPlayer);
 
     void updateStatus(String message, MessageType type);
-    void showSelectablePieces(List<Piece> pieces);
 
     void showGameSetupDialog();
 
