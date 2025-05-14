@@ -31,7 +31,7 @@ public class Board {
         }
         // 경로 초기화
         if (piece.getCustomPath() == null) {
-            piece.resetToStart();
+            piece.resetToStart(this);
         }
         // 다음 위치 계산
         Position next = result.getStep() < 0

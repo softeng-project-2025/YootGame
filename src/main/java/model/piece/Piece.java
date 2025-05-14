@@ -1,5 +1,6 @@
 package model.piece;
 
+import model.board.Board;
 import model.player.Player;
 import model.position.Position;
 
@@ -79,13 +80,13 @@ public class Piece {
         this.moved = false;
     }
 
-    public void resetToStart() {
+    public void resetToStart(Board board) {
         this.position = startPosition;
         this.finished = false;
         this.moved = false;
         this.passedCenter = false;
         this.pathType = PathType.OUTER;
-        this.customPath = Collections.emptyList();
+        this.customPath = board.getStrategy().getPath();
         this.pathIndex = 0;
     }
 
