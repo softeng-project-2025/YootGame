@@ -144,7 +144,7 @@ public class GameController {
                 System.out.println(result.hasPendingYutResults());
                 System.out.println(service.getGame().getTurnResult().getPending());
                 System.out.println(service.getGame().getTurnResult().getApplied());
-                view.updateStatus("같은 플레이어가 한 번 더 던집니다.", MessageType.INFO);
+                view.updateStatus("말을 이동해주세요.", MessageType.INFO);
                 System.out.println("STAY");
                 break;
             case GAME_ENDED:
@@ -196,7 +196,6 @@ public class GameController {
 
     @Deprecated
     public GameStateDto getInitialGameStateDto() {
-        // 예시: 빈 보드, 버튼만 세팅한 DTO
         return GameStateDto.empty();
     }
 

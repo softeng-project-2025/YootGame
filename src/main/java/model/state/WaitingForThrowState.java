@@ -26,9 +26,6 @@ public class WaitingForThrowState implements CanThrowYut {
         }
 
         boolean bonusTurn = (yut == YutResult.YUT || yut == YutResult.MO);
-        NextStateHint hint = bonusTurn? NextStateHint.WAITING_FOR_THROW : NextStateHint.STAY;
-        System.out.println(bonusTurn + "보너스턴인가?");
-        System.out.println(hint+"로가자");
 
         // 그 외엔 원래 로직대로 pending 에 추가
         game.getTurnResult().add(yut);

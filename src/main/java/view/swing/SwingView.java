@@ -2,6 +2,7 @@ package view.swing;
 
 import model.dto.GameStateDto;
 import model.dto.MessageType;
+import model.dto.Phase;
 import model.player.Player;
 import model.position.Position;
 import model.yut.YutResult;
@@ -146,7 +147,7 @@ public class SwingView extends JFrame implements View {
 
         ensureBoardPanel();
         boardPanel.removeAll();
-
+        
         renderPieces(dto);
         updateControls(dto);
 
@@ -159,56 +160,54 @@ public class SwingView extends JFrame implements View {
             boardPanel = new DrawBoard(controller.getCurrentBoardStrategy());
             boardPanel.setLayout(null);
             boardPanel.setBackground(Color.WHITE);
-            JScrollPane scrollPane = new JScrollPane(boardPanel);
-            add(scrollPane, BorderLayout.CENTER);
+            add(new JScrollPane(boardPanel), BorderLayout.CENTER);
             revalidate();
             repaint();
         }
     }
 
     private void renderPieces(GameStateDto dto) {
-        System.out.println("=== PieceInfo Mapping ===");
-        dto.pieces().forEach(info ->
-                System.out.printf("Piece id=%d  ownerId=%d  x=%d  y=%d  selectable=%b%n",
-                        info.id(), info.ownerId(), info.x(), info.y(), info.selectable())
-        );
-        System.out.println("=========================");
-        Map<GameStateDto.PositionKey, List<GameStateDto.PieceInfo>> groups
-                = dto.groupByPosition();
-
-        for (var entry : groups.entrySet()) {
-            List<GameStateDto.PieceInfo> infos = entry.getValue();
-            int size = infos.size();
-
-            // ② 같은 좌표에 있는 말들끼리 오프셋 처리
-            for (int i = 0; i < size; i++) {
-                GameStateDto.PieceInfo info = infos.get(i);
-
-                int shift = (int) Math.round(i - (size - 1) / 2.0);
-                Position pos = new Position(info.id(), info.x(), info.y() - shift * PIECE_OFFSET);
+        boolean canSelect = dto.phase() == Phase.CAN_SELECT;
+        currentDto.groupByPosition().forEach((posKey, list) -> {
+            int size = list.size();
+            for (int i=0; i<size; i++) {
+                var info = list.get(i);
+                int shift = (int)Math.round(i - (size-1)/2.0);
+                Position p = new Position(info.id(), info.x(), info.y() - shift*PIECE_OFFSET);
 
                 CylinderButton btn = new CylinderButton(
-                        getPlayerColor(info.ownerId()), pos, "P" + info.ownerId()
+                        getPlayerColor(info.ownerId()), p, "P"+info.ownerId()
                 );
-                btn.setEnabled(info.selectable());
+                btn.setEnabled(canSelect && info.selectable());
                 btn.addActionListener(e -> controller.onSelectPieceById(info.id()));
                 boardPanel.add(btn);
             }
-        }
+        });
     }
 
     private void updateControls(GameStateDto dto) {
-        // 버튼 활성화 / 라벨 업데이트
-        boolean over = dto.gameOver();
+        Phase phase = dto.phase();
 
-        randomThrowButton.setEnabled(!over);
-        selectThrowButton.setEnabled(!over);
+        // 던지기 모드 (Phase.CAN_THROW) 에만 활성화
+        boolean canThrow = phase == Phase.CAN_THROW;
+        randomThrowButton.setEnabled(canThrow);
+        selectThrowButton.setEnabled(canThrow);
+        yutChoiceBox.setEnabled(canThrow);
 
-        resultLabel.setText("결과: " + dto.findLastYut());
-        currentPlayerLabel.setText("현재 차례: " + dto.findCurrentPlayer());
+        // 선택 모드 (Phase.CAN_SELECT) 에만 pending 버튼 활성화
+        boolean canSelect = dto.phase() == Phase.CAN_SELECT;
+        List<YutResult> pend = currentDto.pendingYuts();
+        for (YutResult r : YutResult.values()) {
+            int cnt = (int)pend.stream().filter(x->x==r).count();
+            JButton b = pendingButtons.get(r);
+            b.setText(r.getName()+" x "+cnt);
+            b.setEnabled(canSelect && cnt>0);
+        }
 
-        updateStatus(dto.messageText(), dto.messageType());
-        updateMoveButtons(dto.pendingYuts());
+        // 5) 기타 UI 업데이트
+        resultLabel.setText("결과: " + currentDto.findLastYut());
+        currentPlayerLabel.setText("현재 차례: " + currentDto.findCurrentPlayer());
+        updateStatus(currentDto.messageText(), currentDto.messageType());
     }
 
     @Override
@@ -227,11 +226,6 @@ public class SwingView extends JFrame implements View {
             default -> color = Color.BLACK;
         }
 
-
-        boolean finished = currentDto.gameOver();
-
-        randomThrowButton.setEnabled(!finished);
-        selectThrowButton.setEnabled(!finished);
 
         boardPanel.revalidate();
         boardPanel.repaint();
@@ -335,6 +329,7 @@ public class SwingView extends JFrame implements View {
     }
 
     public void updateMoveButtons(List<YutResult> pending) {
+
         // 카운터 계산
         Map<YutResult, Long> counts = pending.stream()
                 .collect(Collectors.groupingBy(Function.identity(),
