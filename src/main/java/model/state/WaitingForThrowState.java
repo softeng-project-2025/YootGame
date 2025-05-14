@@ -2,6 +2,7 @@ package model.state;
 
 import model.Game;
 import model.dto.MoveResult;
+import model.dto.NextStateHint;
 import model.yut.YutResult;
 
 public class WaitingForThrowState implements CanThrowYut {
@@ -21,7 +22,7 @@ public class WaitingForThrowState implements CanThrowYut {
                 false,
                 game.isFinished() ? game.getTurnManager().currentPlayer() : null,
                 game
-        ).withNextStateHint(null); // 상태 전이는 GameService에서 처리
+        ).withNextStateHint(NextStateHint.WAITING_FOR_THROW);
     }
 
 }

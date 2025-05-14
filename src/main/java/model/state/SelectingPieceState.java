@@ -17,19 +17,18 @@ import java.util.stream.Collectors;
 // CanSelectPiece 상태: 사용자가 선택한 윷 결과를 특정 말에 적용하는 책임을 수행합니다.
 public class SelectingPieceState implements CanSelectPiece {
     private final Game game;
-    private final TurnResult turnResult;
     private final CaptureManager captureManager;
     private final GroupManager groupManager;
 
     public SelectingPieceState(Game game) {
         this.game = game;
-        this.turnResult = game.getTurnResult();
         this.captureManager = new CaptureManager();
         this.groupManager = new GroupManager();
     }
 
     @Override
     public MoveResult handlePieceSelect(Piece piece, YutResult yut) {
+        TurnResult turnResult = game.getTurnResult();
         // 1) 유효성 검사
         if (piece.isFinished() || piece.getOwner() != game.getTurnManager().currentPlayer()) {
             return MoveResult.fail(yut, MoveFailType.INVALID_SELECTION);
@@ -69,7 +68,6 @@ public class SelectingPieceState implements CanSelectPiece {
         // 6) 승리 검사
         boolean isGameOver = VictoryManager.hasPlayerWon(piece.getOwner());
         if (isGameOver) {
-            game.transitionTo(new GameOverState());
             return MoveResult.gameOver(yut, piece.getOwner())
                     .withNextStateHint(NextStateHint.GAME_ENDED);
         }
@@ -78,17 +76,10 @@ public class SelectingPieceState implements CanSelectPiece {
         boolean bonusTurn = (yut == YutResult.YUT || yut == YutResult.MO) ^ didCapture;
         boolean hasMore = turnResult.hasPending();
         NextStateHint hint = bonusTurn ? NextStateHint.WAITING_FOR_THROW
-                : hasMore  ? NextStateHint.STAY
-                : NextStateHint.NEXT_TURN;
+                            : hasMore  ? NextStateHint.STAY
+                                        : NextStateHint.NEXT_TURN;
 
-        // 8) 상태 전이 및 턴 전환
-        if (hint == NextStateHint.NEXT_TURN) {
-            game.startTurn();
-            game.getTurnManager().nextTurn();
-        }
-        game.transitionTo(new WaitingForThrowState(game));
-
-        // 9) MoveResult 반환
+        // 7) MoveResult 반환
         return MoveResult.success(
                 yut,
                 didCapture,

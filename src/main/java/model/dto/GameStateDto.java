@@ -4,11 +4,9 @@ import model.Game;
 import model.piece.Piece;
 import model.player.Player;
 import model.yut.YutResult;
-import java.util.List;
-import java.util.Map;
-import java.util.EnumMap;
+
+import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * 통합 DTO: 게임 상태와 렌더링에 필요한 모든 정보를 제공합니다.
@@ -40,15 +38,33 @@ public record GameStateDto(
      * 화면에 표시할 말 정보
      */
     public static record PieceInfo(
-            int ownerId, int id, int x, int y, boolean selectable
+            int ownerId,
+            int id,
+            int x,
+            int y,
+            boolean selectable
     ) {}
 
     /**
      * 화면에 표시할 플레이어 정보
      */
     public static record PlayerInfo(
-            int id, String name, boolean isCurrent
+            int id,
+            String name,
+            boolean isCurrent
     ) {}
+
+    public record PositionKey(int ownerId, int x, int y) {}
+
+    /** 동일 소유자·좌표에 있는 PieceInfo 들을 묶어서 반환 */
+    public Map<PositionKey, List<PieceInfo>> groupByPosition() {
+        return pieces.stream()
+                .collect(Collectors.groupingBy(
+                        pi -> new PositionKey(pi.ownerId(), pi.x(), pi.y())
+                ));
+    }
+
+
 
     /**
      * 도메인 모델과 MoveResult로부터 DTO를 생성합니다.
@@ -62,31 +78,55 @@ public record GameStateDto(
     ) {
         YutResult last = result != null ? result.yutResult() : null;
 
-        List<PieceInfo> pieceInfos = game.getPlayers().stream()
+        // 선택 가능한 말 확인을 위한 HashSet
+        Set<Piece> selectableSet = selectablePieces != null
+                ? new HashSet<>(selectablePieces)
+                : Collections.emptySet();
+
+        // PieceInfo 생성
+        List<PieceInfo> infos = game.getPlayers().stream()
                 .flatMap(p -> p.getPieces().stream())
-                .map(p -> {
-                    var pos = p.getPosition();
-                    boolean sel = selectablePieces != null && selectablePieces.contains(p);
-                    return new PieceInfo(p.getOwner().getId(),p.getId(), pos.x(), pos.y(), sel);
+                .map(piece -> {
+                    var pos = piece.getPosition();
+                    return new PieceInfo(
+                            piece.getOwner().getId(),
+                            piece.getId(),
+                            positionToX(pos),
+                            positionToY(pos),
+                            selectableSet.contains(piece)
+                    );
                 })
                 .collect(Collectors.toList());
 
+        // PlayerInfo 생성
         Player current = game.getTurnManager().currentPlayer();
         List<PlayerInfo> playerInfos = game.getPlayers().stream()
-                .map(p -> new PlayerInfo(p.getId(), p.getName(), p.equals(current)))
+                .map(p -> new PlayerInfo(
+                        p.getId(),
+                        p.getName(),
+                        p.equals(current)
+                ))
                 .collect(Collectors.toList());
 
         boolean over = game.isFinished();
-        List<YutResult> pending = game.getTurnResult().getPending();
+        List<YutResult> pending = List.copyOf(game.getTurnResult().getPending());
 
         return new GameStateDto(
                 last,
-                pieceInfos,
+                infos,
                 playerInfos,
                 messageText != null ? messageText : "",
                 messageType != null ? messageType : MessageType.INFO,
                 over,
-                List.copyOf(pending)
+                pending
         );
+    }
+
+    private static int positionToX(model.position.Position pos) {
+        return pos.x();
+    }
+
+    private static int positionToY(model.position.Position pos) {
+        return pos.y();
     }
 }

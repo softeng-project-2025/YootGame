@@ -53,15 +53,15 @@ public class GameController {
     // 3) 랜덤 윷 던지기
     public void onRandomThrow() {
         MoveResult result = service.throwYut();
-        view.renderGame(buildDto(result, result.yutResult().toString() + "이(가) 나왔습니다.", null));
         handleNextStateHint(result);
+        view.renderGame(buildDto(result, result.yutResult().toString() + "이(가) 나왔습니다.", null));
     }
 
     // 4) 지정 윷 던지기 (테스트용)
     public void onDesignatedThrow(YutResult yut) {
         MoveResult result = service.throwYut(yut);
-        view.renderGame(buildDto(result, result.yutResult().toString() + "이(가) 나왔습니다.", null));
         handleNextStateHint(result);
+        view.renderGame(buildDto(result, result.yutResult().toString() + "이(가) 나왔습니다.", null));
     }
 
     // 5) 말 선택 (뷰에서 ID를 찾는 메서드 쓰거나, Piece 객체 직접 넘겨도 됨)
@@ -102,26 +102,36 @@ public class GameController {
                 null
         );
         view.renderGame(dto);
+        System.out.println("현재 차례: " + service.getGame().getTurnManager().currentPlayer().getName());
         handleNextStateHint(result);
     }
 
     private void handleNextStateHint(MoveResult result) {
-        switch (result.nextStateHint()) {
+        NextStateHint hint = result.nextStateHint();
+        if (hint == null) {
+            // 전이할 상태가 지정되지 않은 경우(예: 아직 선택 단계로 넘어가지 않을 때) 무시
+            return;
+        }
+
+        switch (hint) {
             case WAITING_FOR_THROW:
                 // 다음 단계 대기이니 따로 할 일 없음
+                view.updateStatus("윷을 던지세요.", MessageType.INFO);
                 break;
             case NEXT_TURN:
-                view.updateStatus(
-                        "다음 차례: " + service.getGame().getTurnManager().currentPlayer().getName(),
-                        MessageType.INFO
-                );
+                String next = service.getGame()
+                        .getTurnManager()
+                        .currentPlayer()
+                        .getName();
+                view.showMessage("이제 " + next + " 차례입니다.");
+                view.updateStatus("다음: " + next, MessageType.INFO);
                 break;
             case STAY:
                 view.updateStatus("같은 플레이어가 한 번 더 던집니다.", MessageType.INFO);
                 break;
             case GAME_ENDED:
                 Player winner = result.winner();
-                view.showWinner(winner); // Ensure this method includes restart logic.
+                view.showWinner(winner);
                 break;
         }
     }
@@ -156,10 +166,14 @@ public class GameController {
         return service.getGame().getBoard().getStrategy();
     }
 
+
     public void onRestartGame() {
+        // 1) 모델 초기화
         service.restartGame();
+        // 2) View 초기화(UI 리셋 + 보드 클리어)
         view.resetUI();
-        view.renderGame(buildDto(null, "게임을 시작하세요.", MessageType.INFO));
+        // 3) 새 게임 설정 다이얼로그 띄우기
+        view.showGameSetupDialog();
     }
 
     @Deprecated
