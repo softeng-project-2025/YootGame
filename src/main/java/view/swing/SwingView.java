@@ -136,11 +136,23 @@ public class SwingView extends JFrame implements View {
         ));
 
         DoButton = new JButton("도 x 0");
+        // ★ ④ 추가: 클릭 시 해당 YutResult 선택
+        DoButton.addActionListener(e -> controller.onSelectPendingYut(YutResult.DO));
+
         GaeButton = new JButton("개 x 0");
+        GaeButton.addActionListener(e -> controller.onSelectPendingYut(YutResult.GAE));
+
         GeolButton = new JButton("걸 x 0");
+        GeolButton.addActionListener(e -> controller.onSelectPendingYut(YutResult.GEOL));
+
         YutButton = new JButton("윷 x 0");
+        YutButton.addActionListener(e -> controller.onSelectPendingYut(YutResult.YUT));
+
         MoButton = new JButton("모 x 0");
+        MoButton.addActionListener(e -> controller.onSelectPendingYut(YutResult.MO));
+
         BackDoButton = new JButton("빽도 x 0");
+        BackDoButton.addActionListener(e -> controller.onSelectPendingYut(YutResult.BACK_DO));
 
         JPanel leftButtons = new JPanel(new FlowLayout(FlowLayout.LEFT));
         leftButtons.add(restartButton);
