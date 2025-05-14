@@ -62,7 +62,10 @@ public class SelectingPieceState implements CanSelectPiece {
 
         // 5) 캡처 처리
         Map<Piece, List<Piece>> captures = captureManager.handleCaptures(
-                List.of(piece), game.getPlayers());
+                List.of(piece),
+                game.getPlayers(),
+                game.getBoard()
+        );
         boolean didCapture = captures.containsKey(piece);
 
         // 6) 승리 검사

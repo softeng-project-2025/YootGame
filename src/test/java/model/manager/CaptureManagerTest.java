@@ -1,8 +1,10 @@
 package model.manager;
 
+import model.board.Board;
 import model.piece.Piece;
 import model.player.Player;
 import model.position.Position;
+import model.strategy.SquarePathStrategy;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -14,10 +16,12 @@ import static org.mockito.Mockito.*;
 
 class CaptureManagerTest {
     private CaptureManager sut;
+    Board board;
 
     @BeforeEach
     void setUp() {
         sut = new CaptureManager();
+        board = new Board(new SquarePathStrategy());
     }
 
     @Test
@@ -42,13 +46,14 @@ class CaptureManagerTest {
 
         Map<Piece, List<Piece>> result = sut.handleCaptures(
                 List.of(mover),
-                List.of(owner, other)
+                List.of(owner, other),
+                board
         );
 
         assertTrue(result.containsKey(mover));
         assertEquals(1, result.get(mover).size());
         assertSame(enemy, result.get(mover).get(0));
-        verify(enemy).resetToStart();
+        verify(enemy).resetToStart(board);
     }
 
     @Test
@@ -69,10 +74,11 @@ class CaptureManagerTest {
 
         Map<Piece, List<Piece>> result = sut.handleCaptures(
                 List.of(mover),
-                List.of(owner)
+                List.of(owner),
+                board
         );
 
         assertTrue(result.isEmpty());
-        verify(friend, never()).resetToStart();
+        verify(friend, never()).resetToStart(board);
     }
 }

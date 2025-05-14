@@ -1,5 +1,6 @@
 package model.manager;
 
+import model.board.Board;
 import model.piece.Piece;
 import model.player.Player;
 import model.position.Position;
@@ -14,7 +15,8 @@ public class CaptureManager {
     // 캡처 매핑: mover -> 캡처된 말 리스트
     public Map<Piece, List<Piece>> handleCaptures(
             List<Piece> movedPieces,
-            List<Player> allPlayers
+            List<Player> allPlayers,
+            Board board
     ) {
         Objects.requireNonNull(movedPieces, "movedPieces must not be null");
         Objects.requireNonNull(allPlayers, "allPlayers must not be null");
@@ -26,7 +28,7 @@ public class CaptureManager {
                     .filter(p -> !p.equals(mover.getOwner()))
                     .flatMap(player -> player.getPieces().stream())
                     .filter(other -> !other.isFinished() && other.getPosition().index() == destIndex)
-                    .peek(Piece::resetToStart)
+                    .peek(p -> p.resetToStart(board))
                     .collect(Collectors.toList());
             if (!captured.isEmpty()) {
                 captureMap.put(mover, captured);

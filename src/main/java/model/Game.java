@@ -127,8 +127,7 @@ public class Game {
     public void reset() {
         for (Player p : players) {
             for (Piece piece : p.getPieces()) {
-                piece.resetToStart();
-                piece.setCustomPath(board.getStrategy().getPath());
+                piece.resetToStart(board);
             }
         }
         turnManager.reset();
