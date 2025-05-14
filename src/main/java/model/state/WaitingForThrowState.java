@@ -18,15 +18,17 @@ public class WaitingForThrowState implements CanThrowYut {
     public MoveResult handleYutThrow(YutResult yut) {
         Player current = game.getTurnManager().currentPlayer();
         boolean noneMovedYet = game.noneMovedYet(current);
+        boolean hasPending = game.getTurnResult().hasPending();
 
         // 백도이고, 말이 하나도 움직이지 않았다면 바로 다음 턴으로 스킵
-        if (yut == YutResult.BACK_DO && noneMovedYet) {
+        if (yut == YutResult.BACK_DO && noneMovedYet && !hasPending ) {
             return MoveResult.skipped(yut);
         }
 
         boolean bonusTurn = (yut == YutResult.YUT || yut == YutResult.MO);
         NextStateHint hint = bonusTurn? NextStateHint.WAITING_FOR_THROW : NextStateHint.STAY;
         System.out.println(bonusTurn + "보너스턴인가?");
+        System.out.println(hint+"로가자");
 
         // 그 외엔 원래 로직대로 pending 에 추가
         game.getTurnResult().add(yut);
@@ -36,7 +38,7 @@ public class WaitingForThrowState implements CanThrowYut {
                 bonusTurn,
                 null,
                 game
-        ).withNextStateHint(hint);
+        );
     }
 
 }

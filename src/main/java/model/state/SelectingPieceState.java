@@ -28,11 +28,11 @@ public class SelectingPieceState implements CanSelectPiece {
 
     @Override
     public MoveResult handlePieceSelect(Piece piece, YutResult yut) {
-        TurnResult turnResult = game.getTurnResult();
         // 1) 유효성 검사
         if (piece.isFinished() || piece.getOwner() != game.getTurnManager().currentPlayer()) {
             return MoveResult.fail(yut, MoveFailType.INVALID_SELECTION);
         }
+        TurnResult turnResult = game.getTurnResult();
         List<YutResult> pending = turnResult.getPending();
         if (!pending.contains(yut)) {
             return MoveResult.fail(yut, MoveFailType.NO_RESULT);
@@ -98,7 +98,7 @@ public class SelectingPieceState implements CanSelectPiece {
                 hasMore,
                 captures,
                 groupMap
-        ).withNextStateHint(null);
+        );
     }
 
 }
