@@ -14,12 +14,15 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.List;
 import java.util.EnumMap;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Swing 기반 View: GameStateDto를 받아 화면을 렌더링합니다.
  */
 public class SwingView extends JFrame implements View {
 
+    private static final int PIECE_OFFSET = 13;
     private GameStateDto currentDto;
     private GameController controller;
     private JLabel resultLabel;
@@ -65,17 +68,38 @@ public class SwingView extends JFrame implements View {
         }
         boardPanel.removeAll();
 
-        // PieceInfo 리스트로 버튼 생성
-        for (PieceInfo info : dto.pieces()) {
-            CylinderButton btn = new CylinderButton(
-                    getPlayerColor(info.ownerId()),
-                    new Position(info.id(),info.x(), info.y()),
-                    "P" + info.ownerId()
-            );
-            btn.setEnabled(info.selectable());
-            btn.addActionListener(e -> controller.onSelectPieceById(info.id()));
-            boardPanel.add(btn);
+        Map<String, List<PieceInfo>> groups = dto.pieces().stream()
+                .collect(Collectors.groupingBy(
+                        info -> info.ownerId() + "-" + info.x() + "-" + info.y()
+                ));
+
+        // 2) 그룹별로 버튼 생성, 같은 좌표 업힌 말들은 위로 오프셋
+        final int OFFSET = PIECE_OFFSET;
+        for (var entry : groups.entrySet()) {
+            List<PieceInfo> grp = entry.getValue();
+            int size = grp.size();
+            for (int i = 0; i < size; i++) {
+                PieceInfo info = grp.get(i);
+                // 높이 기준: (i - (size-1)/2.0) → 실수, 반올림
+                int shiftIndex = (int) Math.round(i - (size - 1) / 2.0);
+                int dy = - shiftIndex * OFFSET;  // 음수면 위로, 양수면 아래로
+                // x 좌표는 그대로, y 좌표만 조정
+                Position uiPos = new Position(
+                        info.id(),
+                        info.x(),
+                        info.y() + dy
+                );
+                CylinderButton btn = new CylinderButton(
+                        getPlayerColor(info.ownerId()),
+                        uiPos,
+                        "P" + info.ownerId()
+                );
+                btn.setEnabled(info.selectable());
+                btn.addActionListener(e -> controller.onSelectPieceById(info.id()));
+                boardPanel.add(btn);
+            }
         }
+
 
         boolean gameOver = dto.gameOver();
         randomThrowButton.setEnabled(!gameOver);
