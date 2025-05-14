@@ -124,7 +124,7 @@ public class Game {
     // 상태 전이를 캡슐화합니다.
     public void transitionTo(GameState next) {
         currentState.onExit(this);
-        this.currentState = next;
+        setState(next);
         currentState.onEnter(this);
     }
 
