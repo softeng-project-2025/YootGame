@@ -91,6 +91,11 @@ public class GameController {
 
         MoveResult result = service.selectPiece(piece, toUse);
 
+        if (result.isGameOver()) {
+            view.showWinner(result.winner());
+            return;
+        }
+
         GameStateDto dto = buildDto(
                 result,
                 result.movedPiece().getId() + "번 말을 옮겼습니다.",
