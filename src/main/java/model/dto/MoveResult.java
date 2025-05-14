@@ -89,8 +89,8 @@ public record MoveResult(
                 false,
                 null,
                 null,
-                false,
-                hintFor(bonusTurn, false, game.isFinished()),
+                true,
+                hintFor(bonusTurn, true, game.isFinished()),
                 Map.of(),
                 Map.of()
         );
@@ -107,7 +107,7 @@ public record MoveResult(
                 false,
                 movedPiece,
                 null,
-                false,
+                true,
                 hintFor(bonusTurn, false, game.isFinished()),
                 Map.of(),
                 Map.of()
@@ -196,10 +196,15 @@ public record MoveResult(
     }
 
     private static NextStateHint hintFor(boolean bonusTurn, boolean hasPendingYuts, boolean isFinished) {
-        if (isFinished) return NextStateHint.GAME_ENDED;
-        if (bonusTurn) return NextStateHint.WAITING_FOR_THROW;
-        if (hasPendingYuts) return NextStateHint.STAY;
-        return NextStateHint.NEXT_TURN;
+        if (isFinished) {
+            return NextStateHint.GAME_ENDED;
+        } else if (bonusTurn) {
+            return NextStateHint.WAITING_FOR_THROW;
+        } else if (hasPendingYuts) {
+            return NextStateHint.STAY;
+        } else {
+            return NextStateHint.NEXT_TURN;
+        }
     }
     /** captureMap만 교체한 새 인스턴스를 반환 */
     public MoveResult withCaptureMap(Map<Piece, List<Piece>> newCaptureMap) {

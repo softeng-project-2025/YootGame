@@ -117,9 +117,17 @@ public class GameController {
             return;
         }
 
+        // 턴 스킵된 경우 사용자에게 알려주기
+        if (result.turnSkipped()) {
+            view.showMessage("빽도가 나왔지만, 이동할 수 있는 말이 없어서 자동으로 넘겨집니다.");
+        }
+
         switch (hint) {
             case WAITING_FOR_THROW:
                 // 다음 단계 대기이니 따로 할 일 없음
+                System.out.println(result.hasPendingYutResults());
+                System.out.println(service.getGame().getTurnResult().getPending());
+                System.out.println(service.getGame().getTurnResult().getApplied());
                 view.updateStatus("윷을 던지세요.", MessageType.INFO);
                 System.out.println("WAITING_FOR_THROW");
                 break;

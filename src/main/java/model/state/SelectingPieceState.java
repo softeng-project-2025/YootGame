@@ -76,11 +76,16 @@ public class SelectingPieceState implements CanSelectPiece {
         }
 
         // 7) 다음 상태 힌트 계산
-        boolean bonusTurn = (yut == YutResult.YUT || yut == YutResult.MO) ^ didCapture;
-        boolean hasMore = turnResult.hasPending();
+        boolean bonusTurn = false;
+        if (didCapture){
+            if (yut != YutResult.YUT && yut != YutResult.MO) bonusTurn = true;
+        }
+
+        boolean hasMore = game.getTurnResult().hasPending();
         NextStateHint hint = bonusTurn ? NextStateHint.WAITING_FOR_THROW
                             : hasMore  ? NextStateHint.STAY
                                         : NextStateHint.NEXT_TURN;
+        System.out.println(hint + "로가자꾸나!!");
 
         // 7) MoveResult 반환
         return MoveResult.success(
@@ -93,7 +98,7 @@ public class SelectingPieceState implements CanSelectPiece {
                 hasMore,
                 captures,
                 groupMap
-        ).withNextStateHint(hint);
+        ).withNextStateHint(null);
     }
 
 }

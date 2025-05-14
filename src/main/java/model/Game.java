@@ -98,6 +98,10 @@ public class Game {
         return turnResult;
     }
 
+    public boolean noneMovedYet(Player current){
+        return current.getPieces().stream().noneMatch(Piece::hasMoved);
+    }
+
     // 게임이 종료 상태인지 확인합니다.
     public boolean isFinished() {
         // 1) 이미 GameOverState 인 경우
