@@ -42,6 +42,7 @@ public class SwingView extends JFrame implements View {
     private final EnumMap<YutResult, JButton> pendingButtons = new EnumMap<>(YutResult.class);
     private JComboBox<String> yutChoiceBox;
     private JLabel statusLabel;
+    private JLabel currentPlayerLabel;
 
     public SwingView() {
         super("YootGame");
@@ -64,8 +65,18 @@ public class SwingView extends JFrame implements View {
     }
 
     private void initResultLabel() {
-        resultLabel = new JLabel("결과: ", SwingConstants.CENTER);
-        add(resultLabel, BorderLayout.NORTH);
+        resultLabel = new JLabel("결과: ", SwingConstants.LEFT);
+
+        currentPlayerLabel = new JLabel("현재 차례: –", SwingConstants.RIGHT);
+        currentPlayerLabel.setFont(new Font("맑은 고딕", Font.BOLD, 14));
+
+        JPanel header = new JPanel(new BorderLayout());
+        header.add(resultLabel, BorderLayout.WEST);
+        header.add(currentPlayerLabel, BorderLayout.EAST);
+        header.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
+
+        add(header, BorderLayout.NORTH);
+
     }
 
     private void initControlPanel() {
@@ -157,6 +168,12 @@ public class SwingView extends JFrame implements View {
     }
 
     private void renderPieces(GameStateDto dto) {
+        System.out.println("=== PieceInfo Mapping ===");
+        dto.pieces().forEach(info ->
+                System.out.printf("Piece id=%d  ownerId=%d  x=%d  y=%d  selectable=%b%n",
+                        info.id(), info.ownerId(), info.x(), info.y(), info.selectable())
+        );
+        System.out.println("=========================");
         Map<GameStateDto.PositionKey, List<GameStateDto.PieceInfo>> groups
                 = dto.groupByPosition();
 
@@ -184,9 +201,13 @@ public class SwingView extends JFrame implements View {
     private void updateControls(GameStateDto dto) {
         // 버튼 활성화 / 라벨 업데이트
         boolean over = dto.gameOver();
+
         randomThrowButton.setEnabled(!over);
-        selectThrowButton.setEnabled(!over && !dto.pendingYuts().isEmpty());
-        resultLabel.setText("결과: " + Optional.ofNullable(dto.lastYut()).map(YutResult::getName).orElse(""));
+        selectThrowButton.setEnabled(!over);
+
+        resultLabel.setText("결과: " + dto.findLastYut());
+        currentPlayerLabel.setText("현재 차례: " + dto.findCurrentPlayer());
+
         updateStatus(dto.messageText(), dto.messageType());
         updateMoveButtons(dto.pendingYuts());
     }

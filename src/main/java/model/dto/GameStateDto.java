@@ -64,6 +64,21 @@ public record GameStateDto(
                 ));
     }
 
+    /** 마지막 윷 결과를 꺼내와서 레이블에 표시 */
+    public String findLastYut() {
+        return Optional.ofNullable(lastYut)
+                .map(YutResult::getName)
+                .orElse("");
+    }
+
+    /** 현재 플레이어 반환 */
+    public String findCurrentPlayer() {
+        return players().stream()
+                .filter(PlayerInfo::isCurrent)
+                .map(PlayerInfo::name)
+                .findFirst()
+                .orElse("–");
+    }
 
 
     /**
