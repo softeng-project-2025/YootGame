@@ -129,37 +129,53 @@ public class PentagonPathStrategy implements PathStrategy {
             prevIndex = 25;
         }
 
-        // 모에 있었다가 백도 받아서 윷에 있었을 때
-        if (
-                pathType == PathType.FROM5
-                        && prevIndex == 4
-        ) {
-            piece.setPathType(PathType.OUTER);
-            piece.setCustomPath(createPath(outerPath));
-            piece.setPathIndex(4);
+        if (pathType == PathType.FROM5) {
+            switch(prevIndex) {
+                case 4:
+                    piece.setPathType(PathType.OUTER);
+                    piece.setCustomPath(createPath(outerPath));
+                    piece.setPathIndex(4);
+                    break;
+                case 8:
+                    piece.setPathType(PathType.FROM5CENTER);
+                    piece.setCustomPath(createPath(pathFrom5Center));
+                    piece.setPathIndex(8);
+                    break;
+            }
         }
 
-        // 뒷모에 있었다가 백도를 받아서 뒷윷에 있었을 때
-        if (
-                pathType == PathType.FROM10
-                        && prevIndex == 9
-        ) {
-            piece.setPathType(PathType.OUTER);
-            piece.setCustomPath(createPath(outerPath));
-            piece.setPathIndex(9);
+        if (pathType == PathType.FROM10) {
+            switch(prevIndex) {
+                case 9:
+                    piece.setPathType(PathType.OUTER);
+                    piece.setCustomPath(createPath(outerPath));
+                    piece.setPathIndex(9);
+                    break;
+                case 13:
+                    piece.setPathType(PathType.FROM10CENTER);
+                    piece.setCustomPath(createPath(pathFrom10Center));
+                    piece.setPathIndex(13);
+                    break;
+            }
+        }
+
+        if (pathType == PathType.FROM15) {
+            switch(prevIndex) {
+                case 14:
+                    piece.setPathType(PathType.OUTER);
+                    piece.setCustomPath(createPath(outerPath));
+                    piece.setPathIndex(14);
+                    break;
+                case 18:
+                    piece.setPathType(PathType.FROM15CENTER);
+                    piece.setCustomPath(createPath(pathFrom15Center));
+                    piece.setPathIndex(18);
+                    break;
+            }
         }
 
         if (
-                pathType == PathType.FROM15
-                        && prevIndex == 14
-        ) {
-            piece.setPathType(PathType.OUTER);
-            piece.setCustomPath(createPath(outerPath));
-            piece.setPathIndex(14);
-        }
-
-        if (
-                pathType == PathType.FROM5
+                pathType == PathType.FROM5CENTER
                         && prevIndex == 7
         ) {
             piece.setPathType(PathType.FROM5);
@@ -168,7 +184,7 @@ public class PentagonPathStrategy implements PathStrategy {
         }
 
         if (
-                pathType == PathType.FROM10
+                pathType == PathType.FROM10CENTER
                         && prevIndex == 12
         ) {
             piece.setPathType(PathType.FROM10);
@@ -177,7 +193,7 @@ public class PentagonPathStrategy implements PathStrategy {
         }
 
         if (
-                pathType == PathType.FROM15
+                pathType == PathType.FROM15CENTER
                         && prevIndex == 17
         ) {
             piece.setPathType(PathType.FROM15);
