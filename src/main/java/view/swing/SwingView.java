@@ -2,7 +2,6 @@ package view.swing;
 
 import model.dto.GameStateDto;
 import model.dto.MessageType;
-import model.dto.GameStateDto.PieceInfo;
 import model.piece.Piece;
 import model.player.Player;
 import model.position.Position;
@@ -16,7 +15,6 @@ import java.util.List;
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 /**
  * Swing 기반 View: GameStateDto를 받아 화면을 렌더링합니다.
@@ -264,23 +262,19 @@ public class SwingView extends JFrame implements View {
                 JOptionPane.INFORMATION_MESSAGE,
                 null,
                 options,
-                options[0]   // 기본 선택은 “다시 시작”
+                options[0]
         );
 
         if (choice == 0) {
-            // 1) 기존 UI 완전 제거
-            getContentPane().removeAll();
-            boardPanel = null;        // 이전에 생성된 보드 패널 해제
-            // 2) 레이아웃·UI 초기화
-            setLayout(new BorderLayout());
-            initUI();                // 버튼·라벨·스테이터스 바 다시 세팅
-            revalidate();
-            repaint();
-            // 3) 게임 설정 다이얼로그 띄우기
-            controller.initializeGameDialog();
+            controller.onRestartGame();
         } else {
             System.exit(0);
         }
+    }
+
+    // 새 게임 설정 다이얼로그 전용으로 뷰를 깨끗이 초기화
+    private void prepareForNewGameSetup() {
+
     }
 
     @Override
@@ -288,22 +282,47 @@ public class SwingView extends JFrame implements View {
         int sel = JOptionPane.showConfirmDialog(
                 this, "게임을 다시 시작할까요?", "게임 종료",
                 JOptionPane.YES_NO_OPTION);
-        if (sel == JOptionPane.YES_OPTION) controller.onRestartGame();
-        else System.exit(0);
+        if (sel == JOptionPane.YES_OPTION) {
+            controller.onRestartGame();
+        } else {
+            System.exit(0);
+        }
+    }
+
+    @Override
+    public void resetUI() {
+        // 1) 결과/상태 라벨 초기화
+        resultLabel.setText("결과: ");
+        statusLabel.setText("게임을 시작하세요.");
+        statusLabel.setForeground(Color.BLACK);
+
+        // 2) 윷 던지기/선택 버튼 상태 초기화
+        randomThrowButton.setEnabled(true);
+        selectThrowButton.setEnabled(true);
+
+        // 3) pending 윷 버튼 카운터 초기화
+        updateMoveButtons(List.of());
+
+        // 4) 보드판 위의 말들 제거
+        if (boardPanel != null) {
+            boardPanel.removeAll();
+            boardPanel.revalidate();
+            boardPanel.repaint();
+        }
+
+        // 기존에 그려진 보드, 버튼 모두 제거
+        getContentPane().removeAll();
+        boardPanel = null;
+        // 레이아웃·컴포넌트 재설정
+        setLayout(new BorderLayout());
+        initUI();
+        revalidate();
+        repaint();
     }
 
     private Color getPlayerColor(int pieceId) {
         Color[] colors = {Color.CYAN, Color.PINK, Color.ORANGE, Color.MAGENTA};
         return colors[(pieceId - 1) % colors.length];
-    }
-
-    @Override
-    public void resetUI() {
-        resultLabel.setText("결과: ");
-        statusLabel.setText("게임을 시작하세요.");
-        randomThrowButton.setEnabled(true);
-        selectThrowButton.setEnabled(true);
-        updateMoveButtons(List.of());
     }
 
     public void updateMoveButtons(List<YutResult> pending) {
