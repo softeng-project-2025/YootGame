@@ -16,20 +16,30 @@ YootGame/
 ├── src/
 │   ├── main/
 │   │   ├── java/
-│   │   │   ├── app/               # Main 실행 클래스
-│   │   │   ├── controller/        # GameController
-│   │   │   ├── model/             # Board, Player, Piece, Yut 등 도메인 모델
-│   │   │   ├── view/              # View 계층
-│   │   │ 
-│   │   │   
+│   │   │   ├── app/                 # Main 실행 클래스
+│   │   │   ├── controller/          # GameController
+│   │   │   ├── model/
+│   │   │   │   ├── dto/              # MoveResult, NextStateHint, MessageType 등
+│   │   │   │   ├── service/          # GameService, StateTransitioner, StateFactory
+│   │   │   │   ├── states/           # WaitingForThrowState, SelectingPieceState, GameOverState 등
+│   │   │   │   ├── board/            # Board
+│   │   │   │   ├── piece/            # Piece
+│   │   │   │   ├── player/           # Player
+│   │   │   │   ├── position/         # Position
+│   │   │   │   ├── yut/              # YutResult, YutThrower
+│   │   │   │   ├── strategy/         # SquarePathStrategy, PentagonPathStrategy, HexPathStrategy
+│   │   │   │   ├── turn/             # TurnResult
+│   │   │   │   ├── yut/              # YutResult, YutThrower
+│   │   │   │   └── manager/          # PieceUtil, GroupManager, CaptureManager
+│   │   │   └── view/                 # SwingView, DrawBoard, View 인터페이스
 │   │   └── resources/
 │   └── test/
-│       ├── java/
+│       ├── java/                    # JUnit 테스트 케이스
 │       └── resources/
-├── docs/                          # 설계 문서, 다이어그램 등
-├── pom.xml                        # Maven 설정
-├── LICENSE
-└── README.md
+├── docs/                            # 설계 문서, 다이어그램 등
+├── pom.xml                          # Maven 설정
+├── LICENSE                          # MIT License
+└── README.md                        # 프로젝트 소개 (이 파일)
 </code></pre>
 
 ## 실행 방법
@@ -64,16 +74,16 @@ mvn exec:java
 - 사용자 수 / 말 개수 / 윷판 형태 설정 가능 
 - 랜덤 윷 던지기 및 지정 던지기 지원 
 - 말 이동, 겹침, 잡기, 업기 처리 
-- 상태 패턴 기반 턴 전환 로직 
+- 상태 패턴(State) 기반 턴 전환 로직 (StateFactory 이용)
 - 게임 종료 및 승자 출력 기능 
-- Swing 기반 UI 및 JavaFX 교체 구조 준비됨
+- Swing 기반 UI와 JavaFX UI 교체 구조 준비
 
 ## 적용 패턴
 
 - MVC: 모델-뷰-컨트롤러 분리 
 - Strategy: 윷판 경로 전략 교체 (Square, Pentagon, Hexagon)
-- State: 게임 상태 전환 관리 
-- Factory (예정): 말, 보드 객체 생성 분리 
+- State: 게임 상태 전환 관리 (WaitingForThrowState, SelectingPieceState, GameOverState)
+- Factory: 상태 전이용 StateFactory 구현 완료
 - Observer (예정): 모델-뷰 자동 동기화
 
 
