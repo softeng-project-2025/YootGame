@@ -20,6 +20,7 @@ import model.yut.YutThrower;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 // GameService: 한 턴 단위로 윷 던지기, 이동, 캡처, 그룹핑, 상태 전이를 관리합니다.
 public class GameService {
@@ -137,12 +138,12 @@ public class GameService {
 
     public List<Piece> getSelectablePieces() {
         TurnResult tr = game.getTurnResult();
-        if (tr == null || !tr.hasPending()) {
-            return List.of();
-        }
+        if (tr == null || !tr.hasPending()) return List.of();
         Player current = game.getTurnManager().currentPlayer();
-        YutResult last = tr.getLastResult();
-        return finder.findMovable(current, last);
+        return tr.getPending().stream()
+                .flatMap(y -> finder.findMovable(current, y).stream())
+                .distinct()
+                .collect(Collectors.toList());
     }
 
     // 현재 게임 인스턴스 반환
