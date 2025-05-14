@@ -20,8 +20,16 @@ import java.util.Optional;
  * Swing 기반 View: GameStateDto를 받아 화면을 렌더링합니다.
  */
 public class SwingView extends JFrame implements View {
+    private static final int WINDOW_WIDTH       = 1200;
+    private static final int WINDOW_HEIGHT      = 1000;
+    private static final int PIECE_OFFSET       = 13;   // 말 겹침 오프셋
+    private static final int DEFAULT_YUT_INDEX  = 1;    // 콤보박스 '도' 기본 선택
+    private static final int MIN_PLAYERS        = 2;
+    private static final int MAX_PLAYERS        = 4;
+    private static final int MIN_PIECES         = 2;
+    private static final int MAX_PIECES         = 5;
+    private static final String[] BOARD_TYPES   = {"square", "pentagon", "hexagon"};
 
-    private static final int PIECE_OFFSET = 13;
     private GameStateDto currentDto;
     private GameController controller;
 
@@ -36,7 +44,7 @@ public class SwingView extends JFrame implements View {
 
     public SwingView() {
         super("YootGame");
-        setSize(1200, 1000);
+        setSize(WINDOW_WIDTH, WINDOW_HEIGHT);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
     }
@@ -65,7 +73,7 @@ public class SwingView extends JFrame implements View {
         randomThrowButton.addActionListener(e -> controller.onRandomThrow());
 
         yutChoiceBox = new JComboBox<>(YutResult.getNames());
-        yutChoiceBox.setSelectedIndex(1); // 기본 '도'
+        yutChoiceBox.setSelectedIndex(DEFAULT_YUT_INDEX); // 기본 '도'
 
         selectThrowButton = new JButton("지정 윷 던지기");
         selectThrowButton.addActionListener(e -> controller.onDesignatedThrow(
@@ -219,12 +227,12 @@ public class SwingView extends JFrame implements View {
     @Override
     public void showGameSetupDialog() {
 
-        SpinnerNumberModel playerModel = new SpinnerNumberModel(2, 2, 4, 1);
-        SpinnerNumberModel pieceModel  = new SpinnerNumberModel(2, 2, 5, 1);
+        SpinnerNumberModel playerModel = new SpinnerNumberModel(MIN_PLAYERS, MIN_PLAYERS, MAX_PLAYERS, 1);
+        SpinnerNumberModel pieceModel  = new SpinnerNumberModel(MIN_PIECES, MIN_PIECES, MAX_PIECES, 1);
 
         JSpinner playerCountSpinner = new JSpinner(playerModel);
         JSpinner pieceCountSpinner  = new JSpinner(pieceModel);
-        JComboBox<String> boardTypeBox = new JComboBox<>(new String[]{"square", "pentagon", "hexagon"});
+        JComboBox<String> boardTypeBox = new JComboBox<>(BOARD_TYPES);
 
         JPanel panel = new JPanel(new GridLayout(3, 2));
         panel.add(new JLabel("플레이어 수:"));
