@@ -37,7 +37,7 @@ public record MoveResult(
                 null,
                 reason,
                 false,
-                NextStateHint.STAY,
+                NextStateHint.SELECTING_PIECE,
                 Map.of(),
                 Map.of()
         );
@@ -201,7 +201,7 @@ public record MoveResult(
         } else if (bonusTurn) {
             return NextStateHint.WAITING_FOR_THROW;
         } else if (hasPendingYuts) {
-            return NextStateHint.STAY;
+            return NextStateHint.SELECTING_PIECE;
         } else {
             return NextStateHint.NEXT_TURN;
         }

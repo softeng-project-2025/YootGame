@@ -95,7 +95,7 @@ public class SelectingPieceState implements CanSelectPiece {
 
         boolean hasMore = game.getTurnResult().hasPending();
         NextStateHint hint = bonusTurn ? NextStateHint.WAITING_FOR_THROW
-                            : hasMore  ? NextStateHint.STAY
+                            : hasMore  ? NextStateHint.SELECTING_PIECE
                                         : NextStateHint.NEXT_TURN;
         System.out.println(hint + "로가자꾸나!!");
 

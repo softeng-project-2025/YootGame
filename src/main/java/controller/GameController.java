@@ -140,7 +140,7 @@ public class GameController {
                 view.updateStatus("다음: " + next, MessageType.INFO);
                 System.out.println("NEXT_TURN");
                 break;
-            case STAY:
+            case SELECTING_PIECE:
                 System.out.println(result.hasPendingYutResults());
                 System.out.println(service.getGame().getTurnResult().getPending());
                 System.out.println(service.getGame().getTurnResult().getApplied());

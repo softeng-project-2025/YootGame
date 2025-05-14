@@ -151,7 +151,7 @@ public record GameStateDto(
         } else if (hint == NextStateHint.WAITING_FOR_THROW) {
             // 보너스턴이거나 윷·모 후 다시 던져야 할 때
             phase = Phase.CAN_THROW;
-        } else if (hint == NextStateHint.STAY) {
+        } else if (hint == NextStateHint.SELECTING_PIECE) {
             // 같은 턴에 여러 말 선택만 반복할 때
             phase = Phase.CAN_SELECT;
         } else {
