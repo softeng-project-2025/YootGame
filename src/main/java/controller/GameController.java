@@ -5,6 +5,7 @@ import model.board.Board;
 import model.dto.GameStateDto;
 import model.dto.MessageType;
 import model.dto.MoveResult;
+import model.dto.NextStateHint;
 import model.service.GameService;
 import model.player.Player;
 import model.piece.Piece;
@@ -21,6 +22,7 @@ import java.util.stream.IntStream;
 public class GameController {
     private GameService service;
     private final View view;
+    private YutResult selectedYut;
 
 
     public GameController(View view) {
@@ -74,12 +76,27 @@ public class GameController {
                 );
     }
 
+    // ★ 추가: SwingView에서 호출될 메서드
+    public void onSelectPendingYut(YutResult yut) {
+        this.selectedYut = yut;
+        view.updateStatus(yut + " 선택됨. 이동할 말을 선택하세요.", MessageType.INFO);
+    }
+
     private void onSelectPiece(Piece piece) {
-        MoveResult result = service.selectPiece(
-                piece,
-                service.getGame().getTurnResult().getLastResult()
+        YutResult toUse = (selectedYut != null)
+                ? selectedYut
+                : service.getGame().getTurnResult().getLastResult();
+        // 선택 후 초기화
+        selectedYut = null;
+
+        MoveResult result = service.selectPiece(piece, toUse);
+
+        GameStateDto dto = buildDto(
+                result,
+                result.movedPiece().getId() + "번 말을 옮겼습니다.",
+                null
         );
-        view.renderGame(buildDto(result, result.movedPiece().getId() + "번 말을 옮겼습니다.", null));
+        view.renderGame(dto);
         handleNextStateHint(result);
     }
 
