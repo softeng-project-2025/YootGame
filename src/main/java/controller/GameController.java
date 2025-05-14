@@ -99,7 +99,7 @@ public class GameController {
 
         GameStateDto dto = buildDto(
                 result,
-                result.movedPiece().getId() + "번 말을 옮겼습니다.",
+                (result.movedPiece().getId() - (piece.getOwner().getId() - 1) * piece.getOwner().getPieces().size()) + "번 말을 옮겼습니다.",
                 null
         );
         view.renderGame(dto);
