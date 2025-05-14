@@ -25,16 +25,13 @@ public class SwingView extends JFrame implements View {
     private static final int PIECE_OFFSET = 13;
     private GameStateDto currentDto;
     private GameController controller;
+
     private JLabel resultLabel;
     private JPanel boardPanel;
+
     private JButton randomThrowButton;
     private JButton selectThrowButton;
-    private JButton DoButton;
-    private JButton GaeButton;
-    private JButton GeolButton;
-    private JButton YutButton;
-    private JButton MoButton;
-    private JButton BackDoButton;
+    private JButton DoButton, GaeButton, GeolButton, YutButton, MoButton, BackDoButton;
     private JComboBox<String> yutChoiceBox;
     private JLabel statusLabel;
 
@@ -52,18 +49,92 @@ public class SwingView extends JFrame implements View {
         setVisible(true);
     }
 
+    private void initUI() {
+        initResultLabel();
+        initControlPanel();
+        // boardPanel은 renderGame 호출 시 초기화됩니다
+    }
+
+    private void initResultLabel() {
+        resultLabel = new JLabel("결과: ", SwingConstants.CENTER);
+        add(resultLabel, BorderLayout.NORTH);
+    }
+
+    private void initControlPanel() {
+        // 버튼 및 콤보박스 생성
+        randomThrowButton = new JButton("랜덤 윷 던지기");
+        randomThrowButton.addActionListener(e -> controller.onRandomThrow());
+
+        yutChoiceBox = new JComboBox<>(YutResult.getNames());
+        yutChoiceBox.setSelectedIndex(1); // 기본 '도'
+
+        selectThrowButton = new JButton("지정 윷 던지기");
+        selectThrowButton.addActionListener(e -> controller.onDesignatedThrow(
+                YutResult.fromName((String) yutChoiceBox.getSelectedItem())
+        ));
+
+        // Pending Yut 선택 버튼
+        DoButton = new JButton("도 x 0");
+        DoButton.addActionListener(e -> controller.onSelectPendingYut(YutResult.DO));
+
+        GaeButton = new JButton("개 x 0");
+        GaeButton.addActionListener(e -> controller.onSelectPendingYut(YutResult.GAE));
+
+        GeolButton = new JButton("걸 x 0");
+        GeolButton.addActionListener(e -> controller.onSelectPendingYut(YutResult.GEOL));
+
+        YutButton = new JButton("윷 x 0");
+        YutButton.addActionListener(e -> controller.onSelectPendingYut(YutResult.YUT));
+
+        MoButton = new JButton("모 x 0");
+        MoButton.addActionListener(e -> controller.onSelectPendingYut(YutResult.MO));
+
+        BackDoButton = new JButton("빽도 x 0");
+        BackDoButton.addActionListener(e -> controller.onSelectPendingYut(YutResult.BACK_DO));
+
+        // 레이아웃 구성
+        JPanel leftButtons = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        leftButtons.add(randomThrowButton);
+        leftButtons.add(selectThrowButton);
+        leftButtons.add(yutChoiceBox);
+
+        JPanel rightButtons = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        rightButtons.add(DoButton);
+        rightButtons.add(GaeButton);
+        rightButtons.add(GeolButton);
+        rightButtons.add(YutButton);
+        rightButtons.add(MoButton);
+        rightButtons.add(BackDoButton);
+
+        JPanel buttonPanel = new JPanel(new BorderLayout());
+        buttonPanel.add(leftButtons, BorderLayout.WEST);
+        buttonPanel.add(rightButtons, BorderLayout.EAST);
+
+        // 상태바
+        statusLabel = new JLabel("게임을 시작하세요.", SwingConstants.CENTER);
+        statusLabel.setFont(new Font("맑은 고딕", Font.BOLD, 16));
+        statusLabel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+        JPanel bottomPanel = new JPanel(new BorderLayout());
+        bottomPanel.add(buttonPanel, BorderLayout.CENTER);
+        bottomPanel.add(statusLabel, BorderLayout.SOUTH);
+
+        add(bottomPanel, BorderLayout.SOUTH);
+    }
+
     @Override
     public void renderGame(Object dtoObj) {
         this.currentDto = (GameStateDto) dtoObj;
         GameStateDto dto = (GameStateDto) dtoObj;
+
         if (boardPanel == null) {
             boardPanel = new DrawBoard(controller.getCurrentBoardStrategy());
             boardPanel.setLayout(null);
             boardPanel.setBackground(Color.WHITE);
             JScrollPane scrollPane = new JScrollPane(boardPanel);
             add(scrollPane, BorderLayout.CENTER);
-            this.revalidate();
-            this.repaint();
+            revalidate();
+            repaint();
         }
         boardPanel.removeAll();
 
@@ -109,74 +180,9 @@ public class SwingView extends JFrame implements View {
         updateStatus(dto.messageText(), dto.messageType());
 
         updateMoveButtons(dto.pendingYuts());
-
+        
         boardPanel.revalidate();
         boardPanel.repaint();
-    }
-
-    private void initUI() {
-        resultLabel = new JLabel("결과: ", SwingConstants.CENTER);
-        add(resultLabel, BorderLayout.NORTH);
-
-        randomThrowButton = new JButton("랜덤 윷 던지기");
-        randomThrowButton.addActionListener(e -> controller.onRandomThrow());
-
-        // 콤보박스 생성 및 기본값 설정
-        yutChoiceBox = new JComboBox<>(YutResult.getNames());
-        yutChoiceBox.setSelectedIndex(1);
-        selectThrowButton = new JButton("지정 윷 던지기");
-        selectThrowButton.addActionListener(e -> controller.onDesignatedThrow(
-                YutResult.fromName((String) yutChoiceBox.getSelectedItem())
-        ));
-
-        DoButton = new JButton("도 x 0");
-        // ★ ④ 추가: 클릭 시 해당 YutResult 선택
-        DoButton.addActionListener(e -> controller.onSelectPendingYut(YutResult.DO));
-
-        GaeButton = new JButton("개 x 0");
-        GaeButton.addActionListener(e -> controller.onSelectPendingYut(YutResult.GAE));
-
-        GeolButton = new JButton("걸 x 0");
-        GeolButton.addActionListener(e -> controller.onSelectPendingYut(YutResult.GEOL));
-
-        YutButton = new JButton("윷 x 0");
-        YutButton.addActionListener(e -> controller.onSelectPendingYut(YutResult.YUT));
-
-        MoButton = new JButton("모 x 0");
-        MoButton.addActionListener(e -> controller.onSelectPendingYut(YutResult.MO));
-
-        BackDoButton = new JButton("빽도 x 0");
-        BackDoButton.addActionListener(e -> controller.onSelectPendingYut(YutResult.BACK_DO));
-
-        JPanel leftButtons = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        leftButtons.add(randomThrowButton);
-        leftButtons.add(selectThrowButton);
-        leftButtons.add(yutChoiceBox);
-
-        JPanel rightButtons = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        rightButtons.add(DoButton);
-        rightButtons.add(GaeButton);
-        rightButtons.add(GeolButton);
-        rightButtons.add(YutButton);
-        rightButtons.add(MoButton);
-        rightButtons.add(BackDoButton);
-
-        JPanel buttonPanel = new JPanel(new BorderLayout());
-        buttonPanel.add(leftButtons, BorderLayout.WEST);
-        buttonPanel.add(rightButtons, BorderLayout.EAST);
-
-        statusLabel = new JLabel("게임을 시작하세요.");
-        statusLabel = new JLabel("게임을 시작하세요.", SwingConstants.CENTER);
-        statusLabel.setFont(new Font("맑은 고딕", Font.BOLD, 16));
-        statusLabel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-
-
-
-        JPanel bottomPanel = new JPanel(new BorderLayout());
-        bottomPanel.add(buttonPanel, BorderLayout.CENTER);
-        bottomPanel.add(statusLabel, BorderLayout.SOUTH);
-
-        add(bottomPanel, BorderLayout.SOUTH);
     }
 
     @Override
