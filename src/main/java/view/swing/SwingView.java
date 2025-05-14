@@ -151,21 +151,19 @@ public class SwingView extends JFrame implements View {
     }
 
     private void renderPieces(GameStateDto dto) {
-        // 기존 그룹핑+버튼 추가 로직
-        Map<String, List<PieceInfo>> groups = dto.pieces().stream()
-                .collect(Collectors.groupingBy(
-                        info -> info.ownerId() + "-" + info.x() + "-" + info.y()
-                ));
-        final int OFFSET = PIECE_OFFSET;
+        Map<GameStateDto.PositionKey, List<GameStateDto.PieceInfo>> groups
+                = dto.groupByPosition();
 
         for (var entry : groups.entrySet()) {
-            List<PieceInfo> grp = entry.getValue();
-            int size = grp.size();
+            List<GameStateDto.PieceInfo> infos = entry.getValue();
+            int size = infos.size();
+
+            // ② 같은 좌표에 있는 말들끼리 오프셋 처리
             for (int i = 0; i < size; i++) {
-                PieceInfo info = grp.get(i);
-                // 높이 기준: (i - (size-1)/2.0) → 실수, 반올림
+                GameStateDto.PieceInfo info = infos.get(i);
+
                 int shift = (int) Math.round(i - (size - 1) / 2.0);
-                Position pos = new Position(info.id(), info.x(), info.y() - shift * OFFSET);
+                Position pos = new Position(info.id(), info.x(), info.y() - shift * PIECE_OFFSET);
 
                 CylinderButton btn = new CylinderButton(
                         getPlayerColor(info.ownerId()), pos, "P" + info.ownerId()
