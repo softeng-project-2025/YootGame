@@ -1,6 +1,5 @@
 package model.service;
 
-import model.Game;
 import model.dto.MoveFailType;
 import model.dto.MoveResult;
 import model.dto.NextStateHint;

@@ -3,7 +3,6 @@ package model;
 import exception.GameInitializationException;
 import model.board.Board;
 import model.player.Player;
-import model.state.WaitingForThrowState;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;

@@ -7,7 +7,6 @@ import model.manager.CaptureManager;
 import model.manager.GroupManager;
 import model.position.Position;
 import model.state.GameOverState;
-import model.state.WaitingForThrowState;
 import model.strategy.SquarePathStrategy;
 import model.strategy.PentagonPathStrategy;
 import model.strategy.HexPathStrategy;
@@ -50,7 +49,7 @@ class GameServiceIntegrationTest {
         mover.moveTo(target.getStartPosition(), YutResult.DO.getStep());
 
         var captures = new CaptureManager().handleCaptures(
-                List.of(mover), List.of(p1, p2)
+                List.of(mover), List.of(p1, p2), squareBoard
         );
 
         assertTrue(captures.containsKey(mover));
@@ -146,7 +145,8 @@ class GameServiceIntegrationTest {
         // Act: 캡처 수행
         var caps = new CaptureManager().handleCaptures(
                 List.of(captor),
-                List.of(targetOwner, attacker)
+                List.of(targetOwner, attacker),
+                squareBoard
         );
 
         // Assert: 캡터가 key로 존재하고, 두 말 모두 resetToStart 호출되어 시작 위치로
