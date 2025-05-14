@@ -15,6 +15,7 @@ import java.awt.*;
 import java.util.List;
 import java.util.EnumMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -127,6 +128,17 @@ public class SwingView extends JFrame implements View {
         this.currentDto = (GameStateDto) dtoObj;
         GameStateDto dto = (GameStateDto) dtoObj;
 
+        ensureBoardPanel();
+        boardPanel.removeAll();
+
+        renderPieces(dto);
+        updateControls(dto);
+
+        boardPanel.revalidate();
+        boardPanel.repaint();
+    }
+
+    private void ensureBoardPanel() {
         if (boardPanel == null) {
             boardPanel = new DrawBoard(controller.getCurrentBoardStrategy());
             boardPanel.setLayout(null);
@@ -136,53 +148,43 @@ public class SwingView extends JFrame implements View {
             revalidate();
             repaint();
         }
-        boardPanel.removeAll();
+    }
 
+    private void renderPieces(GameStateDto dto) {
+        // 기존 그룹핑+버튼 추가 로직
         Map<String, List<PieceInfo>> groups = dto.pieces().stream()
                 .collect(Collectors.groupingBy(
                         info -> info.ownerId() + "-" + info.x() + "-" + info.y()
                 ));
-
-        // 2) 그룹별로 버튼 생성, 같은 좌표 업힌 말들은 위로 오프셋
         final int OFFSET = PIECE_OFFSET;
+
         for (var entry : groups.entrySet()) {
             List<PieceInfo> grp = entry.getValue();
             int size = grp.size();
             for (int i = 0; i < size; i++) {
                 PieceInfo info = grp.get(i);
                 // 높이 기준: (i - (size-1)/2.0) → 실수, 반올림
-                int shiftIndex = (int) Math.round(i - (size - 1) / 2.0);
-                int dy = - shiftIndex * OFFSET;  // 음수면 위로, 양수면 아래로
-                // x 좌표는 그대로, y 좌표만 조정
-                Position uiPos = new Position(
-                        info.id(),
-                        info.x(),
-                        info.y() + dy
-                );
+                int shift = (int) Math.round(i - (size - 1) / 2.0);
+                Position pos = new Position(info.id(), info.x(), info.y() - shift * OFFSET);
+
                 CylinderButton btn = new CylinderButton(
-                        getPlayerColor(info.ownerId()),
-                        uiPos,
-                        "P" + info.ownerId()
+                        getPlayerColor(info.ownerId()), pos, "P" + info.ownerId()
                 );
                 btn.setEnabled(info.selectable());
                 btn.addActionListener(e -> controller.onSelectPieceById(info.id()));
                 boardPanel.add(btn);
             }
         }
+    }
 
-
-        boolean gameOver = dto.gameOver();
-        randomThrowButton.setEnabled(!gameOver);
-        selectThrowButton.setEnabled(!gameOver && !dto.pendingYuts().isEmpty());
-
-        // 결과 및 상태 표시
-        resultLabel.setText("결과: " + (dto.lastYut() != null ? dto.lastYut().getName() : ""));
+    private void updateControls(GameStateDto dto) {
+        // 버튼 활성화 / 라벨 업데이트
+        boolean over = dto.gameOver();
+        randomThrowButton.setEnabled(!over);
+        selectThrowButton.setEnabled(!over && !dto.pendingYuts().isEmpty());
+        resultLabel.setText("결과: " + Optional.ofNullable(dto.lastYut()).map(YutResult::getName).orElse(""));
         updateStatus(dto.messageText(), dto.messageType());
-
         updateMoveButtons(dto.pendingYuts());
-        
-        boardPanel.revalidate();
-        boardPanel.repaint();
     }
 
     @Override
