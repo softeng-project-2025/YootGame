@@ -258,10 +258,17 @@ public class SwingView extends JFrame implements View {
         );
 
         if (choice == 0) {
-            // 다시 시작
+            // 1) 기존 UI 완전 제거
+            getContentPane().removeAll();
+            boardPanel = null;        // 이전에 생성된 보드 패널 해제
+            // 2) 레이아웃·UI 초기화
+            setLayout(new BorderLayout());
+            initUI();                // 버튼·라벨·스테이터스 바 다시 세팅
+            revalidate();
+            repaint();
+            // 3) 게임 설정 다이얼로그 띄우기
             controller.initializeGameDialog();
         } else {
-            // 종료
             System.exit(0);
         }
     }
