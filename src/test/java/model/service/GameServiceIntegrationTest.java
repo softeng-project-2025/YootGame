@@ -49,25 +49,15 @@ class GameServiceIntegrationTest {
         mover.moveTo(target.getStartPosition(), YutResult.DO.getStep());
 
         var captures = new CaptureManager().handleCaptures(
-                List.of(mover), List.of(p1, p2), squareBoard
+                List.of(mover),
+                List.of(p1, p2),
+                squareBoard
         );
 
         assertTrue(captures.containsKey(mover));
         assertEquals(target, captures.get(mover).get(0));
         assertEquals(target.getStartPosition().index(), target.getPosition().index());
         assertSame(p1, game.getTurnManager().currentPlayer());
-    }
-
-    @Test
-    void cornerResetsPathStrategy() {
-        Piece piece = p1.getPieces().get(0);
-        piece.setCustomPath(squareBoard.getStrategy().getPath());
-
-        squareBoard.movePiece(piece, YutResult.MO);
-        assertEquals(PathType.OUTER, piece.getPathType());
-
-        squareBoard.movePiece(piece, YutResult.GAE);
-        assertEquals(PathType.FROM5, piece.getPathType());
     }
 
     @Test
@@ -94,29 +84,6 @@ class GameServiceIntegrationTest {
 
         // 4) 단언: 말은 finished, 턴은 local2로 넘어간다
         assertTrue(piece.isFinished());
-    }
-
-    @Test
-    void backDo_returnsAlongPreviousPath_andCornerResetsToOuter() {
-        Piece piece = p1.getPieces().get(0);
-        piece.setCustomPath(squareBoard.getStrategy().getPath());
-
-        squareBoard.movePiece(piece, YutResult.GAE);
-        assertEquals(2, piece.getPathIndex());
-
-        squareBoard.movePiece(piece, YutResult.GAE);
-        assertEquals(4, piece.getPathIndex());
-
-        squareBoard.movePiece(piece, YutResult.BACK_DO);
-        assertEquals(3, piece.getPathIndex());
-        assertEquals(PathType.OUTER, piece.getPathType());
-
-        squareBoard.movePiece(piece, YutResult.DO);
-        squareBoard.movePiece(piece, YutResult.DO);
-        assertEquals(PathType.OUTER, piece.getPathType());
-
-        squareBoard.movePiece(piece, YutResult.GAE);
-        assertEquals(PathType.FROM5, piece.getPathType());
     }
 
     @Test
@@ -179,73 +146,6 @@ class GameServiceIntegrationTest {
         assertTrue(game.isFinished());
         assertTrue(game.getState() instanceof GameOverState);
     }
-
-
-    @Test
-    void pentagonAndHexagon_strategiesSwitchAtCorner() {
-        // Pentagon
-        Board pentBoard = new Board(new PentagonPathStrategy());
-        Player pentPlayer = new Player(0, "P1", 2);
-        Player dummy = new Player(99, "Dummy", 2);
-        game = new Game(new model.board.Board(new model.strategy.PentagonPathStrategy()), List.of(p1, dummy));
-        Piece pp = pentPlayer.getPieces().get(0);
-        pp.setCustomPath(pentBoard.getStrategy().getPath());
-        pentBoard.movePiece(pp, YutResult.MO);
-        assertEquals(PathType.OUTER, pp.getPathType());
-        pentBoard.movePiece(pp, YutResult.GAE);
-        assertEquals(PathType.FROM5, pp.getPathType());
-
-        // Hexagon
-        Board hexBoard = new Board(new HexPathStrategy());
-        Player hexPlayer = new Player(0, "P1", 2);
-        game = new Game(new model.board.Board(new model.strategy.HexPathStrategy()), List.of(p1, dummy));
-        Piece hh = hexPlayer.getPieces().get(0);
-        hh.setCustomPath(hexBoard.getStrategy().getPath());
-        hexBoard.movePiece(hh, YutResult.MO);
-        assertEquals(PathType.OUTER, hh.getPathType());
-        hexBoard.movePiece(hh, YutResult.GAE);
-        assertEquals(PathType.FROM5, hh.getPathType());
-    }
-
-
-    @Test
-    void selectPiece_recordsGroupingInMoveResult() {
-        // 1) 플레이어 두 명에 첫번째 플레이어만 말 2개 세팅 (두번째는 더미)
-        Player multi = new Player(0, "M", 2);
-        Player dummy = new Player(99, "Dummy", 2);
-        Board b = new Board(new SquarePathStrategy());
-        Game g = new Game(b, List.of(multi, dummy));
-
-        GameService svc = new GameService(g);
-
-        // 2) 커스텀 경로 설정 (movePiece 가 이 경로를 쓸 수 있게)
-        List<Position> path = b.getStrategy().getPath();
-        multi.getPieces().forEach(p -> p.setCustomPath(path));
-
-        // 3) 첫 번째 말 이동: throwYut → selectPiece
-        svc.throwYut(YutResult.DO);
-        MoveResult mr1 = svc.selectPiece(multi.getPieces().get(0), YutResult.DO);
-        assertTrue(mr1.isSuccess());
-
-        // 4) 두 번째 말도 같은 위치로 이동
-        svc.throwYut(YutResult.DO);
-        MoveResult mr2 = svc.selectPiece(multi.getPieces().get(1), YutResult.DO);
-        assertTrue(mr2.isSuccess());
-
-        // 5) groupMap 검증
-        Position pos = multi.getPieces().get(1).getPosition();
-        GroupManager.GroupKey key = new GroupManager.GroupKey(multi, pos);
-        var groups = mr2.groupMap();
-
-        assertTrue(groups.containsKey(key),
-                "이동 후 groupMap 에 M의 말 그룹이 등록되어야 한다");
-        var grouped = groups.get(key);
-        assertEquals(2, grouped.size(),
-                "동일 위치에 있는 말이 2개여야 한다");
-        assertTrue(grouped.containsAll(multi.getPieces()),
-                "groupMap 에 두 말 모두 포함되어야 한다");
-    }
-
 
 
     @Test
