@@ -18,7 +18,8 @@ public record GameStateDto(
         String messageText,
         MessageType messageType,
         boolean gameOver,
-        List<YutResult> pendingYuts
+        List<YutResult> pendingYuts,
+        Phase phase
 ) {
 
     /** 아무 것도 없는 초기 화면용 DTO */
@@ -30,7 +31,8 @@ public record GameStateDto(
                 "게임을 설정해주세요", // 초기 안내 문구
                 MessageType.INFO, // INFO 스타일
                 false,
-                List.of()
+                List.of(),
+                null
                 );
     }
 
@@ -126,6 +128,8 @@ public record GameStateDto(
         boolean over = game.isFinished();
         List<YutResult> pending = List.copyOf(game.getTurnResult().getPending());
 
+        Phase phase = getPhase(result, over);
+
         return new GameStateDto(
                 last,
                 infos,
@@ -133,8 +137,29 @@ public record GameStateDto(
                 messageText != null ? messageText : "",
                 messageType != null ? messageType : MessageType.INFO,
                 over,
-                pending
+                List.copyOf(pending),
+                phase
         );
+    }
+
+    private static Phase getPhase(MoveResult result, boolean over) {
+        NextStateHint hint = result != null ? result.nextStateHint() : null;
+        // ① NextStateHint 보고 Phase 결정
+        Phase phase;
+        if (over) {
+            phase = Phase.GAME_OVER;
+        } else if (hint == NextStateHint.WAITING_FOR_THROW) {
+            // 보너스턴이거나 윷·모 후 다시 던져야 할 때
+            phase = Phase.CAN_THROW;
+        } else if (hint == NextStateHint.STAY) {
+            // 같은 턴에 여러 말 선택만 반복할 때
+            phase = Phase.CAN_SELECT;
+        } else {
+            // 초기 상태, NEXT_TURN 후, 또는 지정 던지기 직후
+            phase = Phase.CAN_THROW;
+        }
+
+        return phase;
     }
 
     private static int positionToX(model.position.Position pos) {

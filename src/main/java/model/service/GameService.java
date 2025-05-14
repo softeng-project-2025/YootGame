@@ -113,19 +113,16 @@ public class GameService {
         switch (result.nextStateHint()) {
             case WAITING_FOR_THROW:
                 // bonusTurn 인 경우에만 진짜 던지기 대기 상태로
-                System.out.println("웨이팅->웨이팅뜨로우로가자");
                 game.transitionTo(new WaitingForThrowState(game));
                 break;
 
             case STAY:
-                System.out.println("스테이->셀렉트로가자");
                 // 같은 플레이어가 pending 을 가지고 계속 선택 단계로
                 game.transitionTo(new SelectingPieceState(game));
                 break;
 
             case NEXT_TURN:
                 // 턴 넘기기
-                System.out.println("턴넘기기->웨이팅뜨로우로가자");
                 game.startTurn();
                 game.getTurnManager().nextTurn();
                 game.transitionTo(new WaitingForThrowState(game));
