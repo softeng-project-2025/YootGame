@@ -52,7 +52,7 @@ public class PentagonPathStrategy implements PathStrategy {
     private final int[] pathFrom10 = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 28, 29, 36, 32, 33, 20, 21, 22, 23, 24, 25, 37};
     private final int[] pathFrom15 = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 30, 31, 36, 32, 33, 20, 21, 22, 23, 24, 25, 37};
     private final int[] pathFrom5Center = {0, 1, 2, 3, 4, 5, 26, 27, 36, 34, 35, 25, 37};
-    private final int[] pathFrom10Center = {0, 1, 2, 3, 4, 5, 6, 7, 8, 10, 28, 29, 36, 34, 35, 25, 37};
+    private final int[] pathFrom10Center = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 28, 29, 36, 34, 35, 25, 37};
     private final int[] pathFrom15Center = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 30, 31, 36, 34, 35, 25, 37};
 
     public PentagonPathStrategy() {
