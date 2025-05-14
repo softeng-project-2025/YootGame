@@ -38,8 +38,8 @@ public record GameStateDto(
      * 화면에 표시할 말 정보
      */
     public static record PieceInfo(
-            int ownerId,
             int id,
+            int ownerId,
             int x,
             int y,
             boolean selectable
@@ -89,8 +89,8 @@ public record GameStateDto(
                 .map(piece -> {
                     var pos = piece.getPosition();
                     return new PieceInfo(
-                            piece.getOwner().getId(),
                             piece.getId(),
+                            piece.getOwner().getId(),
                             positionToX(pos),
                             positionToY(pos),
                             selectableSet.contains(piece)
