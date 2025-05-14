@@ -5,7 +5,6 @@ import model.dto.*;
 import model.manager.CaptureManager;
 import model.manager.GroupManager;
 import model.manager.VictoryManager;
-import model.piece.PathType;
 import model.piece.Piece;
 import model.position.Position;
 import model.turn.TurnResult;
