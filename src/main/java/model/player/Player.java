@@ -42,7 +42,7 @@ public class Player {
                             /* x */ baseX,
                             /* y */ BASE_Y_OFFSET + (i - 1) * PIECE_SPACING_Y
                     );
-                    return new Piece(this, i, startPos);
+                    return new Piece(this, this.id * pieceCount + i, startPos);
                 })
                 .collect(Collectors.toList());
     }
