@@ -83,12 +83,13 @@ public class GameController {
     }
 
     private void onSelectPiece(Piece piece) {
+        // 1) 실제 사용할 윷 결과 결정
         YutResult toUse = (selectedYut != null)
                 ? selectedYut
                 : service.getGame().getTurnResult().getLastResult();
-        // 선택 후 초기화
         selectedYut = null;
 
+        // 2) 이동 시도
         MoveResult result = service.selectPiece(piece, toUse);
 
         if (result.isGameOver()) {
@@ -102,8 +103,11 @@ public class GameController {
                 null
         );
         view.renderGame(dto);
-        System.out.println("현재 차례: " + service.getGame().getTurnManager().currentPlayer().getName());
+
+        // 4) 상태 전이 메시지 (턴 넘김 / 보너스 / 종료) 먼저 처리
         handleNextStateHint(result);
+
+        System.out.println("현재 차례: " + service.getGame().getTurnManager().currentPlayer().getName());
     }
 
     private void handleNextStateHint(MoveResult result) {
@@ -117,6 +121,7 @@ public class GameController {
             case WAITING_FOR_THROW:
                 // 다음 단계 대기이니 따로 할 일 없음
                 view.updateStatus("윷을 던지세요.", MessageType.INFO);
+                System.out.println("WAITING_FOR_THROW");
                 break;
             case NEXT_TURN:
                 String next = service.getGame()
@@ -125,9 +130,14 @@ public class GameController {
                         .getName();
                 view.showMessage("이제 " + next + " 차례입니다.");
                 view.updateStatus("다음: " + next, MessageType.INFO);
+                System.out.println("NEXT_TURN");
                 break;
             case STAY:
+                System.out.println(result.hasPendingYutResults());
+                System.out.println(service.getGame().getTurnResult().getPending());
+                System.out.println(service.getGame().getTurnResult().getApplied());
                 view.updateStatus("같은 플레이어가 한 번 더 던집니다.", MessageType.INFO);
+                System.out.println("STAY");
                 break;
             case GAME_ENDED:
                 Player winner = result.winner();
