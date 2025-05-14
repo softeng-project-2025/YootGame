@@ -3,15 +3,10 @@ package model.service;
 import model.Game;
 import model.dto.MoveFailType;
 import model.dto.MoveResult;
-import model.dto.NextStateHint;
-import model.manager.CaptureManager;
-import model.manager.GroupManager;
 import model.manager.TurnManager;
-import model.manager.VictoryManager;
 import model.piece.DefaultMovablePieceFinder;
 import model.piece.MovablePieceFinder;
 import model.piece.Piece;
-import model.piece.PieceUtil;
 import model.player.Player;
 import model.state.*;
 import model.turn.TurnResult;
@@ -19,14 +14,13 @@ import model.yut.YutResult;
 import model.yut.YutThrower;
 
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 // GameService: 한 턴 단위로 윷 던지기, 이동, 캡처, 그룹핑, 상태 전이를 관리합니다.
 public class GameService {
     private final Game game;
     private final MovablePieceFinder finder;
-
+    private final StateTransitioner transitioner;
 
     public GameService(Game game) {
         this(game, new DefaultMovablePieceFinder());
@@ -35,6 +29,7 @@ public class GameService {
     GameService(Game game, MovablePieceFinder finder) {
         this.game = game;
         this.finder = finder;
+        this.transitioner = new StateTransitioner(game);
     }
 
     // 새로운 턴을 시작할 때 호출합니다.
@@ -57,7 +52,6 @@ public class GameService {
             return MoveResult.gameOver(yut, safeCurrentPlayer());
         }
 
-
         // 2) 상태 검사
         if (!(game.getState() instanceof CanThrowYut throwState)) {
             return MoveResult.fail(yut, MoveFailType.THROW_REQUIRED);
@@ -65,9 +59,10 @@ public class GameService {
 
         // 3) 던지기 로직
         MoveResult result = throwState.handleYutThrow(yut);
-        applyNextState(result);
+        transitioner.transition(result);
         return result;
     }
+
     // 선택한 말에 윷 결과 적용
     public MoveResult selectPiece(Piece piece, YutResult yut) {
         if (game.isFinished()) {
@@ -85,8 +80,7 @@ public class GameService {
 
         // 4) 선택 로직
         MoveResult result = selState.handlePieceSelect(piece, yut);
-
-        applyNextState(result);
+        transitioner.transition(result);
         return result;
     }
 
@@ -102,35 +96,6 @@ public class GameService {
             return game.getTurnResult();
         } catch (Exception ignored) {
             return null;
-        }
-    }
-
-    // 상태 전이 + 턴 전환
-    private void applyNextState(MoveResult result) {
-        if (result == null || result.isFailure()) return;
-        NextStateHint hint = result.nextStateHint();
-        if (hint == null) return;
-        switch (result.nextStateHint()) {
-            case WAITING_FOR_THROW:
-                // bonusTurn 인 경우에만 진짜 던지기 대기 상태로
-                game.transitionTo(new WaitingForThrowState(game));
-                break;
-
-            case STAY:
-                // 같은 플레이어가 pending 을 가지고 계속 선택 단계로
-                game.transitionTo(new SelectingPieceState(game));
-                break;
-
-            case NEXT_TURN:
-                // 턴 넘기기
-                game.startTurn();
-                game.getTurnManager().nextTurn();
-                game.transitionTo(new WaitingForThrowState(game));
-                break;
-
-            case GAME_ENDED:
-                game.transitionTo(new GameOverState());
-                break;
         }
     }
 

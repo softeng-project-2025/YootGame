@@ -303,7 +303,7 @@ class GameServiceTest {
         MoveResult r = mock(MoveResult.class);
         when(selState.handlePieceSelect(any(), any())).thenReturn(r);
         when(r.isFailure()).thenReturn(false);
-        when(r.nextStateHint()).thenReturn(NextStateHint.STAY);
+        when(r.nextStateHint()).thenReturn(NextStateHint.SELECTING_PIECE);
 
         sut.selectPiece(mock(Piece.class), YutResult.YUT);
 
