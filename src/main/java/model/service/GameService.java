@@ -82,8 +82,6 @@ public class GameService {
             return MoveResult.fail(yut, MoveFailType.INVALID_SELECTION);
         }
 
-
-
         // 4) 선택 로직
         MoveResult result = selState.handlePieceSelect(piece, yut);
 
@@ -113,21 +111,19 @@ public class GameService {
         if (hint == null) return;
         switch (result.nextStateHint()) {
             case WAITING_FOR_THROW ->
+                // 보너스 턴이거나 모·윷으로 다시 던져야 할 때
                     game.transitionTo(new WaitingForThrowState(game));
-
+            case STAY ->
+                // 같은 플레이어가 남은 pending을 가지고 계속 선택해야 할 때
+                    game.transitionTo(new SelectingPieceState(game));
             case NEXT_TURN -> {
+                // 턴 넘기기
                 game.startTurn();
-                TurnManager tm = game.getTurnManager();
-                if (tm != null) tm.nextTurn();
+                game.getTurnManager().nextTurn();
                 game.transitionTo(new WaitingForThrowState(game));
             }
-
             case GAME_ENDED ->
                     game.transitionTo(new GameOverState());
-
-            case STAY -> {
-                // 그대로 유지
-            }
         }
     }
 
