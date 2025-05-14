@@ -19,9 +19,9 @@ YootGame/
 │   │   │   ├── app/               # Main 실행 클래스
 │   │   │   ├── controller/        # GameController
 │   │   │   ├── model/             # Board, Player, Piece, Yut 등 도메인 모델
-│   │   │   ├── state/             # 상태 패턴 (Waiting, Selecting 등)
-│   │   │   ├── strategy/          # 경로 전략 (정사각형, 오각형 등)
-│   │   │   └── view/              # View 계층 (Swing, JavaFX 등)
+│   │   │   ├── view/              # View 계층
+│   │   │ 
+│   │   │   
 │   │   └── resources/
 │   └── test/
 │       ├── java/
