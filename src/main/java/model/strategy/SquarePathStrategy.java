@@ -30,19 +30,23 @@ import model.piece.PathType;
 public class SquarePathStrategy implements PathStrategy {
 
     private final List<Position> allPositions;
-    private final List<Position> allVertexPositions;
-    private final List<Position> outerPath;
-    private final List<Position> pathFrom5;
-    private final List<Position> pathFrom10;
-    private final List<Position> pathFrom5Center;
+    private final int[] allVertexPositions = {
+            // outer lines
+            5, 10,
+            10, 15,
+            15, 20,
+            20, 5,
+            // inner lines
+            5, 15,
+            10, 20
+    };
+    private final int[] outerPath = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 30};
+    private final int[] pathFrom5 = {0, 1, 2, 3, 4, 5, 21, 22, 29, 25, 26, 15, 16, 17, 18, 19, 20, 30};
+    private final int[] pathFrom10 = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 23, 24, 29, 27, 28, 20, 30};
+    private final int[] pathFrom5Center = {0, 1, 2, 3, 4, 5, 21, 22, 29, 27, 28, 20, 30};
 
     public SquarePathStrategy() {
         allPositions = createAllPositions();
-        allVertexPositions = createAllVertexPositions();
-        outerPath = createOuterPath();
-        pathFrom5 = createPathFrom5();
-        pathFrom10 = createPathFrom10();
-        pathFrom5Center = createPathFrom5Center();
     }
 
     // 경로 업데이트 & 업데이트된 경로 기반 다음 위치
@@ -55,7 +59,7 @@ public class SquarePathStrategy implements PathStrategy {
         // 모에 있었을 때 + 5번째까지는 모든 경로가 OUTER를 따르기에 조건 충분
         if (nextIndex == 5) {
             piece.setPathType(PathType.FROM5);
-            piece.setCustomPath(pathFrom5);
+            piece.setCustomPath(createPath(pathFrom5));
             piece.setPathIndex(5);
         }
 
@@ -65,7 +69,7 @@ public class SquarePathStrategy implements PathStrategy {
                         && nextIndex == 10
         ) {
             piece.setPathType(PathType.FROM10);
-            piece.setCustomPath(pathFrom10);
+            piece.setCustomPath(createPath(pathFrom10));
             piece.setPathIndex(10);
         }
 
@@ -75,7 +79,7 @@ public class SquarePathStrategy implements PathStrategy {
                         && nextIndex == 8
         ) {
             piece.setPathType(PathType.FROM5CENTER);
-            piece.setCustomPath(pathFrom5Center);
+            piece.setCustomPath(createPath(pathFrom5Center));
             piece.setPathIndex(8);
         }
 
@@ -89,7 +93,7 @@ public class SquarePathStrategy implements PathStrategy {
 
         if (prevIndex == 0) {
             piece.setPathType(PathType.OUTER);
-            piece.setCustomPath(outerPath);
+            piece.setCustomPath(createPath(outerPath));
             piece.setPathIndex(20);
             prevIndex = 20;
         }
@@ -100,7 +104,7 @@ public class SquarePathStrategy implements PathStrategy {
                         && prevIndex == 4
         ) {
             piece.setPathType(PathType.OUTER);
-            piece.setCustomPath(outerPath);
+            piece.setCustomPath(createPath(outerPath));
             piece.setPathIndex(4);
         }
 
@@ -110,7 +114,7 @@ public class SquarePathStrategy implements PathStrategy {
                         && prevIndex == 9
         ) {
             piece.setPathType(PathType.OUTER);
-            piece.setCustomPath(outerPath);
+            piece.setCustomPath(createPath(outerPath));
             piece.setPathIndex(9);
         }
 
@@ -120,7 +124,7 @@ public class SquarePathStrategy implements PathStrategy {
                         && prevIndex == 8
         ) {
             piece.setPathType(PathType.FROM5CENTER);
-            piece.setCustomPath(pathFrom5Center);
+            piece.setCustomPath(createPath(pathFrom5Center));
             piece.setPathIndex(8);
         }
 
@@ -130,7 +134,7 @@ public class SquarePathStrategy implements PathStrategy {
                         && prevIndex == 7
         ) {
             piece.setPathType(PathType.FROM5);
-            piece.setCustomPath(pathFrom5);
+            piece.setCustomPath(createPath(pathFrom5));
             piece.setPathIndex(7);
         }
 
@@ -140,7 +144,7 @@ public class SquarePathStrategy implements PathStrategy {
 
     @Override
     public List<Position> getPath() {
-        return outerPath;
+        return createPath(outerPath);
     }
 
     @Override
@@ -150,7 +154,7 @@ public class SquarePathStrategy implements PathStrategy {
 
     @Override
     public List<Position> getAllVertexPositions() {
-        return allVertexPositions;
+        return createPath(allVertexPositions);
     }
 
     // for drawing board's noon
@@ -198,41 +202,6 @@ public class SquarePathStrategy implements PathStrategy {
             positions.add(new Position(i, x, y, isCenter, isVertex));
         }
         return positions;
-    }
-
-    // for drawing board's background line
-    private List<Position> createAllVertexPositions() {
-        int[] coords = {
-                // outer lines
-                5, 10,
-                10, 15,
-                15, 20,
-                20, 5,
-                // inner lines
-                5, 15,
-                10, 20
-        };
-        return createPath(coords);
-    }
-
-    private List<Position> createOuterPath() {
-        int[] coords = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 30};
-        return createPath(coords);
-    }
-
-    private List<Position> createPathFrom5() {
-        int[] coords = {0, 1, 2, 3, 4, 5, 21, 22, 29, 25, 26, 15, 16, 17, 18, 19, 20, 30};
-        return createPath(coords);
-    }
-
-    private List<Position> createPathFrom10() {
-        int[] coords = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 23, 24, 29, 27, 28, 20, 30};
-        return createPath(coords);
-    }
-
-    private List<Position> createPathFrom5Center() {
-        int[] coords = {0, 1, 2, 3, 4, 5, 21, 22, 29, 27, 28, 20, 30};
-        return createPath(coords);
     }
 
     private List<Position> createPath(int[] coords) {

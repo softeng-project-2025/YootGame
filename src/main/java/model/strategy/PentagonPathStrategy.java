@@ -33,25 +33,30 @@ import java.util.List;
 public class PentagonPathStrategy implements PathStrategy {
 
     private final List<Position> allPositions;
-    private final List<Position> allVertexPositions;
-    private final List<Position> outerPath;
-    private final List<Position> pathFrom5;
-    private final List<Position> pathFrom10;
-    private final List<Position> pathFrom15;
-    private final List<Position> pathFrom5Center;
-    private final List<Position> pathFrom10Center;
-    private final List<Position> pathFrom15Center;
+    private final int[] allVertexPositions = {
+            // outer lines
+            5, 10,
+            10, 15,
+            15, 20,
+            20, 25,
+            25, 5,
+            // inner lines
+            36, 5,
+            36, 10,
+            36, 15,
+            36, 20,
+            36, 25
+    };
+    private final int[] outerPath = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 37};
+    private final int[] pathFrom5 = {0, 1, 2, 3, 4, 5, 26, 27, 36, 32, 33, 20, 21, 22, 23, 24, 25, 37};
+    private final int[] pathFrom10 = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 28, 29, 36, 32, 33, 20, 21, 22, 23, 24, 25, 37};
+    private final int[] pathFrom15 = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 30, 31, 36, 32, 33, 20, 21, 22, 23, 24, 25, 37};
+    private final int[] pathFrom5Center = {0, 1, 2, 3, 4, 5, 26, 27, 36, 34, 35, 25, 37};
+    private final int[] pathFrom10Center = {0, 1, 2, 3, 4, 5, 6, 7, 8, 10, 28, 29, 36, 34, 35, 25, 37};
+    private final int[] pathFrom15Center = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 30, 31, 36, 34, 35, 25, 37};
 
     public PentagonPathStrategy() {
         allPositions = createAllPositions();
-        allVertexPositions = createAllVertexPositions();
-        outerPath = createOuterPath();
-        pathFrom5 = createPathFrom5();
-        pathFrom10 = createPathFrom10();
-        pathFrom15 = createPathFrom15();
-        pathFrom5Center = createPathFrom5Center();
-        pathFrom10Center = createPathFrom10Center();
-        pathFrom15Center = createPathFrom15Center();
     }
 
     @Override
@@ -63,7 +68,7 @@ public class PentagonPathStrategy implements PathStrategy {
         // 모에 있었을 때 + 5까지는 모두 OUTER를 따르기에 조건 충분
         if (nextIndex == 5) {
             piece.setPathType(PathType.FROM5);
-            piece.setCustomPath(pathFrom5);
+            piece.setCustomPath(createPath(pathFrom5));
             piece.setPathIndex(5);
         }
 
@@ -73,7 +78,7 @@ public class PentagonPathStrategy implements PathStrategy {
                         && nextIndex == 10
         ) {
             piece.setPathType(PathType.FROM10);
-            piece.setCustomPath(pathFrom10);
+            piece.setCustomPath(createPath(pathFrom10));
             piece.setPathIndex(10);
         }
 
@@ -83,28 +88,28 @@ public class PentagonPathStrategy implements PathStrategy {
                         && nextIndex == 15
         ) {
             piece.setPathType(PathType.FROM15);
-            piece.setCustomPath(pathFrom15);
+            piece.setCustomPath(createPath(pathFrom15));
             piece.setPathIndex(15);
         }
 
         if (pathType == PathType.FROM5) {
             if (nextIndex == 8) {
                 piece.setPathType(PathType.FROM5CENTER);
-                piece.setCustomPath(pathFrom5Center);
+                piece.setCustomPath(createPath(pathFrom5Center));
                 piece.setPathIndex(8);
             }
         }
         else if (pathType == PathType.FROM10) {
             if (nextIndex == 13) {
                 piece.setPathType(PathType.FROM10CENTER);
-                piece.setCustomPath(pathFrom10Center);
+                piece.setCustomPath(createPath(pathFrom10Center));
                 piece.setPathIndex(13);
             }
         }
         else if (pathType == PathType.FROM15) {
             if (nextIndex == 18) {
                 piece.setPathType(PathType.FROM15CENTER);
-                piece.setCustomPath(pathFrom15Center);
+                piece.setCustomPath(createPath(pathFrom15Center));
                 piece.setPathIndex(18);
             }
         }
@@ -119,7 +124,7 @@ public class PentagonPathStrategy implements PathStrategy {
 
         if (prevIndex == 0) {
             piece.setPathType(PathType.OUTER);
-            piece.setCustomPath(outerPath);
+            piece.setCustomPath(createPath(outerPath));
             piece.setPathIndex(25);
             prevIndex = 25;
         }
@@ -130,7 +135,7 @@ public class PentagonPathStrategy implements PathStrategy {
                         && prevIndex == 4
         ) {
             piece.setPathType(PathType.OUTER);
-            piece.setCustomPath(outerPath);
+            piece.setCustomPath(createPath(outerPath));
             piece.setPathIndex(4);
         }
 
@@ -140,7 +145,7 @@ public class PentagonPathStrategy implements PathStrategy {
                         && prevIndex == 9
         ) {
             piece.setPathType(PathType.OUTER);
-            piece.setCustomPath(outerPath);
+            piece.setCustomPath(createPath(outerPath));
             piece.setPathIndex(9);
         }
 
@@ -149,7 +154,7 @@ public class PentagonPathStrategy implements PathStrategy {
                         && prevIndex == 14
         ) {
             piece.setPathType(PathType.OUTER);
-            piece.setCustomPath(outerPath);
+            piece.setCustomPath(createPath(outerPath));
             piece.setPathIndex(14);
         }
 
@@ -158,7 +163,7 @@ public class PentagonPathStrategy implements PathStrategy {
                         && prevIndex == 7
         ) {
             piece.setPathType(PathType.FROM5);
-            piece.setCustomPath(pathFrom5);
+            piece.setCustomPath(createPath(pathFrom5));
             piece.setPathIndex(7);
         }
 
@@ -167,7 +172,7 @@ public class PentagonPathStrategy implements PathStrategy {
                         && prevIndex == 12
         ) {
             piece.setPathType(PathType.FROM10);
-            piece.setCustomPath(pathFrom10);
+            piece.setCustomPath(createPath(pathFrom10));
             piece.setPathIndex(12);
         }
 
@@ -176,7 +181,7 @@ public class PentagonPathStrategy implements PathStrategy {
                         && prevIndex == 17
         ) {
             piece.setPathType(PathType.FROM15);
-            piece.setCustomPath(pathFrom15);
+            piece.setCustomPath(createPath(pathFrom15));
             piece.setPathIndex(17);
         }
 
@@ -186,7 +191,7 @@ public class PentagonPathStrategy implements PathStrategy {
 
     @Override
     public java.util.List<Position> getPath() {
-        return outerPath;
+        return createPath(outerPath);
     }
 
     @Override
@@ -196,7 +201,7 @@ public class PentagonPathStrategy implements PathStrategy {
 
     @Override
     public List<Position> getAllVertexPositions() {
-        return allVertexPositions;
+        return createPath(allVertexPositions);
     }
 
     // for drawing board's noon
@@ -251,60 +256,6 @@ public class PentagonPathStrategy implements PathStrategy {
             positions.add(new Position(i, x, y, isCenter, isVertex));
         }
         return positions;
-    }
-
-    // for drawing board's background line
-    private List<Position> createAllVertexPositions() {
-        int[] coords = {
-                // outer lines
-                5, 10,
-                10, 15,
-                15, 20,
-                20, 25,
-                25, 5,
-                // inner lines
-                36, 5,
-                36, 10,
-                36, 15,
-                36, 20,
-                36, 25
-        };
-        return createPath(coords);
-    }
-
-    private List<Position> createOuterPath() {
-        int[] coords = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 37};
-        return createPath(coords);
-    }
-
-    private List<Position> createPathFrom5() {
-        int[] coords = {0, 1, 2, 3, 4, 5, 26, 27, 36, 32, 33, 20, 21, 22, 23, 24, 25, 37};
-        return createPath(coords);
-    }
-
-    private List<Position> createPathFrom10() {
-        int[] coords = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 28, 29, 36, 32, 33, 20, 21, 22, 23, 24, 25, 37};
-        return createPath(coords);
-    }
-
-    private List<Position> createPathFrom15() {
-        int[] coords = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 30, 31, 36, 32, 33, 20, 21, 22, 23, 24, 25, 37};
-        return createPath(coords);
-    }
-
-    private List<Position> createPathFrom5Center() {
-        int[] coords = {0, 1, 2, 3, 4, 5, 26, 27, 36, 34, 35, 25, 37};
-        return createPath(coords);
-    }
-
-    private List<Position> createPathFrom10Center() {
-        int[] coords = {0, 1, 2, 3, 4, 5, 6, 7, 8, 10, 28, 29, 36, 34, 35, 25, 37};
-        return createPath(coords);
-    }
-
-    private List<Position> createPathFrom15Center() {
-        int[] coords = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 30, 31, 36, 34, 35, 25, 37};
-        return createPath(coords);
     }
 
     private List<Position> createPath(int[] coords) {
