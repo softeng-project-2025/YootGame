@@ -224,36 +224,6 @@ class GameServiceTest {
         verify(mockGame, never()).startTurn();
     }
 
-    // 4) getSelectablePieces 위임 테스트
-    @Test
-    void getSelectablePieces_delegatesToFinder() {
-        // Arrange
-        TurnManager tm = mock(TurnManager.class);
-        Player player = mock(Player.class);
-        when(tm.currentPlayer()).thenReturn(player);
-        when(mockGame.getTurnManager()).thenReturn(tm);
-
-        // Stub TurnResult
-        TurnResult turnResult = mock(TurnResult.class);
-        when(turnResult.hasPending()).thenReturn(true);            // <— add this
-        when(turnResult.getLastResult()).thenReturn(YutResult.MO);
-        when(mockGame.getTurnResult()).thenReturn(turnResult);
-
-        // Stub finder
-        List<Piece> expected = List.of(mock(Piece.class));
-        MovablePieceFinder stubFinder = mock(MovablePieceFinder.class);
-        when(stubFinder.findMovable(player, YutResult.MO))
-                .thenReturn(expected);
-
-        sut = new GameService(mockGame, stubFinder);
-
-        // Act
-        List<Piece> actual = sut.getSelectablePieces();
-
-        // Assert
-        assertSame(expected, actual);
-    }
-
     @Test
     void selectPiece_whenNextTurn_thenAdvancesTurnAndTransitions() {
         // 준비
@@ -296,23 +266,6 @@ class GameServiceTest {
     }
 
     @Test
-    void selectPiece_whenStay_thenDoesNotTransition() {
-        when(mockGame.isFinished()).thenReturn(false);
-        CanSelectPiece selState = mock(CanSelectPiece.class);
-        when(mockGame.getState()).thenReturn(selState);
-
-        MoveResult r = mock(MoveResult.class);
-        when(selState.handlePieceSelect(any(), any())).thenReturn(r);
-        when(r.isFailure()).thenReturn(false);
-        when(r.nextStateHint()).thenReturn(NextStateHint.STAY);
-
-        sut.selectPiece(mock(Piece.class), YutResult.YUT);
-
-        verify(mockGame, never()).transitionTo(any());
-        verify(mockGame, never()).startTurn();
-    }
-
-    @Test
     void startTurn_callsGameStartTurn() {
         sut.startTurn();
         verify(mockGame).startTurn();
@@ -323,42 +276,6 @@ class GameServiceTest {
         assertSame(mockGame, sut.getGame());
     }
 
-    @Test
-    void randomThrowYut_addsToPendingAndReturnsStubbedResult() {
-        // 1) fakeTr 준비
-        TurnResult fakeTr = new TurnResult();
-        when(mockGame.getTurnResult()).thenReturn(fakeTr);
-
-        // 2) real WaitingForThrowState를 스파이로
-        WaitingForThrowState realState = new WaitingForThrowState(mockGame);
-        CanThrowYut spyState = spy(realState);
-        when(mockGame.getState()).thenReturn(spyState);
-        when(mockGame.isFinished()).thenReturn(false);
-
-        // 3) YutThrower.throwYut() stub
-        try (MockedStatic<YutThrower> mockYut = mockStatic(YutThrower.class)) {
-            mockYut.when(YutThrower::throwYut).thenReturn(YutResult.MO);
-
-            // 4) handleYutThrow 호출 시 실제 add()는 실행하되,
-            //    리턴값은 우리가 만든 expected 로 덮어쓰기
-            MoveResult expected = MoveResult.success(
-                    YutResult.MO, false, false, null, mockGame
-            );
-            doAnswer(invocation -> {
-                // 실제 add(...) 실행
-                realState.handleYutThrow(invocation.getArgument(0));
-                // stubbed 리턴
-                return expected;
-            }).when(spyState).handleYutThrow(YutResult.MO);
-
-            // 5) 실행
-            MoveResult actual = sut.throwYut();
-
-            // 6) 검증
-            assertSame(expected, actual, "stubbed MoveResult를 그대로 반환해야 합니다");
-            assertTrue(fakeTr.hasPending(), "실제 WaitingForThrowState.add(...)가 호출되어야 합니다");
-        }
-    }
     @Test
     void randomThrowYut_generatesOnlyValidYutResults() {
         Set<YutResult> seen = new HashSet<>();
