@@ -53,6 +53,18 @@ public class SelectingPieceState implements CanSelectPiece {
         turnResult.apply(yut, piece);                           // 기록만
         Position newPos = game.getBoard().movePiece(piece, yut); // 실제 위치 변경
 
+        // 3-1) 다음 위치에 내 말이 있으면 업힐 말의 path를 따라가도록 변경
+        GroupManager.GroupKey newKey =
+                new GroupManager.GroupKey(piece.getOwner(), newPos);
+        List<Piece> follow =
+                groupMap.getOrDefault(newKey, List.of());
+        if (!follow.isEmpty()) {
+            Piece follower = follow.get(0);
+            piece.setPathType(follower.getPathType());
+            piece.setCustomPath(follower.getCustomPath());
+            piece.setPathIndex(follower.getPathIndex());
+        }
+
         // 4) 그룹원도 함께 이동
         for (Piece p : riding) {
             if (p != piece) {
