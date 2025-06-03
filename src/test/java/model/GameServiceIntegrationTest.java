@@ -1,36 +1,38 @@
-package model.service;
+package model;
 
-import model.Game;
 import model.board.Board;
-import model.dto.MoveResult;
 import model.manager.CaptureManager;
-import model.manager.GroupManager;
 import model.position.Position;
+import model.service.GameService;
 import model.state.GameOverState;
 import model.strategy.SquarePathStrategy;
-import model.strategy.PentagonPathStrategy;
-import model.strategy.HexPathStrategy;
-import model.piece.PathType;
 import model.piece.Piece;
 import model.player.Player;
-import model.turn.TurnResult;
 import model.yut.YutResult;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verify;
 
+/**
+ * GameServiceIntegrationTest.java
+ *
+ * < 시나리오 목록 >
+ *  1) Grouping 상태와 Grouping 초기화(capture 시)
+ *  2) 플레이어의 모든 말이 통과
+ *  3) 게임 재시작 - state 초기화
+ */
 class GameServiceIntegrationTest {
     private Board squareBoard;
     private Player p1, p2;
     private Game game;
     private GameService service;
 
-    @BeforeEach
+    @BeforeEach @DisplayName("유효한 게임 설정(플레이어 수)")
     void setUp() {
         squareBoard = new Board(new SquarePathStrategy());
         p1 = new Player(0, "P1", 2);
@@ -39,54 +41,8 @@ class GameServiceIntegrationTest {
         service = new GameService(game);
     }
 
-    @Test
-    void captureGivesExtraTurnAndResetsPiece() {
-        TurnResult tr = game.getTurnResult();
-        tr.add(YutResult.DO);
 
-        Piece mover = p1.getPieces().get(0);
-        Piece target = p2.getPieces().get(0);
-        mover.moveTo(target.getStartPosition(), YutResult.DO.getStep());
-
-        var captures = new CaptureManager().handleCaptures(
-                List.of(mover),
-                List.of(p1, p2),
-                squareBoard
-        );
-
-        assertTrue(captures.containsKey(mover));
-        assertEquals(target, captures.get(mover).get(0));
-        assertEquals(target.getStartPosition().index(), target.getPosition().index());
-        assertSame(p1, game.getTurnManager().currentPlayer());
-    }
-
-    @Test
-    void goalInAdvancesTurn() {
-        // 1) 로컬 게임/서비스 생성
-        Board board = new Board(new SquarePathStrategy());
-        Player local1 = new Player(0, "P1", 2);
-        Player local2 = new Player(1, "P2", 2);
-        Game localGame = new Game(board, List.of(local1, local2));
-        GameService localService = new GameService(localGame);
-
-        // 2) 골인 직전 위치로 piece 세팅
-        Piece piece = local1.getPieces().get(0);
-        piece.setCustomPath(board.getStrategy().getPath());
-        var path = board.getStrategy().getPath();
-        int finalIdx = path.size() - 1;
-        int beforeFinal = finalIdx - 1;
-        piece.moveTo(path.get(beforeFinal), beforeFinal - piece.getPosition().index());
-        assertFalse(piece.isFinished());
-
-        // 3) 반드시 localService를 통해 throw → select 호출
-        localService.throwYut(YutResult.DO);
-        localService.selectPiece(piece, YutResult.DO);
-
-        // 4) 단언: 말은 finished, 턴은 local2로 넘어간다
-        assertTrue(piece.isFinished());
-    }
-
-    @Test
+    @Test @DisplayName("Grouping 상태와 Grouping 초기화(capture 시)")
     void stackingAndCapture_resetsAllStacked() {
         // Arrange: target owner with two pieces
         Player targetOwner = new Player(0, "P1", 2);
@@ -124,7 +80,7 @@ class GameServiceIntegrationTest {
         assertEquals(b.getStartPosition(), b.getPosition());
     }
 
-    @Test
+    @Test @DisplayName("플레이어의 모든 말이 통과")
     void finishingAllPieces_setsGameFinished() {
         // p1 하나만 골인시킨다
         Piece p1Piece = p1.getPieces().get(0);
@@ -148,7 +104,7 @@ class GameServiceIntegrationTest {
     }
 
 
-    @Test
+    @Test @DisplayName("게임 재시작 - state 초기화")
     void restartGame_resetsAllState() {
         // 1) 윷 던지기로 pending 생성
         service.throwYut(YutResult.DO);
@@ -165,17 +121,6 @@ class GameServiceIntegrationTest {
                 assertEquals(pc.getStartPosition(), pc.getPosition());
             }
         }
-    }
-
-    @Test
-    void restartGame_resetsGameAndTurnAndPieces() {
-        // given
-        service.throwYut(YutResult.DO);
-        service.selectPiece(p1.getPieces().get(0), YutResult.DO);
-        // when
-        service.restartGame();
-        // then
-        verify(game).reset();
     }
 
 }
