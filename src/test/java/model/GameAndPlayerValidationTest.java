@@ -3,6 +3,7 @@ package model;
 import exception.GameInitializationException;
 import model.board.Board;
 import model.player.Player;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -10,13 +11,21 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 
+
+/**
+ * GameAndPlayerValidationTest.java
+ *
+ * < 시나리오 목록 >
+ *  1) 유효한 게임 설정(플레이어 수)
+ *  2) 유효한 게임 설정(piece 수)
+ */
 class GameAndPlayerValidationTest {
 
     private Board mockBoard() {
         return mock(Board.class);
     }
 
-    @Test
+    @Test @DisplayName("유효한 게임 설정(플레이어 수)")
     void gameConstructor_throwsOnTooFewOrTooManyPlayers() {
         Board board = mockBoard();
         Player p1 = new Player(1, "A", 2);
@@ -40,7 +49,7 @@ class GameAndPlayerValidationTest {
         assertDoesNotThrow(() -> new Game(board, List.of(p1, p2, p3, p4)));
     }
 
-    @Test
+    @Test @DisplayName("유효한 게임 설정(piece 수)")
     void playerConstructor_throwsOnTooFewOrTooManyPieces() {
         // 말이 1개면 안 되고
         assertThrows(IllegalArgumentException.class,

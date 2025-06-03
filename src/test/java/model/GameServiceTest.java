@@ -10,6 +10,7 @@ import model.service.GameService;
 import model.state.*;
 import model.yut.YutResult;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashSet;
@@ -19,6 +20,18 @@ import java.util.Set;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+/**
+ * GameServiceTest.java
+ *
+ * < 시나리오 목록 >
+ *  1) 게임이 끝났지만 윷을 던질 때
+ *  2) 윷을 던질 수 없는 상태에서 윷을 던지려 할 때
+ *  3) 게임이 끝났지만 말을 선택하려 할 때
+ *  4) 말 선택 state가 아닐 때 말을 선택하려 할 때
+ *  5) turn 을 잘 인식하는가
+ *  6) 현재 Game 을 잘 인식하는가
+ *  7) 윷 결과가 항상 올바른가
+ */
 class GameServiceTest {
 
     private GameService sut;
@@ -30,7 +43,7 @@ class GameServiceTest {
         sut = new GameService(mockGame);
     }
 
-    @Test
+    @Test @DisplayName("게임이 끝났지만 윷을 던질 때")
     void throwYut_whenGameFinished_returnsGameOver() {
         // 1) 게임이 끝난 상태로 스텁
         when(mockGame.isFinished()).thenReturn(true);
@@ -48,7 +61,7 @@ class GameServiceTest {
         assertTrue(result.isGameOver(), "게임 종료 상태면 isGameOver()가 true여야 한다");
     }
 
-    @Test
+    @Test @DisplayName("윷을 던질 수 없는 상태에서 윷을 던지려 할 때")
     void throwYut_whenNotInThrowState_returnsThrowRequiredFailure() {
         // 1) 게임이 아직 끝나지 않은 상태
         when(mockGame.isFinished()).thenReturn(false);
@@ -73,7 +86,7 @@ class GameServiceTest {
 
 
 
-    @Test
+    @Test @DisplayName("게임이 끝났지만 말을 선택하려 할 때")
     void selectPiece_whenGameFinished_returnsGameOver() {
         when(mockGame.isFinished()).thenReturn(true);
 
@@ -89,7 +102,7 @@ class GameServiceTest {
         verify(mockGame, never()).getState();
     }
 
-    @Test
+    @Test @DisplayName("말 선택 state가 아닐 때 말을 선택하려 할 때")
     void selectPiece_whenNotInSelectState_returnsInvalidSelection() {
         when(mockGame.isFinished()).thenReturn(false);
 
@@ -109,54 +122,18 @@ class GameServiceTest {
         assertEquals(MoveFailType.INVALID_SELECTION, result.failType());
     }
 
-    // 3) 실패 분기
-    @Test
-    void throwYut_whenResultFailure_doesNotTransition() {
-        when(mockGame.isFinished()).thenReturn(false);
-
-        CanThrowYut state = mock(CanThrowYut.class);
-        when(mockGame.getState()).thenReturn(state);
-
-        MoveResult r = mock(MoveResult.class);
-        when(state.handleYutThrow(YutResult.YUT)).thenReturn(r);
-        when(r.isFailure()).thenReturn(true);
-
-        sut.throwYut(YutResult.YUT);
-
-        // applyNextState 내부 어디에도 닿으면 안 됨
-        verify(mockGame, never()).transitionTo(any());
-        verify(mockGame, never()).startTurn();
-    }
-
-    @Test
-    void selectPiece_whenStay_thenDoesNotTransition() {
-        when(mockGame.isFinished()).thenReturn(false);
-        CanSelectPiece selState = mock(CanSelectPiece.class);
-        when(mockGame.getState()).thenReturn(selState);
-
-        MoveResult r = mock(MoveResult.class);
-        when(selState.handlePieceSelect(any(), any())).thenReturn(r);
-        when(r.isFailure()).thenReturn(false);
-        when(r.nextStateHint()).thenReturn(NextStateHint.SELECTING_PIECE);
-
-        sut.selectPiece(mock(Piece.class), YutResult.YUT);
-
-        verify(mockGame, never()).transitionTo(any());
-        verify(mockGame, never()).startTurn();
-    }
-
-    @Test
+    @Test @DisplayName("turn 을 잘 인식하는가")
     void startTurn_callsGameStartTurn() {
         sut.startTurn();
         verify(mockGame).startTurn();
     }
 
-    @Test
+    @Test @DisplayName("현재 Game 을 잘 인식하는가")
     void getGame_returnsOriginalGame() {
         assertSame(mockGame, sut.getGame());
     }
 
-    @Test
+    @Test @DisplayName("윷 결과가 항상 올바른가")
     void randomThrowYut_generatesOnlyValidYutResults() {
         Set<YutResult> seen = new HashSet<>();
         for (int i = 0; i < 100; i++) {

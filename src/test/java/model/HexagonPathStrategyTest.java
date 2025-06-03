@@ -23,6 +23,7 @@ import static org.junit.jupiter.api.Assertions.*;
  *  6) 3‑모서리 +3칸(index 18)  → PathType == FROM15CENTER
  *  7) 4‑모서리(index 20)      → PathType == FROM20
  *  8) 4‑모서리 +3칸(index 23)  → PathType == FROM20CENTER
+ *  9) 5-Corner: index 25     → PathTupe == OUTER
  *  9) 모든 이동에서 누적 칸 == pathIndex (불변식)
  */
 class HexagonPathStrategyTest {
@@ -44,7 +45,7 @@ class HexagonPathStrategyTest {
     }
 
     /* 1 ─ index 5 → FROM5 */
-    @Test @DisplayName("① 1‑Corner: index 5 → FROM5")
+    @Test @DisplayName("1‑Corner: index 5 → FROM5")
     void firstCorner() {
         Bundle b = new Bundle();
         b.mv(5);
@@ -53,7 +54,7 @@ class HexagonPathStrategyTest {
     }
 
     /* 2 ─ index 8 → FROM5CENTER */
-    @Test @DisplayName("② 1‑Corner → Center: index 8 → FROM5CENTER")
+    @Test @DisplayName("1‑Corner → Center: index 8 → FROM5CENTER")
     void firstCornerCenter() {
         Bundle b = new Bundle();
         b.mv(8);
@@ -62,7 +63,7 @@ class HexagonPathStrategyTest {
     }
 
     /* 3 ─ index 10 → FROM10 */
-    @Test @DisplayName("③ 2‑Corner: index 10 → FROM10")
+    @Test @DisplayName("2‑Corner: index 10 → FROM10")
     void secondCorner() {
         Bundle b = new Bundle();
         b.mv(YutResult.YUT);   // +4 → 4
@@ -73,7 +74,7 @@ class HexagonPathStrategyTest {
     }
 
     /* 4 ─ index 13 → FROM10CENTER */
-    @Test @DisplayName("④ 2‑Corner → Center: index 13 → FROM10CENTER")
+    @Test @DisplayName("2‑Corner → Center: index 13 → FROM10CENTER")
     void secondCornerCenter() {
         Bundle b = new Bundle();
         b.mv(YutResult.YUT); b.mv(YutResult.GEOL); b.mv(YutResult.GEOL); // 0→10
@@ -83,7 +84,7 @@ class HexagonPathStrategyTest {
     }
 
     /* 5 ─ index 15 → FROM15 */
-    @Test @DisplayName("⑤ 3‑Corner: index 15 → FROM15")
+    @Test @DisplayName("3‑Corner: index 15 → FROM15")
     void thirdCorner() {
         Bundle b = new Bundle();
         b.mv(YutResult.GEOL);  // +3 → 3
@@ -96,7 +97,7 @@ class HexagonPathStrategyTest {
     }
 
     /* 6 ─ index 18 → FROM15CENTER */
-    @Test @DisplayName("⑥ 3‑Corner → Center: index 18 → FROM15CENTER")
+    @Test @DisplayName("3‑Corner → Center: index 18 → FROM15CENTER")
     void thirdCornerCenter() {
         Bundle b = new Bundle();
         // 0→15
@@ -108,7 +109,7 @@ class HexagonPathStrategyTest {
     }
 
     /* 7 ─ index 20 → FROM20 */
-    @Test @DisplayName("⑦ 4‑Corner: index 20 → FROM20")
+    @Test @DisplayName("4‑Corner: index 20 → FROM20")
     void fourthCorner() {
         Bundle b = new Bundle();
         // 0→20  (YUT×4=16, GEOL=3, DO=1)
@@ -119,7 +120,7 @@ class HexagonPathStrategyTest {
     }
 
     /* 8 ─ index 23 → FROM20CENTER */
-    @Test @DisplayName("⑧ 4‑Corner → Center: index 23 → FROM20CENTER")
+    @Test @DisplayName("4‑Corner → Center: index 23 → FROM20CENTER")
     void fourthCornerCenter() {
         Bundle b = new Bundle();
         // 0→20
@@ -131,7 +132,7 @@ class HexagonPathStrategyTest {
     }
 
     /* 9 index 25 → OUTER (5,10,15,20  모두 ‘건너뛴’ OUTER 경로) */
-    @Test @DisplayName("⑤ 3-Corner: index 15 → FROM15 (센터 분기 없음)")
+    @Test @DisplayName("5-Corner: index 25 → OUTER")
     void fifthCorner() {
         HexagonPathStrategyTest.Bundle b = new HexagonPathStrategyTest.Bundle();
         b.mv(YutResult.YUT);
@@ -145,7 +146,7 @@ class HexagonPathStrategyTest {
     }
 
     /* 10 ─ 불변식 */
-    @Test @DisplayName("⑨ 누적 이동 칸 == pathIndex (invariant)")
+    @Test @DisplayName("누적 이동 칸 == pathIndex (invariant)")
     void invariantTotalStepsEqualsIndex() {
         Bundle b = new Bundle();
         int total = 0;

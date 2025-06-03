@@ -22,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.*;
  *  2) 플레이어가 가진 모든 말이 finished == true 가 되면 hasAllPiecesFinished() 가 true를 반환한다.
  *  3) finished 된 말을 Board.movePiece(...) 로 다시 움직이려 하면 InvalidMoveException 이 발생한다.
  *  4) 이동 스텝이 남아 경로를 초과(오버슛)해도 말은 경로 끝 칸에 고정되며 finished == true 가 된다.
- *  5) **그룹화된 말**(두 말 이상이 같은 칸에 업혀 있음)이 함께 결승점에 도착하면 그룹원 모두 finished == true 가 된다.
+ *  5) 그룹화된 말(두 말 이상이 같은 칸에 업혀 있음)이 함께 결승점에 도착하면 그룹원 모두 finished == true 가 된다.
  */
 class ArriveTest {
 
@@ -38,7 +38,7 @@ class ArriveTest {
     private record TestBundle(Player player, Board board, List<Position> path) {}
 
     /*──────────────── 시나리오 #1 ────────────────*/
-    @Test @DisplayName("① 단일 말이 도착하면 finished 플래그가 true")
+    @Test @DisplayName("단일 말이 도착하면 finished 플래그가 true")
     void singlePieceArrives() {
         TestBundle b = newBundle(2);
         Piece piece  = b.player().getPieces().get(0);
@@ -54,7 +54,7 @@ class ArriveTest {
     }
 
     /*──────────────── 시나리오 #2 ────────────────*/
-    @Test @DisplayName("② 모든 말이 도착하면 hasAllPiecesFinished() == true")
+    @Test @DisplayName("모든 말이 도착하면 hasAllPiecesFinished() == true")
     void allPiecesArrive() {
         TestBundle b   = newBundle(3);
         Position last  = b.path().get(b.path().size() - 1);
@@ -65,7 +65,7 @@ class ArriveTest {
     }
 
     /*──────────────── 시나리오 #3 ────────────────*/
-    @Test @DisplayName("③ finished 된 말을 다시 움직이면 InvalidMoveException")
+    @Test @DisplayName("finished 된 말을 다시 움직이면 InvalidMoveException")
     void cannotMoveAfterArrive() {
         TestBundle b = newBundle(2);
         Piece piece  = b.player().getPieces().get(0);
@@ -80,7 +80,7 @@ class ArriveTest {
     }
 
     /*──────────────── 시나리오 #4 ────────────────*/
-    @Test @DisplayName("④ 오버슛해도 마지막 칸에 고정·완주 처리")
+    @Test @DisplayName("오버슛해도 마지막 칸에 고정·완주 처리")
     void overshootStillFinishes() {
         TestBundle b = newBundle(2);
         Piece piece  = b.player().getPieces().get(0);
@@ -96,7 +96,7 @@ class ArriveTest {
     }
 
     /*──────────────── 시나리오 #5 ────────────────*/
-    @Test @DisplayName("⑤ 그룹화된 두 말이 함께 결승점 도착 → 모두 finished")
+    @Test @DisplayName("그룹화된 두 말이 함께 결승점 도착 → 모두 finished")
     void groupedPiecesArriveTogether() {
         TestBundle b = newBundle(2);
         Board board  = b.board();

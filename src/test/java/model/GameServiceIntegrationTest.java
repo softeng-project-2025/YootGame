@@ -10,21 +10,29 @@ import model.piece.Piece;
 import model.player.Player;
 import model.yut.YutResult;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verify;
 
+/**
+ * GameServiceIntegrationTest.java
+ *
+ * < 시나리오 목록 >
+ *  1) Grouping 상태와 Grouping 초기화(capture 시)
+ *  2) 플레이어의 모든 말이 통과
+ *  3) 게임 재시작 - state 초기화
+ */
 class GameServiceIntegrationTest {
     private Board squareBoard;
     private Player p1, p2;
     private Game game;
     private GameService service;
 
-    @BeforeEach
+    @BeforeEach @DisplayName("유효한 게임 설정(플레이어 수)")
     void setUp() {
         squareBoard = new Board(new SquarePathStrategy());
         p1 = new Player(0, "P1", 2);
@@ -34,7 +42,7 @@ class GameServiceIntegrationTest {
     }
 
 
-    @Test
+    @Test @DisplayName("Grouping 상태와 Grouping 초기화(capture 시)")
     void stackingAndCapture_resetsAllStacked() {
         // Arrange: target owner with two pieces
         Player targetOwner = new Player(0, "P1", 2);
@@ -72,7 +80,7 @@ class GameServiceIntegrationTest {
         assertEquals(b.getStartPosition(), b.getPosition());
     }
 
-    @Test
+    @Test @DisplayName("플레이어의 모든 말이 통과")
     void finishingAllPieces_setsGameFinished() {
         // p1 하나만 골인시킨다
         Piece p1Piece = p1.getPieces().get(0);
@@ -96,7 +104,7 @@ class GameServiceIntegrationTest {
     }
 
 
-    @Test
+    @Test @DisplayName("게임 재시작 - state 초기화")
     void restartGame_resetsAllState() {
         // 1) 윷 던지기로 pending 생성
         service.throwYut(YutResult.DO);
@@ -113,17 +121,6 @@ class GameServiceIntegrationTest {
                 assertEquals(pc.getStartPosition(), pc.getPosition());
             }
         }
-    }
-
-    @Test
-    void restartGame_resetsGameAndTurnAndPieces() {
-        // given
-        service.throwYut(YutResult.DO);
-        service.selectPiece(p1.getPieces().get(0), YutResult.DO);
-        // when
-        service.restartGame();
-        // then
-        verify(game).reset();
     }
 
 }

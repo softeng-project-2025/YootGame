@@ -18,6 +18,15 @@ import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * GroupTest.java
+ *
+ * < 시나리오 목록 >
+ *  1) 모든 말이 다른 칸 → 그룹화 없음
+ *  2) 같은 플레이어 2말이 같은 칸 → 하나의 그룹(크기 2)
+ *  3) 같은 플레이어 여러 위치에 묶음 → 위치별 그룹 분리
+ *  4) 한 칸에 3말 → 그룹 크기 3
+ */
 @TestMethodOrder(MethodOrderer.DisplayName.class)
 class GroupTest {
 
@@ -52,7 +61,7 @@ class GroupTest {
     }
 
     /* ---------- 시나리오 1 ---------- */
-    @Test @DisplayName("1️⃣ 모든 말이 다른 칸 → 그룹화 없음")
+    @Test @DisplayName("모든 말이 다른 칸 → 그룹화 없음")
     void noGroupingWhenAllSeparate() {
         List<Piece> pieces = List.of(
                 p1.getPieces().get(0),
@@ -70,7 +79,7 @@ class GroupTest {
     }
 
     /* ---------- 시나리오 2 ---------- */
-    @Test @DisplayName("2️⃣ 같은 플레이어 2말이 같은 칸 → 하나의 그룹(크기 2)")
+    @Test @DisplayName("같은 플레이어 2말이 같은 칸 → 하나의 그룹(크기 2)")
     void twoPiecesStackIntoOneGroup() {
         Piece a = p1.getPieces().get(0);
         Piece b = p1.getPieces().get(1);
@@ -88,7 +97,7 @@ class GroupTest {
     }
 
     /* ---------- 시나리오 3 ---------- */
-    @Test @DisplayName("3️⃣ 같은 플레이어 여러 위치에 묶음 → 위치별 그룹 분리")
+    @Test @DisplayName("같은 플레이어 여러 위치에 묶음 → 위치별 그룹 분리")
     void sameOwnerDifferentPositionsGroupedSeparately() {
         Piece a = p1.getPieces().get(0);
         Piece b = p1.getPieces().get(1);

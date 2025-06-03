@@ -48,7 +48,7 @@ class TurnTest {
 
     private record Bundle(TurnManager tm, Game game, Player p1, Player p2) {}
 
-    @Test @DisplayName("① NEXT_TURN → 턴 교체")
+    @Test @DisplayName("NEXT_TURN → 턴 교체")
     void nextTurnSwitches() {
         Bundle b = newBundle();
 
@@ -58,7 +58,7 @@ class TurnTest {
         assertEquals(b.p2(), b.tm().currentPlayer(), "플레이어가 p2 로 넘어가야 한다");
     }
 
-    @Test @DisplayName("② 윷/모 보너스 → 턴 유지")
+    @Test @DisplayName("윷/모 보너스 → 턴 유지")
     void bonusTurnFromYutKeepsPlayer() {
         Bundle b = newBundle();
 
@@ -72,7 +72,7 @@ class TurnTest {
         assertEquals(b.p1(), b.tm().currentPlayer(), "보너스턴: p1 이 계속 진행");
     }
 
-    @Test @DisplayName("③ DO 로 캡처 → 보너스턴 → 턴 유지")
+    @Test @DisplayName("DO 로 캡처 → 보너스턴 → 턴 유지")
     void captureWithDoGivesBonusTurn() {
         Bundle b = newBundle();
 
@@ -85,7 +85,7 @@ class TurnTest {
         assertEquals(b.p1(), b.tm().currentPlayer(), "캡처 보너스턴: p1 유지");
     }
 
-    @Test @DisplayName("④ YUT 로 캡처 → 추가 보너스 없음 → 턴 교체")
+    @Test @DisplayName("YUT 로 캡처 → 추가 보너스 없음 → 턴 교체")
     void captureWithYutNoExtra() {
         Bundle b = newBundle();
 
@@ -98,7 +98,7 @@ class TurnTest {
         assertEquals(b.p2(), b.tm().currentPlayer(), "추가 보너스 없음: 턴이 p2 로 넘어감");
     }
 
-    @Test @DisplayName("⑤ BACK_DO 스킵 → NEXT_TURN → 턴 교체")
+    @Test @DisplayName("BACK_DO 스킵 → NEXT_TURN → 턴 교체")
     void skippedBackDoSwitchesTurn() {
         Bundle b = newBundle();
 

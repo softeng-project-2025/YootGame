@@ -14,7 +14,16 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@TestMethodOrder(MethodOrderer.DisplayName.class)
+/**
+ * CaptureTest.java
+ *
+ * < 시나리오 목록 >
+ *  1) 빈 칸에 착지하면 캡처 없음
+ *  2) 상대 말 1개 캡처
+ *  3) 상대 말 2개 동시 캡처.
+ *  4) 같은 칸에 내 말만 있으면 캡처 없음
+ *  5) 두 이동자가 서로 다른 칸에서 각각 캡처
+ */
 class CaptureTest {
 
     private Board board;
