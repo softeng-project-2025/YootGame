@@ -141,9 +141,12 @@ public class JavafxView extends Stage implements View {
                 int n = list.size();
                 for (int i = 0; i < n; i++) {
                     var info = list.get(i);
+
+
+                    if (info.x() >= 5000 || info.y() >= 5000) continue;
+
                     int shift = (int) Math.round(i - (n - 1) / 2.0);
-                    Position p = new Position(info.id(), info.x(),
-                            info.y() - shift * PIECE_OFFSET);
+                    Position p = new Position(info.id(), info.x(), info.y() - shift * PIECE_OFFSET);
 
                     CylinderButton cb = new CylinderButton(
                             playerColor(info.ownerId()), p, "P" + info.ownerId());
