@@ -98,6 +98,24 @@ public class SquarePathStrategy implements PathStrategy {
             prevIndex = 20;
         }
 
+        if (
+                pathType == PathType.OUTER
+                        && prevIndex == 5
+        ) {
+            piece.setPathType(PathType.FROM5);
+            piece.setCustomPath(createPath(pathFrom5));
+            piece.setPathIndex(5);
+        }
+
+        if (
+                pathType == PathType.OUTER
+                        && prevIndex == 10
+        ) {
+            piece.setPathType(PathType.FROM10);
+            piece.setCustomPath(createPath(pathFrom10));
+            piece.setPathIndex(10);
+        }
+
         // 모에 있었다가 백도 받아서 윷에 있었을 때
         if (
                 pathType == PathType.FROM5
