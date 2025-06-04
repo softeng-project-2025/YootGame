@@ -129,6 +129,33 @@ public class PentagonPathStrategy implements PathStrategy {
             prevIndex = 25;
         }
 
+        if (
+                pathType == PathType.OUTER
+                        && prevIndex == 5
+        ) {
+            piece.setPathType(PathType.FROM5);
+            piece.setCustomPath(createPath(pathFrom5));
+            piece.setPathIndex(5);
+        }
+
+        if (
+                pathType == PathType.OUTER
+                        && prevIndex == 10
+        ) {
+            piece.setPathType(PathType.FROM10);
+            piece.setCustomPath(createPath(pathFrom10));
+            piece.setPathIndex(10);
+        }
+
+        if (
+                pathType == PathType.OUTER
+                        && prevIndex == 15
+        ) {
+            piece.setPathType(PathType.FROM15);
+            piece.setCustomPath(createPath(pathFrom15));
+            piece.setPathIndex(15);
+        }
+
         if (pathType == PathType.FROM5) {
             switch(prevIndex) {
                 case 4:
